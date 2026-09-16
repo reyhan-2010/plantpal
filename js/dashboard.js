@@ -23,7 +23,6 @@ function getDaysSinceLastWatering(careLogs) {
     return null;
   }
 
-  // آخرین فعالیت آبیاری
   const waterLogs = careLogs.filter(function(log) {
     return !log.type || log.type === 'water';
   });
@@ -59,7 +58,6 @@ function getWateringStatusText(days) {
 
 function filterPlants(plants) {
   return plants.filter(function(plant) {
-    // فیلتر جستجو
     if (searchQuery) {
       const query = searchQuery.trim().toLowerCase();
       const name = (plant.name || '').toLowerCase();
@@ -71,7 +69,6 @@ function filterPlants(plants) {
       }
     }
 
-    // فیلتر سلامت
     if (filterHealth !== 'all') {
       const health = plant.health || 'healthy';
       if (health !== filterHealth) {
@@ -107,7 +104,6 @@ async function renderDashboard() {
 
     if (emptyState) emptyState.style.display = 'none';
 
-    // اعمال فیلترها
     const plants = filterPlants(allPlants);
 
     if (plants.length === 0) {
@@ -169,7 +165,6 @@ async function renderDashboard() {
     console.log('  - نیاز به آبیاری:', plantsNeedingWater.length);
     console.log('  - سالم:', healthyPlants.length);
 
-    // بارگذاری مجدد آیکون‌ها
     if (typeof loadAllIcons === 'function') {
       await loadAllIcons();
     }
