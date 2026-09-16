@@ -1,7 +1,7 @@
 // PlantPal - Service Worker
-// این فایل مسئول کش کردن فایل‌ها برای استفاده آفلاین است.
+// این فایل مسئول کش کردن فایل‌ها و نمایش نوتیفیکیشن است.
 
-const CACHE_NAME = 'plantpal-v10';
+const CACHE_NAME = 'plantpal-v11';
 
 const CACHE_FILES = [
   './',
@@ -20,6 +20,7 @@ const CACHE_FILES = [
   './js/care.js',
   './js/notes.js',
   './js/dashboard.js',
+  './js/notifications.js',
   './js/settings.js',
   './js/app.js',
   './assets/images/default-plant.png',
@@ -75,6 +76,18 @@ self.addEventListener('fetch', function(event) {
         return response;
       }
       return fetch(event.request);
+    })
+  );
+});
+
+self.addEventListener('notificationclick', function(event) {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window' }).then(function(clientList) {
+      if (clientList.length > 0) {
+        return clientList[0].focus();
+      }
+      return clients.openWindow('./');
     })
   );
 });

@@ -6,6 +6,7 @@
 // ============================================
 
 const WATERING_THRESHOLD_DAYS = 7;
+const FERTILIZING_THRESHOLD_DAYS = 30;
 
 // ============================================
 // بخش ۲: متغیرهای جستجو و فیلتر
@@ -18,25 +19,32 @@ let filterHealth = 'all';
 // بخش ۳: توابع کمکی
 // ============================================
 
-function getDaysSinceLastWatering(careLogs) {
-  if (!careLogs || careLogs.length === 0) {
-    return null;
-  }
+function getDaysSinceLastActivity(careLogs, type) {
+  if (!careLogs || careLogs.length === 0) return null;
 
-  const waterLogs = careLogs.filter(function(log) {
-    return !log.type || log.type === 'water';
+  const filtered = careLogs.filter(function(log) {
+    if (type === 'water') {
+      return !log.type || log.type === 'water';
+    }
+    return log.type === type;
   });
 
-  if (waterLogs.length === 0) {
-    return null;
-  }
+  if (filtered.length === 0) return null;
 
-  const lastLog = waterLogs[0];
-  const lastDate = new Date(lastLog.date);
+  const last = filtered[0];
+  const lastDate = new Date(last.date);
   const now = new Date();
   const diffMs = now - lastDate;
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
   return diffDays;
+}
+
+function getDaysSinceLastWatering(careLogs) {
+  return getDaysSinceLastActivity(careLogs, 'water');
+}
+
+function getDaysSinceLastFertilizing(careLogs) {
+  return getDaysSinceLastActivity(careLogs, 'fertilize');
 }
 
 function needsWatering(careLogs) {
@@ -45,11 +53,38 @@ function needsWatering(careLogs) {
   return days >= WATERING_THRESHOLD_DAYS;
 }
 
+function needsFertilizing(careLogs) {
+  const days = getDaysSinceLastFertilizing(careLogs);
+  if (days === null) return true;
+  return days >= FERTILIZING_THRESHOLD_DAYS;
+}
+
 function getWateringStatusText(days) {
   if (days === null) return 'هرگز آبیاری نشده';
   if (days === 0) return 'امروز آبیاری شده';
   if (days === 1) return '۱ روز پیش آبیاری شده';
   return days + ' روز پیش آبیاری شده';
+}
+
+function getFertilizingStatusText(days) {
+  if (days === null) return 'هرگز کوددهی نشده';
+  if (days === 0) return 'امروز کوددهی شده';
+  if (days === 1) return '۱ روز پیش کوددهی شده';
+  return days + ' روز پیش کوددهی شده';
+}
+
+function getLastActivityText(careLogs) {
+  if (!careLogs || careLogs.length === 0) return 'هیچ فعالیتی ثبت نشده';
+
+  const last = careLogs[0];
+  const type = last.type || 'water';
+  const emoji = getCareTypeEmoji(type);
+  const label = getCareTypeLabel(type);
+  const days = getDaysSinceLastActivity(careLogs, type);
+
+  if (days === 0) return emoji + ' ' + label + ' — امروز';
+  if (days === 1) return emoji + ' ' + label + ' — ۱ روز پیش';
+  return emoji + ' ' + label + ' — ' + days + ' روز پیش';
 }
 
 // ============================================
@@ -115,29 +150,37 @@ async function renderDashboard() {
 
     if (noResultsState) noResultsState.style.display = 'none';
 
-    const plantsNeedingWater = [];
+    const tasks = [];
     const healthyPlants = [];
 
     for (const plant of plants) {
       const careLogs = await getCareLogsByPlantId(plant.id);
-      const days = getDaysSinceLastWatering(careLogs);
 
-      if (needsWatering(careLogs)) {
-        plantsNeedingWater.push({
+      const waterDays = getDaysSinceLastWatering(careLogs);
+      const fertilizeDays = getDaysSinceLastFertilizing(careLogs);
+
+      const waterNeed = needsWatering(careLogs);
+      const fertilizeNeed = needsFertilizing(careLogs);
+
+      if (waterNeed || fertilizeNeed) {
+        tasks.push({
           plant: plant,
-          days: days
+          waterDays: waterDays,
+          fertilizeDays: fertilizeDays,
+          waterNeed: waterNeed,
+          fertilizeNeed: fertilizeNeed
         });
       } else {
         healthyPlants.push(plant);
       }
     }
 
-    if (plantsNeedingWater.length > 0) {
+    if (tasks.length > 0) {
       if (todayTasksDiv) todayTasksDiv.style.display = 'block';
       if (todayTasksList) {
         todayTasksList.innerHTML = '';
-        plantsNeedingWater.forEach(function(item) {
-          const taskElement = createTodayTaskItem(item.plant, item.days);
+        tasks.forEach(function(item) {
+          const taskElement = createTodayTaskItem(item);
           todayTasksList.appendChild(taskElement);
         });
       }
@@ -150,10 +193,11 @@ async function renderDashboard() {
       const plantsList = document.getElementById('plants-list');
       if (plantsList) {
         plantsList.innerHTML = '';
-        healthyPlants.forEach(function(plant) {
-          const card = createPlantCard(plant);
+        for (const plant of healthyPlants) {
+          const careLogs = await getCareLogsByPlantId(plant.id);
+          const card = createPlantCard(plant, careLogs);
           plantsList.appendChild(card);
-        });
+        }
       }
     } else {
       if (healthySection) healthySection.style.display = 'none';
@@ -162,7 +206,7 @@ async function renderDashboard() {
     console.log('✓ داشبورد نمایش داده شد');
     console.log('  - کل گیاهان:', allPlants.length);
     console.log('  - پس از فیلتر:', plants.length);
-    console.log('  - نیاز به آبیاری:', plantsNeedingWater.length);
+    console.log('  - نیاز به مراقبت:', tasks.length);
     console.log('  - سالم:', healthyPlants.length);
 
     if (typeof loadAllIcons === 'function') {
@@ -178,9 +222,10 @@ async function renderDashboard() {
 // بخش ۶: ساخت آیتم کار امروز
 // ============================================
 
-function createTodayTaskItem(plant, days) {
-  const item = document.createElement('div');
-  item.className = 'today-task-item';
+function createTodayTaskItem(item) {
+  const plant = item.plant;
+  const element = document.createElement('div');
+  element.className = 'today-task-item';
 
   const info = document.createElement('div');
   info.className = 'today-task-info';
@@ -192,30 +237,61 @@ function createTodayTaskItem(plant, days) {
     openPlantDetails(plant.id);
   });
 
-  const status = document.createElement('span');
-  status.className = 'today-task-status';
-  status.textContent = getWateringStatusText(days);
-
   info.appendChild(name);
-  info.appendChild(status);
+
+  if (item.waterNeed) {
+    const status = document.createElement('span');
+    status.className = 'today-task-status';
+    status.textContent = '💧 ' + getWateringStatusText(item.waterDays);
+    info.appendChild(status);
+  }
+
+  if (item.fertilizeNeed) {
+    const status = document.createElement('span');
+    status.className = 'today-task-status';
+    status.textContent = '🍃 ' + getFertilizingStatusText(item.fertilizeDays);
+    info.appendChild(status);
+  }
 
   const actions = document.createElement('div');
   actions.className = 'today-task-actions';
 
-  const waterBtn = document.createElement('button');
-  waterBtn.className = 'btn btn-primary';
-  waterBtn.textContent = 'ثبت فعالیت';
-  waterBtn.addEventListener('click', function() {
-    currentPlantId = plant.id;
-    openAddCareModal();
-  });
+  if (item.waterNeed) {
+    const waterBtn = document.createElement('button');
+    waterBtn.className = 'btn btn-primary';
+    waterBtn.textContent = '💧 آبیاری';
+    waterBtn.addEventListener('click', function() {
+      currentPlantId = plant.id;
+      openAddCareModal();
+      setTimeout(function() {
+        if (typeof setSelectedCareType === 'function') {
+          setSelectedCareType('water');
+        }
+      }, 100);
+    });
+    actions.appendChild(waterBtn);
+  }
 
-  actions.appendChild(waterBtn);
+  if (item.fertilizeNeed) {
+    const fertilizeBtn = document.createElement('button');
+    fertilizeBtn.className = 'btn btn-secondary';
+    fertilizeBtn.textContent = '🍃 کوددهی';
+    fertilizeBtn.addEventListener('click', function() {
+      currentPlantId = plant.id;
+      openAddCareModal();
+      setTimeout(function() {
+        if (typeof setSelectedCareType === 'function') {
+          setSelectedCareType('fertilize');
+        }
+      }, 100);
+    });
+    actions.appendChild(fertilizeBtn);
+  }
 
-  item.appendChild(info);
-  item.appendChild(actions);
+  element.appendChild(info);
+  element.appendChild(actions);
 
-  return item;
+  return element;
 }
 
 // ============================================

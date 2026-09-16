@@ -21,6 +21,10 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     initSettings();
 
+    if (typeof initNotifications === 'function') {
+      initNotifications();
+    }
+
     await loadAllIcons();
 
     console.log('✓ PlantPal با موفقیت راه‌اندازی شد');
@@ -121,7 +125,6 @@ function setupEventListeners() {
     formAddCare.addEventListener('submit', handleAddCare);
   }
 
-  // یادداشت‌ها
   const btnAddNote = document.getElementById('btn-add-note');
   if (btnAddNote) {
     btnAddNote.addEventListener('click', openAddNoteModal);
