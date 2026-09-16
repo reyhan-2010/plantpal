@@ -125,5 +125,8 @@ function setupEventListeners() {
   if (typeof setupSearch === 'function') setupSearch();
   if (typeof setupFilters === 'function') setupFilters();
 
+  // راه‌اندازی دکمه‌های نوع فعالیت
+  if (typeof setupCareTypeButtons === 'function') setupCareTypeButtons();
+
   console.log('✓ رویدادها وصل شدند');
 }

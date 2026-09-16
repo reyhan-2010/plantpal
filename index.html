@@ -52,7 +52,6 @@
         </button>
       </div>
 
-      <!-- نوار جستجو و فیلتر -->
       <div class="search-filter-bar">
         <div class="search-box">
           <span class="icon search-icon" data-icon="magnifying-glass"></span>
@@ -74,7 +73,6 @@
         </button>
       </div>
 
-      <!-- فیلترها -->
       <div id="filters-panel" class="filters-panel" style="display: none;">
         <div class="filter-group">
           <label class="filter-label">وضعیت سلامت:</label>
@@ -219,11 +217,11 @@
       </div>
 
       <div class="care-history">
-        <h3 class="care-history-title">تاریخچه آبیاری</h3>
-        <button id="btn-add-care" class="btn btn-primary" aria-label="ثبت آبیاری جدید">+ ثبت آبیاری جدید</button>
+        <h3 class="care-history-title">تاریخچه فعالیت‌ها</h3>
+        <button id="btn-add-care" class="btn btn-primary" aria-label="ثبت فعالیت جدید">+ ثبت فعالیت جدید</button>
         <div id="care-logs-list" class="care-logs-list" aria-live="polite"></div>
         <div id="empty-care-logs" class="empty-state" style="display: none;" role="status">
-          <p>هنوز آبیاری ثبت نشده است.</p>
+          <p>هنوز فعالیتی ثبت نشده است.</p>
         </div>
       </div>
     </section>
@@ -298,13 +296,40 @@
   <div id="modal-add-care" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-care-title">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 id="modal-care-title" class="modal-title">ثبت آبیاری جدید</h3>
+        <h3 id="modal-care-title" class="modal-title">ثبت فعالیت جدید</h3>
         <button id="btn-close-care-modal" class="modal-close" aria-label="بستن">
           <span class="icon" data-icon="x"></span>
         </button>
       </div>
 
       <form id="form-add-care" class="modal-form">
+        <div class="form-group">
+          <label class="form-label">نوع فعالیت</label>
+          <div class="care-type-options">
+            <button type="button" class="care-type-option active" data-care-type="water">
+              <span class="care-type-emoji">💧</span>
+              <span>آبیاری</span>
+            </button>
+            <button type="button" class="care-type-option" data-care-type="fertilize">
+              <span class="care-type-emoji">🍃</span>
+              <span>کوددهی</span>
+            </button>
+            <button type="button" class="care-type-option" data-care-type="prune">
+              <span class="care-type-emoji">✂️</span>
+              <span>هرس</span>
+            </button>
+            <button type="button" class="care-type-option" data-care-type="repot">
+              <span class="care-type-emoji">🪴</span>
+              <span>تعویض گلدان</span>
+            </button>
+            <button type="button" class="care-type-option" data-care-type="cutting">
+              <span class="care-type-emoji">🌿</span>
+              <span>قلمه‌زنی</span>
+            </button>
+          </div>
+          <input type="hidden" id="care-type" value="water">
+        </div>
+
         <div class="form-group">
           <label for="care-date" class="form-label">تاریخ</label>
           <input type="date" id="care-date" class="form-input" required>

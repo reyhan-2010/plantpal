@@ -46,6 +46,7 @@
   cursor: pointer;
   transition: var(--transition);
   text-decoration: none;
+  gap: 0.4rem;
 }
 
 .btn:focus-visible {
@@ -248,7 +249,7 @@
   margin-bottom: 1.5rem;
 }
 
-/* تاریخچه مراقبت */
+/* تاریخچه فعالیت‌ها */
 .care-history {
   background: var(--color-card);
   padding: 1.5rem;
@@ -491,10 +492,7 @@
   gap: 0.5rem;
 }
 
-/* ============================================
-   صفحه تنظیمات
-   ============================================ */
-
+/* صفحه تنظیمات */
 .settings-section {
   background: var(--color-card);
   border-radius: var(--radius-md);
@@ -583,64 +581,7 @@
   opacity: 1;
 }
 
-/* واکنش‌گرا */
-@media (max-width: 600px) {
-  .plants-list { grid-template-columns: 1fr; }
-
-  .plant-card {
-    display: flex;
-    align-items: center;
-  }
-
-  .plant-card-image {
-    width: 80px;
-    height: 80px;
-    flex-shrink: 0;
-  }
-
-  .plant-card-content { padding: 0.8rem; }
-
-  .plant-details {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-
-  .plant-details-image img {
-    width: 150px;
-    height: 150px;
-  }
-
-  .plant-info-row {
-    flex-direction: column;
-    align-items: flex-start;
-    text-align: right;
-  }
-
-  .plant-info-label {
-    min-width: auto;
-    margin-bottom: 0.2rem;
-  }
-
-  .plant-details-actions { justify-content: center; }
-
-  .today-task-item {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .today-task-actions { justify-content: flex-end; }
-
-  .settings-section { padding: 1rem; }
-
-  .theme-option-btn { padding: 0.8rem 1rem; }
-
-  .theme-option-icon { font-size: 1.3rem; }
-}
-/* ============================================
-   آیکون‌ها
-   ============================================ */
-
+/* آیکون‌ها */
 .icon {
   display: inline-flex;
   align-items: center;
@@ -659,7 +600,6 @@
   fill: currentColor;
 }
 
-/* آیکون در عنوان */
 .app-title {
   display: flex;
   align-items: center;
@@ -667,34 +607,21 @@
   gap: 0.4rem;
 }
 
-.app-title .icon {
-  font-size: 1.6rem;
-}
+.app-title .icon { font-size: 1.6rem; }
 
-/* آیکون در دکمه تنظیمات */
-.btn-settings .icon {
-  font-size: 1.3rem;
-}
+.btn-settings .icon { font-size: 1.3rem; }
 
-/* آیکون در دکمه بازگشت */
 .btn-back {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
 }
 
-.btn-back .icon {
-  font-size: 1rem;
-}
+.btn-back .icon { font-size: 1rem; }
 
-/* آیکون در دکمه بستن Modal */
-.modal-close .icon {
-  font-size: 1.2rem;
-}
-/* ============================================
-   وضعیت سلامت گیاه
-   ============================================ */
+.modal-close .icon { font-size: 1.2rem; }
 
+/* وضعیت سلامت گیاه */
 .health-options {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -729,57 +656,50 @@
   box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
 }
 
-.health-option .icon {
-  font-size: 1.3rem;
-}
+.health-option .icon { font-size: 1.3rem; }
 
-/* رنگ آیکون‌ها بر اساس وضعیت */
-.health-option[data-health="healthy"].active .icon {
-  color: #2e7d32;
-}
+.health-option[data-health="healthy"].active .icon { color: #2e7d32; }
+.health-option[data-health="growing"].active .icon { color: #1976d2; }
+.health-option[data-health="warning"].active .icon { color: #fb8c00; }
+.health-option[data-health="sick"].active .icon { color: #e53935; }
 
-.health-option[data-health="growing"].active .icon {
-  color: #1976d2;
-}
-
-.health-option[data-health="warning"].active .icon {
-  color: #fb8c00;
-}
-
-.health-option[data-health="sick"].active .icon {
-  color: #e53935;
-}
-
-/* نمایش وضعیت در صفحه جزئیات */
 .health-display {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
 }
 
-.health-display .icon {
-  font-size: 1.2rem;
+.health-display .icon { font-size: 1.2rem; }
+
+.health-display.health-healthy .icon { color: #2e7d32; }
+.health-display.health-growing .icon { color: #1976d2; }
+.health-display.health-warning .icon { color: #fb8c00; }
+.health-display.health-sick .icon { color: #e53935; }
+
+.plant-card-health {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 
-.health-display.health-healthy .icon {
-  color: #2e7d32;
-}
+.plant-card-health .icon { font-size: 1rem; }
 
-.health-display.health-growing .icon {
-  color: #1976d2;
-}
+.plant-card-health.health-healthy { background: rgba(46, 125, 50, 0.15); color: #2e7d32; }
+.plant-card-health.health-growing { background: rgba(25, 118, 210, 0.15); color: #1976d2; }
+.plant-card-health.health-warning { background: rgba(251, 140, 0, 0.15); color: #fb8c00; }
+.plant-card-health.health-sick { background: rgba(229, 57, 53, 0.15); color: #e53935; }
 
-.health-display.health-warning .icon {
-  color: #fb8c00;
-}
+[data-theme="dark"] .plant-card-health.health-healthy { background: rgba(102, 187, 106, 0.2); color: #81c784; }
+[data-theme="dark"] .plant-card-health.health-growing { background: rgba(100, 181, 246, 0.2); color: #90caf9; }
+[data-theme="dark"] .plant-card-health.health-warning { background: rgba(255, 183, 77, 0.2); color: #ffcc80; }
+[data-theme="dark"] .plant-card-health.health-sick { background: rgba(239, 83, 80, 0.2); color: #e57373; }
 
-.health-display.health-sick .icon {
-  color: #e53935;
-}
-/* ============================================
-   نوار جستجو و فیلتر
-   ============================================ */
-
+/* نوار جستجو و فیلتر */
 .search-filter-bar {
   display: flex;
   gap: 0.8rem;
@@ -849,11 +769,8 @@
   white-space: nowrap;
 }
 
-.btn-toggle-filters .icon {
-  font-size: 1rem;
-}
+.btn-toggle-filters .icon { font-size: 1rem; }
 
-/* پنل فیلترها */
 .filters-panel {
   background: var(--color-card);
   border-radius: var(--radius-md);
@@ -894,9 +811,7 @@
   white-space: nowrap;
 }
 
-.filter-btn:hover {
-  border-color: var(--color-primary-light);
-}
+.filter-btn:hover { border-color: var(--color-primary-light); }
 
 .filter-btn.active {
   background: var(--color-primary);
@@ -904,8 +819,107 @@
   border-color: var(--color-primary);
 }
 
+/* انواع فعالیت */
+.care-type-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem;
+}
+
+.care-type-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 0.8rem 0.5rem;
+  background: var(--color-bg);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  transition: var(--transition);
+  text-align: center;
+}
+
+.care-type-option:hover {
+  border-color: var(--color-primary-light);
+  transform: translateY(-2px);
+}
+
+.care-type-option.active {
+  border-color: var(--color-primary);
+  background: var(--color-primary-bg);
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+}
+
+.care-type-emoji {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+@media (min-width: 500px) {
+  .care-type-options {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
 /* واکنش‌گرا */
 @media (max-width: 600px) {
+  .plants-list { grid-template-columns: 1fr; }
+
+  .plant-card {
+    display: flex;
+    align-items: center;
+  }
+
+  .plant-card-image {
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+  }
+
+  .plant-card-content { padding: 0.8rem; }
+
+  .plant-details {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .plant-details-image img {
+    width: 150px;
+    height: 150px;
+  }
+
+  .plant-info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: right;
+  }
+
+  .plant-info-label {
+    min-width: auto;
+    margin-bottom: 0.2rem;
+  }
+
+  .plant-details-actions { justify-content: center; }
+
+  .today-task-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .today-task-actions { justify-content: flex-end; }
+
+  .settings-section { padding: 1rem; }
+
+  .theme-option-btn { padding: 0.8rem 1rem; }
+
+  .theme-option-icon { font-size: 1.3rem; }
+
   .search-filter-bar {
     flex-direction: column;
     align-items: stretch;

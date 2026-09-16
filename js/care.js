@@ -1,14 +1,35 @@
 // PlantPal - مدیریت مراقبت از گیاه
-// این فایل مسئول ثبت، نمایش و حذف تاریخچه آبیاری است.
+// این فایل مسئول ثبت، نمایش و حذف تاریخچه فعالیت‌هاست.
 
 // ============================================
 // بخش ۱: متغیرهای سراسری
 // ============================================
 
 let currentCarePlantId = null;
+let currentCareType = 'water';
 
 // ============================================
-// بخش ۲: باز و بسته کردن Modal
+// بخش ۲: تنظیمات انواع فعالیت
+// ============================================
+
+const CARE_TYPES = {
+  water: { emoji: '💧', label: 'آبیاری' },
+  fertilize: { emoji: '🍃', label: 'کوددهی' },
+  prune: { emoji: '✂️', label: 'هرس' },
+  repot: { emoji: '🪴', label: 'تعویض گلدان' },
+  cutting: { emoji: '🌿', label: 'قلمه‌زنی' }
+};
+
+function getCareTypeLabel(type) {
+  return (CARE_TYPES[type] && CARE_TYPES[type].label) || 'آبیاری';
+}
+
+function getCareTypeEmoji(type) {
+  return (CARE_TYPES[type] && CARE_TYPES[type].emoji) || '💧';
+}
+
+// ============================================
+// بخش ۳: باز و بسته کردن Modal
 // ============================================
 
 function openAddCareModal() {
@@ -18,6 +39,8 @@ function openAddCareModal() {
   }
 
   currentCarePlantId = currentPlantId;
+
+  setSelectedCareType('water');
 
   const dateInput = document.getElementById('care-date');
   if (dateInput) {
@@ -34,7 +57,7 @@ function openAddCareModal() {
   const modal = document.getElementById('modal-add-care');
   if (modal) {
     modal.classList.add('active');
-    console.log('✓ Modal ثبت آبیاری باز شد');
+    console.log('✓ Modal ثبت فعالیت باز شد');
   }
 }
 
@@ -42,12 +65,46 @@ function closeAddCareModal() {
   const modal = document.getElementById('modal-add-care');
   if (modal) {
     modal.classList.remove('active');
-    console.log('✓ Modal ثبت آبیاری بسته شد');
+    console.log('✓ Modal ثبت فعالیت بسته شد');
   }
 }
 
 // ============================================
-// بخش ۳: ذخیره آبیاری
+// بخش ۴: انتخاب نوع فعالیت
+// ============================================
+
+function setSelectedCareType(type) {
+  currentCareType = type;
+
+  const typeInput = document.getElementById('care-type');
+  if (typeInput) {
+    typeInput.value = type;
+  }
+
+  const typeButtons = document.querySelectorAll('[data-care-type]');
+  typeButtons.forEach(function(btn) {
+    const btnType = btn.getAttribute('data-care-type');
+    if (btnType === type) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+}
+
+function setupCareTypeButtons() {
+  const typeButtons = document.querySelectorAll('[data-care-type]');
+  typeButtons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      const type = btn.getAttribute('data-care-type');
+      setSelectedCareType(type);
+    });
+  });
+  console.log('✓ دکمه‌های نوع فعالیت متصل شدند. تعداد:', typeButtons.length);
+}
+
+// ============================================
+// بخش ۵: ذخیره فعالیت
 // ============================================
 
 async function handleAddCare(event) {
@@ -64,13 +121,13 @@ async function handleAddCare(event) {
 
     const careLogData = {
       plantId: currentCarePlantId,
-      type: 'water',
+      type: currentCareType,
       date: new Date(date).toISOString(),
       note: note
     };
 
     await saveCareLog(careLogData);
-    console.log('✓ آبیاری ثبت شد');
+    console.log('✓ فعالیت ثبت شد. نوع:', currentCareType);
 
     closeAddCareModal();
 
@@ -78,13 +135,13 @@ async function handleAddCare(event) {
     await renderDashboard();
 
   } catch (error) {
-    console.error('✗ خطا در ثبت آبیاری:', error);
-    alert('خطا در ثبت آبیاری.');
+    console.error('✗ خطا در ثبت فعالیت:', error);
+    alert('خطا در ثبت فعالیت.');
   }
 }
 
 // ============================================
-// بخش ۴: نمایش تاریخچه آبیاری
+// بخش ۶: نمایش تاریخچه فعالیت‌ها
 // ============================================
 
 async function renderCareLogs(plantId) {
@@ -112,10 +169,10 @@ async function renderCareLogs(plantId) {
       listContainer.appendChild(item);
     });
 
-    console.log('✓ تاریخچه آبیاری نمایش داده شد. تعداد:', careLogs.length);
+    console.log('✓ تاریخچه فعالیت‌ها نمایش داده شد. تعداد:', careLogs.length);
 
   } catch (error) {
-    console.error('✗ خطا در نمایش تاریخچه آبیاری:', error);
+    console.error('✗ خطا در نمایش تاریخچه فعالیت‌ها:', error);
   }
 }
 
@@ -128,7 +185,12 @@ function createCareLogItem(log) {
 
   const date = document.createElement('span');
   date.className = 'care-log-date';
-  date.textContent = '💧 ' + formatDate(log.date);
+
+  const type = log.type || 'water';
+  const emoji = getCareTypeEmoji(type);
+  const label = getCareTypeLabel(type);
+
+  date.textContent = emoji + ' ' + label + ' — ' + formatDate(log.date);
 
   info.appendChild(date);
 
@@ -142,7 +204,7 @@ function createCareLogItem(log) {
   const deleteBtn = document.createElement('button');
   deleteBtn.className = 'care-log-delete';
   deleteBtn.textContent = '×';
-  deleteBtn.title = 'حذف این آبیاری';
+  deleteBtn.title = 'حذف این فعالیت';
   deleteBtn.addEventListener('click', function(event) {
     event.stopPropagation();
     handleDeleteCareLog(log.id);
@@ -155,24 +217,24 @@ function createCareLogItem(log) {
 }
 
 // ============================================
-// بخش ۵: حذف آبیاری
+// بخش ۷: حذف فعالیت
 // ============================================
 
 async function handleDeleteCareLog(logId) {
-  const confirmed = confirm('آیا مطمئنی می‌خواهی این آبیاری را حذف کنی؟');
+  const confirmed = confirm('آیا مطمئنی می‌خواهی این فعالیت را حذف کنی؟');
   if (!confirmed) {
     return;
   }
 
   try {
     await deleteCareLog(logId);
-    console.log('✓ آبیاری حذف شد. شناسه:', logId);
+    console.log('✓ فعالیت حذف شد. شناسه:', logId);
 
     await renderCareLogs(currentCarePlantId);
     await renderDashboard();
 
   } catch (error) {
-    console.error('✗ خطا در حذف آبیاری:', error);
-    alert('خطا در حذف آبیاری.');
+    console.error('✗ خطا در حذف فعالیت:', error);
+    alert('خطا در حذف فعالیت.');
   }
 }

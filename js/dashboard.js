@@ -23,7 +23,16 @@ function getDaysSinceLastWatering(careLogs) {
     return null;
   }
 
-  const lastLog = careLogs[0];
+  // آخرین فعالیت آبیاری
+  const waterLogs = careLogs.filter(function(log) {
+    return !log.type || log.type === 'water';
+  });
+
+  if (waterLogs.length === 0) {
+    return null;
+  }
+
+  const lastLog = waterLogs[0];
   const lastDate = new Date(lastLog.date);
   const now = new Date();
   const diffMs = now - lastDate;
@@ -183,7 +192,7 @@ function createTodayTaskItem(plant, days) {
 
   const name = document.createElement('h4');
   name.className = 'today-task-name';
-  name.textContent = '💧 ' + plant.name;
+  name.textContent = plant.name;
   name.addEventListener('click', function() {
     openPlantDetails(plant.id);
   });
@@ -200,7 +209,7 @@ function createTodayTaskItem(plant, days) {
 
   const waterBtn = document.createElement('button');
   waterBtn.className = 'btn btn-primary';
-  waterBtn.textContent = 'ثبت آبیاری';
+  waterBtn.textContent = 'ثبت فعالیت';
   waterBtn.addEventListener('click', function() {
     currentPlantId = plant.id;
     openAddCareModal();
