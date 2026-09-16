@@ -8,7 +8,7 @@
 function initSettings() {
   console.log('✓ تنظیمات راه‌اندازی شد');
 
-  // اتصال دکمه‌های تم
+  // دکمه‌های تم
   const themeButtons = document.querySelectorAll('[data-theme-option]');
   themeButtons.forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -19,7 +19,7 @@ function initSettings() {
 
   console.log('✓ دکمه‌های تم متصل شدند. تعداد:', themeButtons.length);
 
-  // اتصال دکمه‌های فرمت تاریخ
+  // دکمه‌های تاریخ
   const dateButtons = document.querySelectorAll('[data-date-format]');
   dateButtons.forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -37,7 +37,7 @@ function initSettings() {
 
   console.log('✓ دکمه‌های فرمت تاریخ متصل شدند. تعداد:', dateButtons.length);
 
-  // اتصال دکمه‌های وضعیت سلامت
+  // دکمه‌های وضعیت سلامت
   const healthButtons = document.querySelectorAll('[data-health]');
   healthButtons.forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -47,4 +47,48 @@ function initSettings() {
   });
 
   console.log('✓ دکمه‌های وضعیت سلامت متصل شدند. تعداد:', healthButtons.length);
+
+  // دکمه‌های یادآوری
+  setupNotificationButtons();
+
+  // به‌روزرسانی وضعیت
+  if (typeof updateNotificationButtons === 'function') {
+    updateNotificationButtons();
+  }
+}
+
+// ============================================
+// بخش ۲: دکمه‌های یادآوری
+// ============================================
+
+function setupNotificationButtons() {
+  const btnToggle = document.getElementById('btn-toggle-notifications');
+  if (btnToggle) {
+    btnToggle.addEventListener('click', function() {
+      console.log('🔔 کلیک روی دکمه فعال‌سازی یادآوری');
+      if (typeof toggleNotifications === 'function') {
+        toggleNotifications();
+      } else {
+        console.error('✗ تابع toggleNotifications وجود ندارد');
+      }
+    });
+    console.log('✓ دکمه فعال‌سازی یادآوری متصل شد');
+  } else {
+    console.warn('⚠ دکمه btn-toggle-notifications پیدا نشد');
+  }
+
+  const btnTest = document.getElementById('btn-test-notification');
+  if (btnTest) {
+    btnTest.addEventListener('click', function() {
+      console.log('🔔 کلیک روی دکمه تست یادآوری');
+      if (typeof testNotification === 'function') {
+        testNotification();
+      } else {
+        console.error('✗ تابع testNotification وجود ندارد');
+      }
+    });
+    console.log('✓ دکمه تست یادآوری متصل شد');
+  } else {
+    console.warn('⚠ دکمه btn-test-notification پیدا نشد');
+  }
 }
