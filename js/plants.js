@@ -68,7 +68,6 @@ function createPlantCard(plant) {
   content.appendChild(name);
   content.appendChild(location);
 
-  // نشانگر وضعیت سلامت
   const health = plant.health || 'healthy';
   const healthIcon = getHealthIcon(health);
   const healthLabel = getHealthLabel(health);
@@ -109,9 +108,7 @@ async function openPlantDetails(plantId) {
     document.getElementById('details-name').textContent = plant.name || '—';
     document.getElementById('details-type').textContent = plant.type || '—';
     document.getElementById('details-location').textContent = plant.location || '—';
-    document.getElementById('details-notes').textContent = plant.notes || '—';
 
-    // نمایش وضعیت سلامت
     const healthDisplay = document.getElementById('details-health');
     if (healthDisplay) {
       const health = plant.health || 'healthy';
@@ -133,9 +130,9 @@ async function openPlantDetails(plantId) {
 
     showDetailsPage();
 
+    await renderNotes(plantId);
     await renderCareLogs(plantId);
 
-    // بارگذاری مجدد آیکون‌ها
     if (typeof loadAllIcons === 'function') {
       await loadAllIcons();
     }
@@ -163,7 +160,6 @@ async function handleAddPlant(event) {
 
     const type = document.getElementById('add-type').value.trim();
     const location = document.getElementById('add-location').value.trim();
-    const notes = document.getElementById('add-notes').value.trim();
     const imageInput = document.getElementById('add-image');
 
     let imageData = null;
@@ -175,7 +171,6 @@ async function handleAddPlant(event) {
       name: name,
       type: type,
       location: location,
-      notes: notes,
       image: imageData,
       health: selectedHealth
     };
@@ -246,7 +241,6 @@ async function handleUpdatePlant(event) {
 
     const type = document.getElementById('add-type').value.trim();
     const location = document.getElementById('add-location').value.trim();
-    const notes = document.getElementById('add-notes').value.trim();
     const imageInput = document.getElementById('add-image');
 
     let imageData = undefined;
@@ -258,7 +252,6 @@ async function handleUpdatePlant(event) {
       name: name,
       type: type,
       location: location,
-      notes: notes,
       health: selectedHealth
     };
 

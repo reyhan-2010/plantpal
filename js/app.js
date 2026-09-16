@@ -121,6 +121,27 @@ function setupEventListeners() {
     formAddCare.addEventListener('submit', handleAddCare);
   }
 
+  // یادداشت‌ها
+  const btnAddNote = document.getElementById('btn-add-note');
+  if (btnAddNote) {
+    btnAddNote.addEventListener('click', openAddNoteModal);
+  }
+
+  const btnCloseNoteModal = document.getElementById('btn-close-note-modal');
+  if (btnCloseNoteModal) {
+    btnCloseNoteModal.addEventListener('click', closeAddNoteModal);
+  }
+
+  const btnCancelNote = document.getElementById('btn-cancel-note');
+  if (btnCancelNote) {
+    btnCancelNote.addEventListener('click', closeAddNoteModal);
+  }
+
+  const formAddNote = document.getElementById('form-add-note');
+  if (formAddNote) {
+    formAddNote.addEventListener('submit', handleAddNote);
+  }
+
   if (typeof setupSearch === 'function') setupSearch();
   if (typeof setupFilters === 'function') setupFilters();
   if (typeof setupCareTypeButtons === 'function') setupCareTypeButtons();

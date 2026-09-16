@@ -161,11 +161,6 @@
           <input type="file" id="add-image" class="form-input" accept="image/*">
         </div>
 
-        <div class="form-group">
-          <label for="add-notes" class="form-label">یادداشت (اختیاری)</label>
-          <textarea id="add-notes" class="form-textarea" rows="4"></textarea>
-        </div>
-
         <div class="form-actions">
           <button type="submit" class="btn btn-primary">ذخیره</button>
           <button type="button" id="btn-cancel-add" class="btn btn-secondary">انصراف</button>
@@ -204,16 +199,21 @@
             <span class="plant-info-label">وضعیت سلامت:</span>
             <span id="details-health" class="plant-info-value">—</span>
           </div>
-          <div class="plant-info-row">
-            <span class="plant-info-label">یادداشت:</span>
-            <span id="details-notes" class="plant-info-value">—</span>
-          </div>
         </div>
       </div>
 
       <div class="plant-details-actions">
         <button id="btn-edit-plant" class="btn btn-secondary" aria-label="ویرایش گیاه">ویرایش</button>
         <button id="btn-delete-plant" class="btn btn-danger" aria-label="حذف گیاه">حذف</button>
+      </div>
+
+      <div class="notes-section">
+        <h3 class="notes-title">📝 یادداشت‌ها</h3>
+        <button id="btn-add-note" class="btn btn-primary" aria-label="افزودن یادداشت">+ افزودن یادداشت</button>
+        <div id="notes-list" class="notes-list"></div>
+        <div id="empty-notes" class="empty-state" style="display: none;" role="status">
+          <p>هنوز یادداشتی ثبت نشده است.</p>
+        </div>
       </div>
 
       <div class="care-history">
@@ -348,6 +348,34 @@
     </div>
   </div>
 
+  <div id="modal-add-note" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-note-title">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-note-title" class="modal-title">افزودن یادداشت جدید</h3>
+        <button id="btn-close-note-modal" class="modal-close" aria-label="بستن">
+          <span class="icon" data-icon="x"></span>
+        </button>
+      </div>
+
+      <form id="form-add-note" class="modal-form">
+        <div class="form-group">
+          <label for="note-text" class="form-label">متن یادداشت *</label>
+          <textarea id="note-text" class="form-textarea" rows="4" required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="note-date" class="form-label">تاریخ</label>
+          <input type="date" id="note-date" class="form-input" required>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">ذخیره</button>
+          <button type="button" id="btn-cancel-note" class="btn btn-secondary">انصراف</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <footer class="app-footer" role="contentinfo">
     <p>نسخه ۰.۱.۰ — در حال ساخت</p>
   </footer>
@@ -360,6 +388,7 @@
   <script src="js/ui.js"></script>
   <script src="js/plants.js"></script>
   <script src="js/care.js"></script>
+  <script src="js/notes.js"></script>
   <script src="js/dashboard.js"></script>
   <script src="js/settings.js"></script>
   <script src="js/app.js"></script>

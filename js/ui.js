@@ -100,7 +100,6 @@ function fillAddForm(plant) {
   document.getElementById('add-name').value = plant.name || '';
   document.getElementById('add-type').value = plant.type || '';
   document.getElementById('add-location').value = plant.location || '';
-  document.getElementById('add-notes').value = plant.notes || '';
   setSelectedHealth(plant.health || 'healthy');
 }
 
