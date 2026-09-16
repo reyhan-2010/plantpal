@@ -25,6 +25,10 @@ document.addEventListener('DOMContentLoaded', async function() {
       initNotifications();
     }
 
+    if (typeof initReports === 'function') {
+      initReports();
+    }
+
     await loadAllIcons();
 
     console.log('✓ PlantPal با موفقیت راه‌اندازی شد');
@@ -39,6 +43,24 @@ function setupEventListeners() {
   if (btnOpenSettings) {
     btnOpenSettings.addEventListener('click', function() {
       showPage('page-settings');
+    });
+  }
+
+  const btnOpenReports = document.getElementById('btn-open-reports');
+  if (btnOpenReports) {
+    btnOpenReports.addEventListener('click', async function() {
+      showPage('page-reports');
+      if (typeof renderReports === 'function') {
+        await renderReports();
+      }
+    });
+  }
+
+  const btnBackFromReports = document.getElementById('btn-back-from-reports');
+  if (btnBackFromReports) {
+    btnBackFromReports.addEventListener('click', function() {
+      showHomePage();
+      renderDashboard();
     });
   }
 

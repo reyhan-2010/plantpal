@@ -9,6 +9,7 @@ const PAGES = {
   HOME: 'page-home',
   ADD: 'page-add',
   DETAILS: 'page-details',
+  REPORTS: 'page-reports',
   SETTINGS: 'page-settings'
 };
 
@@ -42,6 +43,10 @@ function showAddPage() {
 
 function showDetailsPage() {
   showPage(PAGES.DETAILS);
+}
+
+function showReportsPage() {
+  showPage(PAGES.REPORTS);
 }
 
 function showSettingsPage() {
