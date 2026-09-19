@@ -1740,3 +1740,220 @@
     white-space: normal;
   }
 }
+/* ============================================
+   گالری رشد گیاه
+   ============================================ */
+
+.gallery-section {
+  background: var(--color-card);
+  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  margin-bottom: 1.5rem;
+  transition: background 0.3s ease;
+}
+
+.gallery-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.gallery-title {
+  color: var(--color-primary);
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.gallery-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.8rem;
+}
+
+.gallery-item {
+  position: relative;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  cursor: pointer;
+  aspect-ratio: 1 / 1;
+  background: var(--color-bg);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+
+.gallery-item:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.gallery-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.gallery-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.5rem 0.6rem;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.75) 0%,
+    rgba(0, 0, 0, 0.4) 60%,
+    transparent 100%
+  );
+  color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  pointer-events: none;
+}
+
+.gallery-date {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.gallery-note {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.9);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+@media (max-width: 600px) {
+  .gallery-section {
+    padding: 1rem;
+  }
+
+  .gallery-list {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+  }
+
+  .gallery-date {
+    font-size: 0.75rem;
+  }
+
+  .gallery-note {
+    font-size: 0.7rem;
+  }
+}
+/* ============================================
+   Modal نمایش بزرگ عکس
+   ============================================ */
+
+.modal-photo-view {
+  max-width: 700px;
+  width: 100%;
+}
+
+.photo-view-body {
+  padding: 1.2rem 1.5rem;
+}
+
+.photo-view-image-wrapper {
+  width: 100%;
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  max-height: 60vh;
+}
+
+.photo-view-image-wrapper img {
+  max-width: 100%;
+  max-height: 60vh;
+  display: block;
+  object-fit: contain;
+  border-radius: var(--radius-md);
+}
+
+.photo-view-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.photo-view-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  padding: 0.6rem 0.8rem;
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  border-right: 3px solid var(--color-primary);
+}
+
+.photo-view-label {
+  font-weight: 700;
+  color: var(--color-primary);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.photo-view-value {
+  color: var(--color-text);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.photo-view-actions {
+  display: flex;
+  gap: 0.8rem;
+  padding: 1rem 1.5rem 1.5rem 1.5rem;
+  border-top: 1px solid var(--color-border-light);
+}
+
+.photo-view-actions .btn {
+  flex: 1;
+  justify-content: center;
+}
+
+.gallery-item {
+  cursor: zoom-in;
+}
+
+.gallery-item:active {
+  transform: scale(0.98);
+}
+
+@media (max-width: 600px) {
+  .photo-view-body {
+    padding: 1rem;
+  }
+
+  .photo-view-image-wrapper {
+    max-height: 50vh;
+  }
+
+  .photo-view-image-wrapper img {
+    max-height: 50vh;
+  }
+
+  .photo-view-actions {
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  .photo-view-row {
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+}

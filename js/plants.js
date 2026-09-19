@@ -233,7 +233,6 @@ async function openPlantDetails(plantId) {
       freqDisplay.textContent = getWateringFrequencyText(plant.wateringFrequencyDays || 7);
     }
 
-    // آخرین آبیاری
     const lastWateringDisplay = document.getElementById('details-last-watering');
     if (lastWateringDisplay) {
       const careLogs = await getCareLogsByPlantId(plantId);
@@ -252,6 +251,10 @@ async function openPlantDetails(plantId) {
 
     await renderNotes(plantId);
     await renderCareLogs(plantId);
+
+    if (typeof renderGallery === 'function') {
+      await renderGallery(plantId);
+    }
 
     if (typeof loadAllIcons === 'function') {
       await loadAllIcons();

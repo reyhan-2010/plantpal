@@ -1,15 +1,16 @@
 // PlantPal - مدیریت پایگاه داده (IndexedDB)
-// این فایل مسئول ذخیره و بازیابی اطلاعات گیاهان، فعالیت‌ها و یادداشت‌هاست.
+// این فایل مسئول ذخیره و بازیابی اطلاعات گیاهان، فعالیت‌ها، یادداشت‌ها و عکس‌هاست.
 
 // ============================================
 // بخش ۱: تنظیمات اولیه
 // ============================================
 
 const DB_NAME = 'PlantPalDB';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 const STORE_PLANTS = 'plants';
 const STORE_CARE_LOGS = 'careLogs';
 const STORE_NOTES = 'notes';
+const STORE_PHOTOS = 'photos';
 
 const CURRENT_USER_ID = 'local-user';
 
@@ -37,7 +38,7 @@ function openDatabase() {
 
     request.onsuccess = function(event) {
       db = event.target.result;
-      console.log('✓ پایگاه داده با موفقیت باز شد');
+      console.log('✓ پایگاه داده با موفقیت باز شد (نسخه ' + DB_VERSION + ')');
       resolve(db);
     };
 
@@ -88,6 +89,18 @@ function createStores(database) {
     notesStore.createIndex('date', 'date', { unique: false });
 
     console.log('✓ کشوی یادداشت‌ها ساخته شد');
+  }
+
+  if (!database.objectStoreNames.contains(STORE_PHOTOS)) {
+    const photosStore = database.createObjectStore(STORE_PHOTOS, {
+      keyPath: 'id',
+      autoIncrement: true
+    });
+
+    photosStore.createIndex('plantId', 'plantId', { unique: false });
+    photosStore.createIndex('date', 'date', { unique: false });
+
+    console.log('✓ کشوی عکس‌های رشد ساخته شد');
   }
 }
 
@@ -300,7 +313,80 @@ function updateNote(noteId, noteData) {
 }
 
 // ============================================
-// بخش ۸: توابع خواندن
+// بخش ۸: توابع ذخیره عکس‌های رشد
+// ============================================
+
+function savePhoto(photoData) {
+  return new Promise((resolve, reject) => {
+    const now = new Date().toISOString();
+
+    const photo = {
+      plantId: photoData.plantId,
+      image: photoData.image || null,
+      date: photoData.date || now,
+      note: photoData.note || '',
+      createdAt: now
+    };
+
+    const transaction = db.transaction([STORE_PHOTOS], 'readwrite');
+    const store = transaction.objectStore(STORE_PHOTOS);
+    const request = store.add(photo);
+
+    request.onsuccess = function(event) {
+      console.log('✓ عکس رشد ذخیره شد. شناسه:', event.target.result);
+      resolve(event.target.result);
+    };
+
+    request.onerror = function(event) {
+      console.error('✗ خطا در ذخیره عکس:', event.target.error);
+      reject(event.target.error);
+    };
+  });
+}
+
+function updatePhoto(photoId, photoData) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_PHOTOS], 'readwrite');
+    const store = transaction.objectStore(STORE_PHOTOS);
+    const getRequest = store.get(photoId);
+
+    getRequest.onsuccess = function(event) {
+      const existingPhoto = event.target.result;
+
+      if (!existingPhoto) {
+        reject(new Error('عکس پیدا نشد'));
+        return;
+      }
+
+      const updatedPhoto = {
+        ...existingPhoto,
+        image: photoData.image !== undefined ? photoData.image : existingPhoto.image,
+        date: photoData.date !== undefined ? photoData.date : existingPhoto.date,
+        note: photoData.note !== undefined ? photoData.note : existingPhoto.note
+      };
+
+      const putRequest = store.put(updatedPhoto);
+
+      putRequest.onsuccess = function() {
+        console.log('✓ عکس رشد ویرایش شد. شناسه:', photoId);
+        resolve(updatedPhoto);
+      };
+
+      putRequest.onerror = function(event) {
+        console.error('✗ خطا در ویرایش عکس:', event.target.error);
+        reject(event.target.error);
+      };
+    };
+
+    getRequest.onerror = function(event) {
+      console.error('✗ خطا در پیدا کردن عکس:', event.target.error);
+      reject(event.target.error);
+    };
+  });
+}
+
+// ============================================
+// بخش ۹: توابع خواندن
 // ============================================
 
 function getAllPlants() {
@@ -387,15 +473,54 @@ function getNotesByPlantId(plantId) {
   });
 }
 
+function getPhotosByPlantId(plantId) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_PHOTOS], 'readonly');
+    const store = transaction.objectStore(STORE_PHOTOS);
+    const index = store.index('plantId');
+    const request = index.getAll(plantId);
+
+    request.onsuccess = function(event) {
+      let photos = event.target.result;
+      photos.sort((a, b) => new Date(b.date) - new Date(a.date));
+      console.log('✓ تعداد عکس‌های رشد خوانده شد:', photos.length);
+      resolve(photos);
+    };
+
+    request.onerror = function(event) {
+      console.error('✗ خطا در خواندن عکس‌ها:', event.target.error);
+      reject(event.target.error);
+    };
+  });
+}
+
+function getPhotoById(photoId) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_PHOTOS], 'readonly');
+    const store = transaction.objectStore(STORE_PHOTOS);
+    const request = store.get(photoId);
+
+    request.onsuccess = function(event) {
+      resolve(event.target.result);
+    };
+
+    request.onerror = function(event) {
+      console.error('✗ خطا در خواندن عکس:', event.target.error);
+      reject(event.target.error);
+    };
+  });
+}
+
 // ============================================
-// بخش ۹: توابع حذف
+// بخش ۱۰: توابع حذف
 // ============================================
 
 function deletePlant(plantId) {
   return new Promise((resolve, reject) => {
     Promise.all([
       deleteCareLogsByPlantId(plantId),
-      deleteNotesByPlantId(plantId)
+      deleteNotesByPlantId(plantId),
+      deletePhotosByPlantId(plantId)
     ])
       .then(() => {
         const transaction = db.transaction([STORE_PLANTS], 'readwrite');
@@ -477,6 +602,35 @@ function deleteNotesByPlantId(plantId) {
   });
 }
 
+function deletePhotosByPlantId(plantId) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_PHOTOS], 'readwrite');
+    const store = transaction.objectStore(STORE_PHOTOS);
+    const index = store.index('plantId');
+    const request = index.openCursor(plantId);
+
+    let deletedCount = 0;
+
+    request.onsuccess = function(event) {
+      const cursor = event.target.result;
+
+      if (cursor) {
+        cursor.delete();
+        deletedCount++;
+        cursor.continue();
+      } else {
+        console.log('✓ تعداد عکس‌های حذف‌شده:', deletedCount);
+        resolve(deletedCount);
+      }
+    };
+
+    request.onerror = function(event) {
+      console.error('✗ خطا در حذف عکس‌ها:', event.target.error);
+      reject(event.target.error);
+    };
+  });
+}
+
 function deleteCareLog(logId) {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction([STORE_CARE_LOGS], 'readwrite');
@@ -513,9 +667,26 @@ function deleteNote(noteId) {
   });
 }
 
+function deletePhoto(photoId) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_PHOTOS], 'readwrite');
+    const store = transaction.objectStore(STORE_PHOTOS);
+    const request = store.delete(photoId);
+
+    request.onsuccess = function() {
+      console.log('✓ عکس رشد حذف شد. شناسه:', photoId);
+      resolve(true);
+    };
+
+    request.onerror = function(event) {
+      console.error('✗ خطا در حذف عکس:', event.target.error);
+      reject(event.target.error);
+    };
+  });
+}
 
 // ============================================
-// بخش ۱۰: توابع خواندن همه داده‌ها
+// بخش ۱۱: توابع خواندن همه داده‌ها (برای پشتیبان)
 // ============================================
 
 function getAllCareLogs() {
@@ -556,23 +727,51 @@ function getAllNotes() {
   });
 }
 
+function getAllPhotos() {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_PHOTOS], 'readonly');
+    const store = transaction.objectStore(STORE_PHOTOS);
+    const request = store.getAll();
+
+    request.onsuccess = function(event) {
+      const photos = event.target.result;
+      console.log('✓ تعداد کل عکس‌ها خوانده شد:', photos.length);
+      resolve(photos);
+    };
+
+    request.onerror = function(event) {
+      console.error('✗ خطا در خواندن همه عکس‌ها:', event.target.error);
+      reject(event.target.error);
+    };
+  });
+}
+
 // ============================================
-// بخش ۱۱: پشتیبان‌گیری (Export)
+// بخش ۱۲: پشتیبان‌گیری (Export)
 // ============================================
 
 async function exportAllData(includeImages) {
   const plants = await getAllPlants();
   const careLogs = await getAllCareLogs();
   const notes = await getAllNotes();
+  const photos = await getAllPhotos();
 
   let exportPlants;
+  let exportPhotos;
 
   if (includeImages) {
     exportPlants = plants;
+    exportPhotos = photos;
   } else {
     exportPlants = plants.map(function(plant) {
       return {
         ...plant,
+        image: null
+      };
+    });
+    exportPhotos = photos.map(function(photo) {
+      return {
+        ...photo,
         image: null
       };
     });
@@ -581,18 +780,20 @@ async function exportAllData(includeImages) {
   const exportData = {
     metadata: {
       appName: 'PlantPal',
-      version: '1.0',
-      formatVersion: 1,
+      version: '1.1',
+      formatVersion: 2,
       exportDate: new Date().toISOString(),
       includesImages: !!includeImages,
       plantCount: plants.length,
       careLogCount: careLogs.length,
-      noteCount: notes.length
+      noteCount: notes.length,
+      photoCount: photos.length
     },
     data: {
       plants: exportPlants,
       careLogs: careLogs,
-      notes: notes
+      notes: notes,
+      photos: exportPhotos
     }
   };
 
@@ -600,6 +801,7 @@ async function exportAllData(includeImages) {
   console.log('  - گیاهان:', plants.length);
   console.log('  - فعالیت‌ها:', careLogs.length);
   console.log('  - یادداشت‌ها:', notes.length);
+  console.log('  - عکس‌های رشد:', photos.length);
   console.log('  - شامل عکس:', includeImages);
 
   return exportData;
@@ -637,17 +839,18 @@ async function getBackupStats() {
   const plants = await getAllPlants();
   const careLogs = await getAllCareLogs();
   const notes = await getAllNotes();
+  const photos = await getAllPhotos();
 
   return {
     plants: plants.length,
     careLogs: careLogs.length,
-    notes: notes.length
+    notes: notes.length,
+    photos: photos.length
   };
 }
 
-
 // ============================================
-// بخش ۱۲: اعتبارسنجی فایل پشتیبان
+// بخش ۱۳: اعتبارسنجی فایل پشتیبان
 // ============================================
 
 function validateBackupData(data) {
@@ -684,6 +887,12 @@ function validateBackupData(data) {
     errors.push('فهرست یادداشت‌ها در فایل ناقص است.');
   }
 
+  // فایل‌های قدیمی ممکن است photos نداشته باشند — این خطا نیست
+  // اما اگر photos داشت، باید آرایه باشد
+  if (data.data.photos !== undefined && !Array.isArray(data.data.photos)) {
+    errors.push('فهرست عکس‌های رشد در فایل ناقص است.');
+  }
+
   return {
     valid: errors.length === 0,
     errors: errors
@@ -691,23 +900,25 @@ function validateBackupData(data) {
 }
 
 // ============================================
-// بخش ۱۳: پاک کردن همه داده‌ها
+// بخش ۱۴: پاک کردن همه داده‌ها
 // ============================================
 
 function clearAllData() {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(
-      [STORE_PLANTS, STORE_CARE_LOGS, STORE_NOTES],
+      [STORE_PLANTS, STORE_CARE_LOGS, STORE_NOTES, STORE_PHOTOS],
       'readwrite'
     );
 
     const plantsStore = transaction.objectStore(STORE_PLANTS);
     const careLogsStore = transaction.objectStore(STORE_CARE_LOGS);
     const notesStore = transaction.objectStore(STORE_NOTES);
+    const photosStore = transaction.objectStore(STORE_PHOTOS);
 
     plantsStore.clear();
     careLogsStore.clear();
     notesStore.clear();
+    photosStore.clear();
 
     transaction.oncomplete = function() {
       console.log('✓ همه داده‌ها پاک شد');
@@ -722,7 +933,7 @@ function clearAllData() {
 }
 
 // ============================================
-// بخش ۱۴: بازیابی از فایل (Import)
+// بخش ۱۵: بازیابی از فایل (Import)
 // ============================================
 
 function importSinglePlant(oldPlant) {
@@ -806,6 +1017,32 @@ function importSingleNote(oldNote, newPlantId) {
   });
 }
 
+function importSinglePhoto(oldPhoto, newPlantId) {
+  return new Promise((resolve, reject) => {
+    const now = new Date().toISOString();
+
+    const photo = {
+      plantId: newPlantId,
+      image: oldPhoto.image || null,
+      date: oldPhoto.date || now,
+      note: oldPhoto.note || '',
+      createdAt: oldPhoto.createdAt || now
+    };
+
+    const transaction = db.transaction([STORE_PHOTOS], 'readwrite');
+    const store = transaction.objectStore(STORE_PHOTOS);
+    const request = store.add(photo);
+
+    request.onsuccess = function(event) {
+      resolve(event.target.result);
+    };
+
+    request.onerror = function(event) {
+      reject(event.target.error);
+    };
+  });
+}
+
 async function importAllData(importData) {
   try {
     console.log('▶ شروع بازیابی داده‌ها...');
@@ -864,13 +1101,32 @@ async function importAllData(importData) {
     }
 
     console.log('✓ یادداشت‌ها بازیابی شد:', importedNotes);
+
+    // ۵. بازیابی عکس‌های رشد (اگر در فایل باشند)
+    const photos = importData.data.photos || [];
+    let importedPhotos = 0;
+
+    for (let i = 0; i < photos.length; i++) {
+      const oldPhoto = photos[i];
+      const newPlantId = idMap[oldPhoto.plantId];
+
+      if (newPlantId !== undefined) {
+        await importSinglePhoto(oldPhoto, newPlantId);
+        importedPhotos++;
+      } else {
+        console.warn('⚠ عکس با گیاه نامعلوم رد شد. plantId قدیمی:', oldPhoto.plantId);
+      }
+    }
+
+    console.log('✓ عکس‌های رشد بازیابی شد:', importedPhotos);
     console.log('✅ بازیابی با موفقیت انجام شد');
 
     return {
       success: true,
       plants: plants.length,
       careLogs: importedLogs,
-      notes: importedNotes
+      notes: importedNotes,
+      photos: importedPhotos
     };
 
   } catch (error) {

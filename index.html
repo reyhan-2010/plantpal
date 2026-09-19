@@ -280,6 +280,18 @@
         </div>
       </div>
 
+      <div class="gallery-section">
+        <div class="gallery-header">
+          <h3 class="gallery-title">📸 گالری رشد</h3>
+          <button id="btn-add-photo" class="btn btn-primary" aria-label="افزودن عکس">+ افزودن عکس</button>
+        </div>
+        <div id="gallery-list" class="gallery-list"></div>
+        <div id="empty-gallery" class="empty-state" style="display: none;" role="status">
+          <p>هنوز عکسی ثبت نشده است.</p>
+          <p>با افزودن اولین عکس، رشد گیاهت را ثبت کن.</p>
+        </div>
+      </div>
+
       <div class="care-history">
         <h3 class="care-history-title">تاریخچه فعالیت‌ها</h3>
         <button id="btn-add-care" class="btn btn-primary" aria-label="ثبت فعالیت جدید">+ ثبت فعالیت جدید</button>
@@ -529,6 +541,74 @@
     </div>
   </div>
 
+  <!-- Modal: افزودن عکس رشد -->
+  <div id="modal-add-photo" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-photo-title">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-photo-title" class="modal-title">📸 افزودن عکس جدید</h3>
+        <button id="btn-close-photo-modal" class="modal-close" aria-label="بستن">
+          <span class="icon" data-icon="x"></span>
+        </button>
+      </div>
+
+      <form id="form-add-photo" class="modal-form">
+        <div class="form-group">
+          <label for="photo-file" class="form-label">انتخاب عکس *</label>
+          <input type="file" id="photo-file" class="form-input" accept="image/*" required>
+        </div>
+
+        <div class="form-group">
+          <label for="photo-date" class="form-label">تاریخ</label>
+          <input type="date" id="photo-date" class="form-input" required>
+        </div>
+
+        <div class="form-group">
+          <label for="photo-note" class="form-label">یادداشت (اختیاری)</label>
+          <textarea id="photo-note" class="form-textarea" rows="3" placeholder="مثلاً: برگ جدید داد"></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">ذخیره</button>
+          <button type="button" id="btn-cancel-photo" class="btn btn-secondary">انصراف</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: نمایش بزرگ عکس -->
+  <div id="modal-view-photo" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-view-photo-title">
+    <div class="modal-content modal-photo-view">
+      <div class="modal-header">
+        <h3 id="modal-view-photo-title" class="modal-title">📸 عکس رشد</h3>
+        <button id="btn-close-view-photo" class="modal-close" aria-label="بستن">
+          <span class="icon" data-icon="x"></span>
+        </button>
+      </div>
+
+      <div class="photo-view-body">
+        <div class="photo-view-image-wrapper">
+          <img id="photo-view-image" src="" alt="عکس رشد">
+        </div>
+
+        <div class="photo-view-info">
+          <div class="photo-view-row">
+            <span class="photo-view-label">📅 تاریخ:</span>
+            <span id="photo-view-date" class="photo-view-value">—</span>
+          </div>
+          <div class="photo-view-row" id="photo-view-note-row" style="display: none;">
+            <span class="photo-view-label">📝 یادداشت:</span>
+            <span id="photo-view-note" class="photo-view-value">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="photo-view-actions">
+        <button id="btn-delete-photo" class="btn btn-danger">🗑️ حذف عکس</button>
+        <button id="btn-cancel-view-photo" class="btn btn-secondary">بستن</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal: دانلود پشتیبان -->
   <div id="modal-export-backup" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-export-title">
     <div class="modal-content">
@@ -632,6 +712,7 @@
   <script src="js/plants.js"></script>
   <script src="js/care.js"></script>
   <script src="js/notes.js"></script>
+  <script src="js/gallery.js"></script>
   <script src="js/dashboard.js"></script>
   <script src="js/notifications.js"></script>
   <script src="js/reports.js"></script>
