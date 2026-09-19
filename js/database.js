@@ -512,3 +512,369 @@ function deleteNote(noteId) {
     };
   });
 }
+
+
+// ============================================
+// بخش ۱۰: توابع خواندن همه داده‌ها
+// ============================================
+
+function getAllCareLogs() {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_CARE_LOGS], 'readonly');
+    const store = transaction.objectStore(STORE_CARE_LOGS);
+    const request = store.getAll();
+
+    request.onsuccess = function(event) {
+      const logs = event.target.result;
+      console.log('✓ تعداد کل فعالیت‌ها خوانده شد:', logs.length);
+      resolve(logs);
+    };
+
+    request.onerror = function(event) {
+      console.error('✗ خطا در خواندن همه فعالیت‌ها:', event.target.error);
+      reject(event.target.error);
+    };
+  });
+}
+
+function getAllNotes() {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_NOTES], 'readonly');
+    const store = transaction.objectStore(STORE_NOTES);
+    const request = store.getAll();
+
+    request.onsuccess = function(event) {
+      const notes = event.target.result;
+      console.log('✓ تعداد کل یادداشت‌ها خوانده شد:', notes.length);
+      resolve(notes);
+    };
+
+    request.onerror = function(event) {
+      console.error('✗ خطا در خواندن همه یادداشت‌ها:', event.target.error);
+      reject(event.target.error);
+    };
+  });
+}
+
+// ============================================
+// بخش ۱۱: پشتیبان‌گیری (Export)
+// ============================================
+
+async function exportAllData(includeImages) {
+  const plants = await getAllPlants();
+  const careLogs = await getAllCareLogs();
+  const notes = await getAllNotes();
+
+  let exportPlants;
+
+  if (includeImages) {
+    exportPlants = plants;
+  } else {
+    exportPlants = plants.map(function(plant) {
+      return {
+        ...plant,
+        image: null
+      };
+    });
+  }
+
+  const exportData = {
+    metadata: {
+      appName: 'PlantPal',
+      version: '1.0',
+      formatVersion: 1,
+      exportDate: new Date().toISOString(),
+      includesImages: !!includeImages,
+      plantCount: plants.length,
+      careLogCount: careLogs.length,
+      noteCount: notes.length
+    },
+    data: {
+      plants: exportPlants,
+      careLogs: careLogs,
+      notes: notes
+    }
+  };
+
+  console.log('✓ داده‌های پشتیبان آماده شد:');
+  console.log('  - گیاهان:', plants.length);
+  console.log('  - فعالیت‌ها:', careLogs.length);
+  console.log('  - یادداشت‌ها:', notes.length);
+  console.log('  - شامل عکس:', includeImages);
+
+  return exportData;
+}
+
+function downloadBackupFile(exportData) {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+
+  const filename = 'plantpal-backup-' + year + '-' + month + '-' + day + '.json';
+
+  const json = JSON.stringify(exportData, null, 2);
+  const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  setTimeout(function() {
+    URL.revokeObjectURL(url);
+  }, 1000);
+
+  console.log('✓ فایل پشتیبان دانلود شد:', filename);
+
+  return filename;
+}
+
+async function getBackupStats() {
+  const plants = await getAllPlants();
+  const careLogs = await getAllCareLogs();
+  const notes = await getAllNotes();
+
+  return {
+    plants: plants.length,
+    careLogs: careLogs.length,
+    notes: notes.length
+  };
+}
+
+
+// ============================================
+// بخش ۱۲: اعتبارسنجی فایل پشتیبان
+// ============================================
+
+function validateBackupData(data) {
+  const errors = [];
+
+  if (!data || typeof data !== 'object') {
+    errors.push('ساختار فایل معتبر نیست.');
+    return { valid: false, errors: errors };
+  }
+
+  if (!data.metadata || typeof data.metadata !== 'object') {
+    errors.push('اطلاعات نسخه پشتیبان یافت نشد.');
+    return { valid: false, errors: errors };
+  }
+
+  if (data.metadata.appName !== 'PlantPal') {
+    errors.push('این فایل پشتیبان PlantPal نیست.');
+  }
+
+  if (!data.data || typeof data.data !== 'object') {
+    errors.push('داده‌های فایل یافت نشد.');
+    return { valid: false, errors: errors };
+  }
+
+  if (!Array.isArray(data.data.plants)) {
+    errors.push('فهرست گیاهان در فایل ناقص است.');
+  }
+
+  if (!Array.isArray(data.data.careLogs)) {
+    errors.push('فهرست فعالیت‌ها در فایل ناقص است.');
+  }
+
+  if (!Array.isArray(data.data.notes)) {
+    errors.push('فهرست یادداشت‌ها در فایل ناقص است.');
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors: errors
+  };
+}
+
+// ============================================
+// بخش ۱۳: پاک کردن همه داده‌ها
+// ============================================
+
+function clearAllData() {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(
+      [STORE_PLANTS, STORE_CARE_LOGS, STORE_NOTES],
+      'readwrite'
+    );
+
+    const plantsStore = transaction.objectStore(STORE_PLANTS);
+    const careLogsStore = transaction.objectStore(STORE_CARE_LOGS);
+    const notesStore = transaction.objectStore(STORE_NOTES);
+
+    plantsStore.clear();
+    careLogsStore.clear();
+    notesStore.clear();
+
+    transaction.oncomplete = function() {
+      console.log('✓ همه داده‌ها پاک شد');
+      resolve(true);
+    };
+
+    transaction.onerror = function(event) {
+      console.error('✗ خطا در پاک کردن داده‌ها:', event.target.error);
+      reject(event.target.error);
+    };
+  });
+}
+
+// ============================================
+// بخش ۱۴: بازیابی از فایل (Import)
+// ============================================
+
+function importSinglePlant(oldPlant) {
+  return new Promise((resolve, reject) => {
+    const now = new Date().toISOString();
+
+    const plant = {
+      name: oldPlant.name || '',
+      type: oldPlant.type || '',
+      location: oldPlant.location || '',
+      image: oldPlant.image || null,
+      health: oldPlant.health || 'healthy',
+      wateringFrequencyDays: normalizeWateringFrequency(oldPlant.wateringFrequencyDays),
+      userId: oldPlant.userId || CURRENT_USER_ID,
+      createdAt: oldPlant.createdAt || now,
+      updatedAt: oldPlant.updatedAt || now
+    };
+
+    const transaction = db.transaction([STORE_PLANTS], 'readwrite');
+    const store = transaction.objectStore(STORE_PLANTS);
+    const request = store.add(plant);
+
+    request.onsuccess = function(event) {
+      resolve(event.target.result);
+    };
+
+    request.onerror = function(event) {
+      reject(event.target.error);
+    };
+  });
+}
+
+function importSingleCareLog(oldLog, newPlantId) {
+  return new Promise((resolve, reject) => {
+    const now = new Date().toISOString();
+
+    const careLog = {
+      plantId: newPlantId,
+      type: oldLog.type || 'water',
+      date: oldLog.date || now,
+      note: oldLog.note || '',
+      createdAt: oldLog.createdAt || now
+    };
+
+    const transaction = db.transaction([STORE_CARE_LOGS], 'readwrite');
+    const store = transaction.objectStore(STORE_CARE_LOGS);
+    const request = store.add(careLog);
+
+    request.onsuccess = function(event) {
+      resolve(event.target.result);
+    };
+
+    request.onerror = function(event) {
+      reject(event.target.error);
+    };
+  });
+}
+
+function importSingleNote(oldNote, newPlantId) {
+  return new Promise((resolve, reject) => {
+    const now = new Date().toISOString();
+
+    const note = {
+      plantId: newPlantId,
+      text: oldNote.text || '',
+      date: oldNote.date || now,
+      createdAt: oldNote.createdAt || now
+    };
+
+    const transaction = db.transaction([STORE_NOTES], 'readwrite');
+    const store = transaction.objectStore(STORE_NOTES);
+    const request = store.add(note);
+
+    request.onsuccess = function(event) {
+      resolve(event.target.result);
+    };
+
+    request.onerror = function(event) {
+      reject(event.target.error);
+    };
+  });
+}
+
+async function importAllData(importData) {
+  try {
+    console.log('▶ شروع بازیابی داده‌ها...');
+
+    // ۱. پاک کردن همه داده‌های فعلی
+    await clearAllData();
+
+    // ۲. بازیابی گیاهان + ساخت نگاشت شناسه‌ها
+    const idMap = {};
+    const plants = importData.data.plants;
+
+    for (let i = 0; i < plants.length; i++) {
+      const oldPlant = plants[i];
+      const oldId = oldPlant.id;
+      const newId = await importSinglePlant(oldPlant);
+
+      if (oldId !== undefined && oldId !== null) {
+        idMap[oldId] = newId;
+      }
+    }
+
+    console.log('✓ گیاهان بازیابی شد:', plants.length);
+
+    // ۳. بازیابی فعالیت‌ها با نگاشت شناسه گیاه
+    const careLogs = importData.data.careLogs;
+    let importedLogs = 0;
+
+    for (let i = 0; i < careLogs.length; i++) {
+      const oldLog = careLogs[i];
+      const newPlantId = idMap[oldLog.plantId];
+
+      if (newPlantId !== undefined) {
+        await importSingleCareLog(oldLog, newPlantId);
+        importedLogs++;
+      } else {
+        console.warn('⚠ فعالیت با گیاه نامعلوم رد شد. plantId قدیمی:', oldLog.plantId);
+      }
+    }
+
+    console.log('✓ فعالیت‌ها بازیابی شد:', importedLogs);
+
+    // ۴. بازیابی یادداشت‌ها با نگاشت شناسه گیاه
+    const notes = importData.data.notes;
+    let importedNotes = 0;
+
+    for (let i = 0; i < notes.length; i++) {
+      const oldNote = notes[i];
+      const newPlantId = idMap[oldNote.plantId];
+
+      if (newPlantId !== undefined) {
+        await importSingleNote(oldNote, newPlantId);
+        importedNotes++;
+      } else {
+        console.warn('⚠ یادداشت با گیاه نامعلوم رد شد. plantId قدیمی:', oldNote.plantId);
+      }
+    }
+
+    console.log('✓ یادداشت‌ها بازیابی شد:', importedNotes);
+    console.log('✅ بازیابی با موفقیت انجام شد');
+
+    return {
+      success: true,
+      plants: plants.length,
+      careLogs: importedLogs,
+      notes: importedNotes
+    };
+
+  } catch (error) {
+    console.error('✗ خطا در بازیابی داده‌ها:', error);
+    throw error;
+  }
+}

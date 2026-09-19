@@ -398,10 +398,53 @@
           </div>
         </div>
       </div>
+
+      <div class="settings-section">
+        <h3 class="settings-section-title">💾 پشتیبان‌گیری و بازیابی</h3>
+        <div class="settings-option">
+          <p class="backup-description">
+            از اطلاعات خود یک نسخه پشتیبان بگیرید یا از فایل قبلی بازیابی کنید.
+          </p>
+
+          <div id="backup-stats" class="backup-stats">
+            <div class="backup-stat-item">
+              <span class="backup-stat-icon">🌱</span>
+              <span class="backup-stat-label">گیاهان:</span>
+              <span id="backup-stat-plants" class="backup-stat-value">—</span>
+            </div>
+            <div class="backup-stat-item">
+              <span class="backup-stat-icon">📋</span>
+              <span class="backup-stat-label">فعالیت‌ها:</span>
+              <span id="backup-stat-logs" class="backup-stat-value">—</span>
+            </div>
+            <div class="backup-stat-item">
+              <span class="backup-stat-icon">📝</span>
+              <span class="backup-stat-label">یادداشت‌ها:</span>
+              <span id="backup-stat-notes" class="backup-stat-value">—</span>
+            </div>
+          </div>
+
+          <div class="backup-actions">
+            <button id="btn-export-backup" class="btn btn-primary" aria-label="دانلود نسخه پشتیبان">
+              📥 دانلود نسخه پشتیبان
+            </button>
+            <button id="btn-import-backup" class="btn btn-secondary" aria-label="بازیابی از فایل">
+              📤 بازیابی از فایل
+            </button>
+          </div>
+
+          <p class="backup-warning">
+            ⚠️ توجه: بازیابی از فایل، همه‌ی داده‌های فعلی را پاک می‌کند و با فایل جایگزین می‌کند.
+          </p>
+
+          <input type="file" id="import-file-input" accept=".json,application/json" style="display: none;">
+        </div>
+      </div>
     </section>
 
   </main>
 
+  <!-- Modal: افزودن فعالیت -->
   <div id="modal-add-care" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-care-title">
     <div class="modal-content">
       <div class="modal-header">
@@ -457,6 +500,7 @@
     </div>
   </div>
 
+  <!-- Modal: افزودن یادداشت -->
   <div id="modal-add-note" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-note-title">
     <div class="modal-content">
       <div class="modal-header">
@@ -482,6 +526,96 @@
           <button type="button" id="btn-cancel-note" class="btn btn-secondary">انصراف</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Modal: دانلود پشتیبان -->
+  <div id="modal-export-backup" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-export-title">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-export-title" class="modal-title">📥 دانلود نسخه پشتیبان</h3>
+        <button id="btn-close-export-modal" class="modal-close" aria-label="بستن">
+          <span class="icon" data-icon="x"></span>
+        </button>
+      </div>
+
+      <div class="modal-form">
+        <p class="export-description">
+          فایل شامل همه گیاهان، فعالیت‌ها و یادداشت‌های شما می‌شود.
+        </p>
+
+        <label class="checkbox-option">
+          <input type="checkbox" id="export-include-images" checked>
+          <span class="checkbox-label">شامل عکس‌های گیاهان</span>
+        </label>
+
+        <p class="checkbox-hint">
+          اگر تیک را بردارید، حجم فایل خیلی کم‌تر می‌شود ولی عکس‌ها در پشتیبان نخواهند بود.
+        </p>
+
+        <div class="form-actions">
+          <button id="btn-confirm-export" class="btn btn-primary">💾 دانلود فایل</button>
+          <button id="btn-cancel-export" class="btn btn-secondary">انصراف</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: بازیابی از فایل -->
+  <div id="modal-import-backup" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-import-title">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-import-title" class="modal-title">📤 بازیابی از فایل</h3>
+        <button id="btn-close-import-modal" class="modal-close" aria-label="بستن">
+          <span class="icon" data-icon="x"></span>
+        </button>
+      </div>
+
+      <div class="modal-form">
+        <div class="import-warning">
+          ⚠️ هشدار مهم<br>
+          این کار <strong>همه‌ی داده‌های فعلی</strong> (گیاهان، فعالیت‌ها، یادداشت‌ها) را <strong>پاک می‌کند</strong> و با محتوای فایل جایگزین می‌کند.<br>
+          این عملیات قابل بازگشت نیست.
+        </div>
+
+        <div class="import-file-info">
+          <div class="import-file-row">
+            <span class="import-file-label">نام فایل:</span>
+            <span id="import-filename" class="import-file-value">—</span>
+          </div>
+          <div class="import-file-row">
+            <span class="import-file-label">تاریخ پشتیبان:</span>
+            <span id="import-date" class="import-file-value">—</span>
+          </div>
+          <div class="import-file-row">
+            <span class="import-file-label">شامل عکس:</span>
+            <span id="import-has-images" class="import-file-value">—</span>
+          </div>
+        </div>
+
+        <div class="backup-stats">
+          <div class="backup-stat-item">
+            <span class="backup-stat-icon">🌱</span>
+            <span class="backup-stat-label">گیاهان:</span>
+            <span id="import-stat-plants" class="backup-stat-value">—</span>
+          </div>
+          <div class="backup-stat-item">
+            <span class="backup-stat-icon">📋</span>
+            <span class="backup-stat-label">فعالیت‌ها:</span>
+            <span id="import-stat-logs" class="backup-stat-value">—</span>
+          </div>
+          <div class="backup-stat-item">
+            <span class="backup-stat-icon">📝</span>
+            <span class="backup-stat-label">یادداشت‌ها:</span>
+            <span id="import-stat-notes" class="backup-stat-value">—</span>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button id="btn-confirm-import" class="btn btn-danger">⚠️ بله، بازیابی کن</button>
+          <button id="btn-cancel-import" class="btn btn-secondary">انصراف</button>
+        </div>
+      </div>
     </div>
   </div>
 
