@@ -1,5 +1,5 @@
 // PlantPal - داشبورد
-// این فایل مسئول نمایش کارهای امروز و گیاهان سالم است.
+// این فایل مسئول نمایش کارهای امروز، گیاهان نیازمند توجه و گیاهان سالم است.
 
 // ============================================
 // بخش ۱: تنظیمات
@@ -142,12 +142,15 @@ async function renderDashboard() {
 
     const todayTasksDiv = document.getElementById('today-tasks');
     const todayTasksList = document.getElementById('today-tasks-list');
+    const attentionSection = document.getElementById('attention-plants-section');
+    const attentionList = document.getElementById('attention-plants-list');
     const healthySection = document.getElementById('healthy-plants-section');
     const emptyState = document.getElementById('empty-state');
     const noResultsState = document.getElementById('no-results-state');
 
     if (allPlants.length === 0) {
       if (todayTasksDiv) todayTasksDiv.style.display = 'none';
+      if (attentionSection) attentionSection.style.display = 'none';
       if (healthySection) healthySection.style.display = 'none';
       if (emptyState) emptyState.style.display = 'block';
       if (noResultsState) noResultsState.style.display = 'none';
@@ -160,6 +163,7 @@ async function renderDashboard() {
 
     if (plants.length === 0) {
       if (todayTasksDiv) todayTasksDiv.style.display = 'none';
+      if (attentionSection) attentionSection.style.display = 'none';
       if (healthySection) healthySection.style.display = 'none';
       if (noResultsState) noResultsState.style.display = 'block';
       return;
@@ -169,6 +173,7 @@ async function renderDashboard() {
 
     const tasks = [];
     const healthyPlants = [];
+    const attentionPlants = [];
 
     for (const plant of plants) {
       const careLogs = await getCareLogsByPlantId(plant.id);
@@ -190,8 +195,22 @@ async function renderDashboard() {
       } else {
         healthyPlants.push(plant);
       }
+
+      const health = plant.health || 'healthy';
+      if (health === 'warning' || health === 'sick') {
+        attentionPlants.push(plant);
+      }
     }
 
+    // مرتب‌سازی گیاهان نیازمند توجه: بیمارها اول
+    attentionPlants.sort(function(a, b) {
+      const order = { sick: 0, warning: 1 };
+      const aOrder = order[a.health] !== undefined ? order[a.health] : 2;
+      const bOrder = order[b.health] !== undefined ? order[b.health] : 2;
+      return aOrder - bOrder;
+    });
+
+    // نمایش کارهای امروز
     if (tasks.length > 0) {
       if (todayTasksDiv) todayTasksDiv.style.display = 'block';
       if (todayTasksList) {
@@ -205,6 +224,21 @@ async function renderDashboard() {
       if (todayTasksDiv) todayTasksDiv.style.display = 'none';
     }
 
+    // نمایش گیاهان نیازمند توجه
+    if (attentionPlants.length > 0) {
+      if (attentionSection) attentionSection.style.display = 'block';
+      if (attentionList) {
+        attentionList.innerHTML = '';
+        attentionPlants.forEach(function(plant) {
+          const item = createAttentionItem(plant);
+          attentionList.appendChild(item);
+        });
+      }
+    } else {
+      if (attentionSection) attentionSection.style.display = 'none';
+    }
+
+    // نمایش گیاهان من (گیاهانی که امروز نیازی ندارند)
     if (healthyPlants.length > 0) {
       if (healthySection) healthySection.style.display = 'block';
       const plantsList = document.getElementById('plants-list');
@@ -224,6 +258,7 @@ async function renderDashboard() {
     console.log('  - کل گیاهان:', allPlants.length);
     console.log('  - پس از فیلتر:', plants.length);
     console.log('  - نیاز به مراقبت:', tasks.length);
+    console.log('  - نیازمند توجه:', attentionPlants.length);
     console.log('  - سالم:', healthyPlants.length);
 
     if (typeof loadAllIcons === 'function') {
@@ -317,7 +352,67 @@ function createTodayTaskItem(item) {
 }
 
 // ============================================
-// بخش ۷: مدیریت جستجو
+// بخش ۷: ساخت آیتم گیاه نیازمند توجه
+// ============================================
+
+function createAttentionItem(plant) {
+  const health = plant.health || 'healthy';
+
+  const emoji = health === 'sick' ? '☹️' : '😐';
+  const label = getHealthLabel(health);
+
+  const item = document.createElement('div');
+  item.className = 'attention-item';
+  item.setAttribute('data-health', health);
+
+  const info = document.createElement('div');
+  info.className = 'attention-info';
+
+  const emojiSpan = document.createElement('span');
+  emojiSpan.className = 'attention-emoji';
+  emojiSpan.textContent = emoji;
+
+  const text = document.createElement('div');
+  text.className = 'attention-text';
+
+  const name = document.createElement('h4');
+  name.className = 'attention-name';
+  name.textContent = plant.name;
+
+  const status = document.createElement('span');
+  status.className = 'attention-status';
+  status.textContent = label;
+
+  text.appendChild(name);
+  text.appendChild(status);
+  info.appendChild(emojiSpan);
+  info.appendChild(text);
+
+  const action = document.createElement('div');
+  action.className = 'attention-action';
+
+  const viewBtn = document.createElement('button');
+  viewBtn.className = 'btn btn-secondary';
+  viewBtn.textContent = 'مشاهده';
+  viewBtn.addEventListener('click', function(event) {
+    event.stopPropagation();
+    openPlantDetails(plant.id);
+  });
+
+  action.appendChild(viewBtn);
+
+  item.appendChild(info);
+  item.appendChild(action);
+
+  item.addEventListener('click', function() {
+    openPlantDetails(plant.id);
+  });
+
+  return item;
+}
+
+// ============================================
+// بخش ۸: مدیریت جستجو
 // ============================================
 
 function setupSearch() {
@@ -353,7 +448,7 @@ function setupSearch() {
 }
 
 // ============================================
-// بخش ۸: مدیریت فیلترها
+// بخش ۹: مدیریت فیلترها
 // ============================================
 
 function setupFilters() {

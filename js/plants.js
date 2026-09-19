@@ -36,7 +36,37 @@ function getWateringFrequencyText(freq) {
 }
 
 // ============================================
-// بخش ۳: مدیریت دکمه‌های فاصله آبیاری
+// بخش ۳: توابع کمکی برای آخرین آبیاری
+// ============================================
+
+function getLastWateringInfo(careLogs) {
+  if (!careLogs || careLogs.length === 0) {
+    return { text: 'هنوز آبیاری نشده', days: null };
+  }
+
+  const waterLogs = careLogs.filter(function(log) {
+    return !log.type || log.type === 'water';
+  });
+
+  if (waterLogs.length === 0) {
+    return { text: 'هنوز آبیاری نشده', days: null };
+  }
+
+  const last = waterLogs[0];
+  const lastDate = new Date(last.date);
+  const now = new Date();
+  const diffMs = now - lastDate;
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return { text: 'امروز', days: 0 };
+  if (diffDays === 1) return { text: 'دیروز', days: 1 };
+  if (diffDays < 7) return { text: diffDays + ' روز پیش', days: diffDays };
+
+  return { text: formatDate(last.date), days: diffDays };
+}
+
+// ============================================
+// بخش ۴: مدیریت دکمه‌های فاصله آبیاری
 // ============================================
 
 function setSelectedWateringFrequency(freq) {
@@ -89,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ============================================
-// بخش ۴: نمایش فهرست گیاهان
+// بخش ۵: نمایش فهرست گیاهان
 // ============================================
 
 async function renderPlantsList() {
@@ -168,7 +198,7 @@ function createPlantCard(plant) {
 }
 
 // ============================================
-// بخش ۵: صفحه جزئیات گیاه
+// بخش ۶: صفحه جزئیات گیاه
 // ============================================
 
 async function openPlantDetails(plantId) {
@@ -203,6 +233,14 @@ async function openPlantDetails(plantId) {
       freqDisplay.textContent = getWateringFrequencyText(plant.wateringFrequencyDays || 7);
     }
 
+    // آخرین آبیاری
+    const lastWateringDisplay = document.getElementById('details-last-watering');
+    if (lastWateringDisplay) {
+      const careLogs = await getCareLogsByPlantId(plantId);
+      const lastInfo = getLastWateringInfo(careLogs);
+      lastWateringDisplay.textContent = lastInfo.text;
+    }
+
     const detailsImage = document.getElementById('details-image');
     if (plant.image) {
       detailsImage.src = plant.image;
@@ -226,7 +264,7 @@ async function openPlantDetails(plantId) {
 }
 
 // ============================================
-// بخش ۶: افزودن گیاه جدید
+// بخش ۷: افزودن گیاه جدید
 // ============================================
 
 async function handleAddPlant(event) {
@@ -290,7 +328,7 @@ function fileToBase64(file) {
 }
 
 // ============================================
-// بخش ۷: ویرایش گیاه
+// بخش ۸: ویرایش گیاه
 // ============================================
 
 function handleEditPlant() {
@@ -371,7 +409,7 @@ async function handleUpdatePlant(event) {
 }
 
 // ============================================
-// بخش ۸: حذف گیاه
+// بخش ۹: حذف گیاه
 // ============================================
 
 async function handleDeletePlant() {

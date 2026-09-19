@@ -469,6 +469,11 @@
 
 .today-task-name:hover { text-decoration: underline; }
 
+.today-task-schedule {
+  color: var(--color-text-light);
+  font-size: 0.85rem;
+}
+
 .today-task-status {
   color: var(--color-warning-dark);
   font-size: 0.9rem;
@@ -477,6 +482,125 @@
 .today-task-actions {
   display: flex;
   gap: 0.5rem;
+}
+
+/* بخش گیاهان نیازمند توجه */
+.attention-section {
+  background: rgba(229, 57, 53, 0.06);
+  border: 2px solid rgba(229, 57, 53, 0.3);
+  border-radius: var(--radius-md);
+  padding: 1.2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(229, 57, 53, 0.08);
+  transition: background 0.3s ease;
+}
+
+[data-theme="dark"] .attention-section {
+  background: rgba(229, 57, 53, 0.12);
+  border-color: rgba(229, 57, 53, 0.45);
+}
+
+.attention-section-title {
+  color: #c62828;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+[data-theme="dark"] .attention-section-title {
+  color: #ef9a9a;
+}
+
+.attention-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.attention-item {
+  background: var(--color-card);
+  border-radius: var(--radius-sm);
+  padding: 0.9rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm);
+  border-right: 4px solid #fb8c00;
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.attention-item:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.attention-item[data-health="sick"] {
+  border-right-color: #e53935;
+}
+
+.attention-item[data-health="warning"] {
+  border-right-color: #fb8c00;
+}
+
+.attention-info {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.attention-emoji {
+  font-size: 1.6rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.attention-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.attention-name {
+  color: var(--color-text);
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.attention-status {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.attention-item[data-health="sick"] .attention-status {
+  color: #e53935;
+}
+
+.attention-item[data-health="warning"] .attention-status {
+  color: #fb8c00;
+}
+
+[data-theme="dark"] .attention-item[data-health="sick"] .attention-status {
+  color: #e57373;
+}
+
+[data-theme="dark"] .attention-item[data-health="warning"] .attention-status {
+  color: #ffb74d;
+}
+
+.attention-action {
+  flex-shrink: 0;
 }
 
 /* بخش گیاهان من */
@@ -1103,6 +1227,18 @@
   }
 
   .today-task-actions { justify-content: flex-end; }
+
+  .attention-item {
+    padding: 0.8rem;
+  }
+
+  .attention-emoji {
+    font-size: 1.4rem;
+  }
+
+  .attention-name {
+    font-size: 1rem;
+  }
 
   .settings-section { padding: 1rem; }
 
