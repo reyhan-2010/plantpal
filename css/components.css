@@ -866,6 +866,196 @@
   }
 }
 
+/* ============================================
+   فاصله آبیاری (نسخه زیبا و متعادل)
+   ============================================ */
+
+.watering-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 0.75rem;
+}
+
+.watering-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 1rem 0.7rem;
+  min-height: 82px;
+  background: var(--color-bg);
+  border: 2px solid var(--color-border);
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: 'Vazirmatn', inherit;
+  color: var(--color-text);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.watering-option:hover {
+  border-color: #1976d2;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(25, 118, 210, 0.18);
+}
+
+.watering-option.active {
+  border-color: #1976d2;
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.2), 0 6px 16px rgba(25, 118, 210, 0.25);
+  transform: translateY(-2px);
+}
+
+.watering-option.active::after {
+  content: '✓';
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #1976d2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(25, 118, 210, 0.4);
+  animation: checkmarkPop 0.35s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+@keyframes checkmarkPop {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.watering-option-num {
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: #1976d2;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  transition: transform 0.25s ease;
+  font-family: 'Vazirmatn', inherit;
+}
+
+.watering-option.active .watering-option-num {
+  transform: scale(1.08);
+}
+
+.watering-option-unit {
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+  line-height: 1.3;
+  font-weight: 500;
+  font-family: 'Vazirmatn', inherit;
+}
+
+.watering-option.active .watering-option-unit {
+  color: #1976d2;
+  font-weight: 600;
+}
+
+.watering-hint {
+  margin: 0.7rem 0 0 0;
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+  font-style: italic;
+}
+
+/* حالت تاریک */
+[data-theme="dark"] .watering-option:hover {
+  border-color: #64b5f6;
+  box-shadow: 0 8px 20px rgba(100, 181, 246, 0.2);
+}
+
+[data-theme="dark"] .watering-option.active {
+  background: linear-gradient(135deg, rgba(25, 118, 210, 0.3) 0%, rgba(100, 181, 246, 0.4) 100%);
+  border-color: #64b5f6;
+  box-shadow: 0 0 0 3px rgba(100, 181, 246, 0.25), 0 6px 16px rgba(100, 181, 246, 0.25);
+}
+
+[data-theme="dark"] .watering-option.active::after {
+  background: #64b5f6;
+  color: #0d1f2d;
+}
+
+[data-theme="dark"] .watering-option-num {
+  color: #90caf9;
+}
+
+[data-theme="dark"] .watering-option.active .watering-option-unit {
+  color: #90caf9;
+}
+
+/* ============================================
+   کارت‌های آمار کلی
+   ============================================ */
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--color-card);
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  margin-bottom: 10px;
+  border-right: 4px solid var(--color-primary);
+  transition: var(--transition);
+}
+
+.stat-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.stat-card-icon {
+  font-size: 28px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.stat-card-content {
+  flex: 1;
+}
+
+.stat-card-label {
+  font-size: 13px;
+  color: var(--color-text-light);
+  margin-bottom: 2px;
+}
+
+.stat-card-value {
+  font-size: 22px;
+  font-weight: bold;
+  color: var(--color-primary);
+  line-height: 1.1;
+}
+
+.stat-card.stat-color-green { border-right-color: #2e7d32; }
+.stat-card.stat-color-green .stat-card-value { color: #2e7d32; }
+
+.stat-card.stat-color-blue { border-right-color: #1976d2; }
+.stat-card.stat-color-blue .stat-card-value { color: #1976d2; }
+
+.stat-card.stat-color-light-green { border-right-color: #66bb6a; }
+.stat-card.stat-color-light-green .stat-card-value { color: #66bb6a; }
+
+.stat-card.stat-color-orange { border-right-color: #fb8c00; }
+.stat-card.stat-color-orange .stat-card-value { color: #fb8c00; }
+
+.stat-card.stat-color-brown { border-right-color: #8d6e63; }
+.stat-card.stat-color-brown .stat-card-value { color: #8d6e63; }
+
+.stat-card.stat-color-red { border-right-color: #e53935; }
+.stat-card.stat-color-red .stat-card-value { color: #e53935; }
+
 /* واکنش‌گرا */
 @media (max-width: 600px) {
   .plants-list { grid-template-columns: 1fr; }
@@ -933,7 +1123,28 @@
   .filter-buttons {
     justify-content: center;
   }
+
+  .watering-options {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.6rem;
+  }
+
+  .watering-option {
+    padding: 0.85rem 0.5rem;
+    min-height: 75px;
+  }
+
+  .watering-option-num {
+    font-size: 1.5rem;
+  }
 }
+
+@media (max-width: 380px) {
+  .watering-options {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 /* ============================================
    یادداشت‌ها
    ============================================ */
@@ -1049,6 +1260,7 @@
     padding: 0.8rem;
   }
 }
+
 /* ============================================
    صفحه گزارش‌ها
    ============================================ */

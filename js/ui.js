@@ -97,6 +97,11 @@ function clearAddForm() {
     form.reset();
     selectedHealth = 'healthy';
     setSelectedHealth('healthy');
+
+    if (typeof setSelectedWateringFrequency === 'function') {
+      setSelectedWateringFrequency(7);
+    }
+
     console.log('✓ فرم پاک شد');
   }
 }
@@ -106,6 +111,10 @@ function fillAddForm(plant) {
   document.getElementById('add-type').value = plant.type || '';
   document.getElementById('add-location').value = plant.location || '';
   setSelectedHealth(plant.health || 'healthy');
+
+  if (typeof setSelectedWateringFrequency === 'function') {
+    setSelectedWateringFrequency(plant.wateringFrequencyDays || 7);
+  }
 }
 
 // ============================================

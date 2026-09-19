@@ -10,9 +10,86 @@ let currentPlantImage = null;
 let isEditMode = false;
 let editingPlantId = null;
 let selectedHealth = 'healthy';
+let selectedWateringFrequency = 7;
 
 // ============================================
-// بخش ۲: نمایش فهرست گیاهان
+// بخش ۲: تنظیمات فاصله آبیاری
+// ============================================
+
+const WATERING_FREQUENCY_LABELS = {
+  1: 'هر روز',
+  2: 'هر 2 روز یک‌بار',
+  3: 'هر 3 روز یک‌بار',
+  4: 'هر 4 روز یک‌بار',
+  5: 'هر 5 روز یک‌بار',
+  6: 'هر 6 روز یک‌بار',
+  7: 'هفتگی (هر 7 روز)',
+  10: 'هر 10 روز یک‌بار',
+  14: 'هر 14 روز یک‌بار'
+};
+
+function getWateringFrequencyText(freq) {
+  const num = parseInt(freq, 10);
+  if (isNaN(num)) return 'هفتگی (هر 7 روز)';
+  if (WATERING_FREQUENCY_LABELS[num]) return WATERING_FREQUENCY_LABELS[num];
+  return 'هر ' + num + ' روز یک‌بار';
+}
+
+// ============================================
+// بخش ۳: مدیریت دکمه‌های فاصله آبیاری
+// ============================================
+
+function setSelectedWateringFrequency(freq) {
+  const num = parseInt(freq, 10);
+  selectedWateringFrequency = isNaN(num) ? 7 : num;
+
+  const hiddenInput = document.getElementById('add-watering-frequency');
+  if (hiddenInput) {
+    hiddenInput.value = String(selectedWateringFrequency);
+  }
+
+  updateWateringButtons(selectedWateringFrequency);
+
+  console.log('✓ فاصله آبیاری انتخاب شد:', selectedWateringFrequency, 'روز');
+}
+
+function updateWateringButtons(freq) {
+  const buttons = document.querySelectorAll('[data-frequency]');
+  buttons.forEach(function(btn) {
+    const btnFreq = parseInt(btn.getAttribute('data-frequency'), 10);
+    if (btnFreq === freq) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+}
+
+function setupWateringButtons() {
+  const buttons = document.querySelectorAll('[data-frequency]');
+
+  if (buttons.length === 0) {
+    return;
+  }
+
+  buttons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      const freq = parseInt(btn.getAttribute('data-frequency'), 10);
+      setSelectedWateringFrequency(freq);
+    });
+  });
+
+  setSelectedWateringFrequency(7);
+
+  console.log('✓ دکمه‌های فاصله آبیاری متصل شدند. تعداد:', buttons.length);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  setupWateringButtons();
+});
+
+// ============================================
+// بخش ۴: نمایش فهرست گیاهان
 // ============================================
 
 async function renderPlantsList() {
@@ -91,7 +168,7 @@ function createPlantCard(plant) {
 }
 
 // ============================================
-// بخش ۳: صفحه جزئیات گیاه
+// بخش ۵: صفحه جزئیات گیاه
 // ============================================
 
 async function openPlantDetails(plantId) {
@@ -121,6 +198,11 @@ async function openPlantDetails(plantId) {
         '</span>';
     }
 
+    const freqDisplay = document.getElementById('details-watering-frequency');
+    if (freqDisplay) {
+      freqDisplay.textContent = getWateringFrequencyText(plant.wateringFrequencyDays || 7);
+    }
+
     const detailsImage = document.getElementById('details-image');
     if (plant.image) {
       detailsImage.src = plant.image;
@@ -144,7 +226,7 @@ async function openPlantDetails(plantId) {
 }
 
 // ============================================
-// بخش ۴: افزودن گیاه جدید
+// بخش ۶: افزودن گیاه جدید
 // ============================================
 
 async function handleAddPlant(event) {
@@ -161,18 +243,24 @@ async function handleAddPlant(event) {
     const type = document.getElementById('add-type').value.trim();
     const location = document.getElementById('add-location').value.trim();
     const imageInput = document.getElementById('add-image');
+    const freqInput = document.getElementById('add-watering-frequency');
 
     let imageData = null;
     if (imageInput.files && imageInput.files[0]) {
       imageData = await fileToBase64(imageInput.files[0]);
     }
 
+    const wateringFrequencyDays = freqInput
+      ? parseInt(freqInput.value, 10) || 7
+      : 7;
+
     const plantData = {
       name: name,
       type: type,
       location: location,
       image: imageData,
-      health: selectedHealth
+      health: selectedHealth,
+      wateringFrequencyDays: wateringFrequencyDays
     };
 
     await savePlant(plantData);
@@ -202,7 +290,7 @@ function fileToBase64(file) {
 }
 
 // ============================================
-// بخش ۵: ویرایش گیاه
+// بخش ۷: ویرایش گیاه
 // ============================================
 
 function handleEditPlant() {
@@ -218,6 +306,8 @@ function handleEditPlant() {
     }
 
     fillAddForm(plant);
+
+    setSelectedWateringFrequency(plant.wateringFrequencyDays || 7);
 
     isEditMode = true;
     editingPlantId = currentPlantId;
@@ -242,17 +332,23 @@ async function handleUpdatePlant(event) {
     const type = document.getElementById('add-type').value.trim();
     const location = document.getElementById('add-location').value.trim();
     const imageInput = document.getElementById('add-image');
+    const freqInput = document.getElementById('add-watering-frequency');
 
     let imageData = undefined;
     if (imageInput.files && imageInput.files[0]) {
       imageData = await fileToBase64(imageInput.files[0]);
     }
 
+    const wateringFrequencyDays = freqInput
+      ? parseInt(freqInput.value, 10) || 7
+      : 7;
+
     const plantData = {
       name: name,
       type: type,
       location: location,
-      health: selectedHealth
+      health: selectedHealth,
+      wateringFrequencyDays: wateringFrequencyDays
     };
 
     if (imageData !== undefined) {
@@ -275,7 +371,7 @@ async function handleUpdatePlant(event) {
 }
 
 // ============================================
-// بخش ۶: حذف گیاه
+// بخش ۸: حذف گیاه
 // ============================================
 
 async function handleDeletePlant() {

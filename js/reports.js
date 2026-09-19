@@ -40,6 +40,16 @@ const CARE_TYPE_COLORS = {
   cutting: '#43a047'
 };
 
+// نگاشت رنگ به کلاس CSS
+const STAT_COLOR_CLASSES = {
+  green: 'stat-color-green',
+  blue: 'stat-color-blue',
+  lightGreen: 'stat-color-light-green',
+  orange: 'stat-color-orange',
+  brown: 'stat-color-brown',
+  red: 'stat-color-red'
+};
+
 // ============================================
 // بخش ۲: راه‌اندازی
 // ============================================
@@ -430,32 +440,58 @@ async function renderStats() {
 
     // ساخت کارت‌های آماری
     const stats = [
-      { icon: '🌱', label: 'کل گیاهان',          value: totalPlants,                              color: '#2e7d32' },
-      { icon: '💧', label: 'آبیاری این ماه',      value: careCounts.water,                         color: '#1976d2' },
-      { icon: '🍃', label: 'کوددهی این ماه',      value: careCounts.fertilize,                     color: '#66bb6a' },
-      { icon: '✂️', label: 'هرس این ماه',         value: careCounts.prune,                         color: '#fb8c00' },
-      { icon: '📝', label: 'یادداشت‌ها',           value: totalNotes,                               color: '#8d6e63' },
-      { icon: '✅', label: 'گیاهان سالم',         value: healthCounts.healthy,                     color: '#2e7d32' },
-      { icon: '⚠️', label: 'نیازمند توجه',        value: healthCounts.warning + healthCounts.sick, color: '#e53935' }
+      {
+        icon: '🌱',
+        label: 'کل گیاهان',
+        value: totalPlants,
+        colorClass: STAT_COLOR_CLASSES.green
+      },
+      {
+        icon: '💧',
+        label: 'آبیاری این ماه',
+        value: careCounts.water,
+        colorClass: STAT_COLOR_CLASSES.blue
+      },
+      {
+        icon: '🍃',
+        label: 'کوددهی این ماه',
+        value: careCounts.fertilize,
+        colorClass: STAT_COLOR_CLASSES.lightGreen
+      },
+      {
+        icon: '✂️',
+        label: 'هرس این ماه',
+        value: careCounts.prune,
+        colorClass: STAT_COLOR_CLASSES.orange
+      },
+      {
+        icon: '📝',
+        label: 'یادداشت‌ها',
+        value: totalNotes,
+        colorClass: STAT_COLOR_CLASSES.brown
+      },
+      {
+        icon: '✅',
+        label: 'گیاهان سالم',
+        value: healthCounts.healthy,
+        colorClass: STAT_COLOR_CLASSES.green
+      },
+      {
+        icon: '⚠️',
+        label: 'نیازمند توجه',
+        value: healthCounts.warning + healthCounts.sick,
+        colorClass: STAT_COLOR_CLASSES.red
+      }
     ];
 
+    // رندر کارت‌ها با کلاس‌های CSS
     statsList.innerHTML = stats.map(function(s) {
       return (
-        '<div style="' +
-          'display:flex;' +
-          'align-items:center;' +
-          'gap:12px;' +
-          'padding:14px 16px;' +
-          'background:var(--card-bg, #ffffff);' +
-          'border-radius:12px;' +
-          'border-right:4px solid ' + s.color + ';' +
-          'box-shadow:0 2px 6px rgba(0,0,0,0.06);' +
-          'margin-bottom:10px;' +
-        '">' +
-          '<div style="font-size:28px;">' + s.icon + '</div>' +
-          '<div style="flex:1;">' +
-            '<div style="font-size:13px; color:var(--text-secondary, #666);">' + s.label + '</div>' +
-            '<div style="font-size:22px; font-weight:bold; color:' + s.color + ';">' + s.value + '</div>' +
+        '<div class="stat-card ' + s.colorClass + '">' +
+          '<div class="stat-card-icon">' + s.icon + '</div>' +
+          '<div class="stat-card-content">' +
+            '<div class="stat-card-label">' + s.label + '</div>' +
+            '<div class="stat-card-value">' + s.value + '</div>' +
           '</div>' +
         '</div>'
       );

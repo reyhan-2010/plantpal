@@ -13,6 +13,13 @@ const STORE_NOTES = 'notes';
 
 const CURRENT_USER_ID = 'local-user';
 
+// مقدار پیش‌فرض فاصله آبیاری (روز)
+const DEFAULT_WATERING_FREQUENCY_DAYS = 7;
+
+// محدوده مجاز فاصله آبیاری
+const MIN_WATERING_FREQUENCY_DAYS = 1;
+const MAX_WATERING_FREQUENCY_DAYS = 14;
+
 let db = null;
 
 // ============================================
@@ -85,7 +92,29 @@ function createStores(database) {
 }
 
 // ============================================
-// بخش ۴: توابع ذخیره گیاهان
+// بخش ۴: اعتبارسنجی فاصله آبیاری
+// ============================================
+
+function normalizeWateringFrequency(value) {
+  const num = parseInt(value, 10);
+
+  if (isNaN(num)) {
+    return DEFAULT_WATERING_FREQUENCY_DAYS;
+  }
+
+  if (num < MIN_WATERING_FREQUENCY_DAYS) {
+    return MIN_WATERING_FREQUENCY_DAYS;
+  }
+
+  if (num > MAX_WATERING_FREQUENCY_DAYS) {
+    return MAX_WATERING_FREQUENCY_DAYS;
+  }
+
+  return num;
+}
+
+// ============================================
+// بخش ۵: توابع ذخیره گیاهان
 // ============================================
 
 function savePlant(plantData) {
@@ -98,6 +127,7 @@ function savePlant(plantData) {
       location: plantData.location || '',
       image: plantData.image || null,
       health: plantData.health || 'healthy',
+      wateringFrequencyDays: normalizeWateringFrequency(plantData.wateringFrequencyDays),
       userId: CURRENT_USER_ID,
       createdAt: now,
       updatedAt: now
@@ -140,6 +170,9 @@ function updatePlant(plantId, plantData) {
         location: plantData.location !== undefined ? plantData.location : existingPlant.location,
         image: plantData.image !== undefined ? plantData.image : existingPlant.image,
         health: plantData.health !== undefined ? plantData.health : existingPlant.health,
+        wateringFrequencyDays: plantData.wateringFrequencyDays !== undefined
+          ? normalizeWateringFrequency(plantData.wateringFrequencyDays)
+          : normalizeWateringFrequency(existingPlant.wateringFrequencyDays),
         updatedAt: new Date().toISOString()
       };
 
@@ -164,7 +197,7 @@ function updatePlant(plantId, plantData) {
 }
 
 // ============================================
-// بخش ۵: توابع ذخیره فعالیت‌ها
+// بخش ۶: توابع ذخیره فعالیت‌ها
 // ============================================
 
 function saveCareLog(logData) {
@@ -196,7 +229,7 @@ function saveCareLog(logData) {
 }
 
 // ============================================
-// بخش ۶: توابع ذخیره یادداشت‌ها
+// بخش ۷: توابع ذخیره یادداشت‌ها
 // ============================================
 
 function saveNote(noteData) {
@@ -267,7 +300,7 @@ function updateNote(noteId, noteData) {
 }
 
 // ============================================
-// بخش ۷: توابع خواندن
+// بخش ۸: توابع خواندن
 // ============================================
 
 function getAllPlants() {
@@ -355,7 +388,7 @@ function getNotesByPlantId(plantId) {
 }
 
 // ============================================
-// بخش ۸: توابع حذف
+// بخش ۹: توابع حذف
 // ============================================
 
 function deletePlant(plantId) {

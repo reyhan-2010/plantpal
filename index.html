@@ -164,6 +164,50 @@
         </div>
 
         <div class="form-group">
+          <label class="form-label">💧 فاصله آبیاری</label>
+          <div class="watering-options">
+            <button type="button" class="watering-option" data-frequency="1">
+              <span class="watering-option-num">1</span>
+              <span class="watering-option-unit">هر روز</span>
+            </button>
+            <button type="button" class="watering-option" data-frequency="2">
+              <span class="watering-option-num">2</span>
+              <span class="watering-option-unit">روز</span>
+            </button>
+            <button type="button" class="watering-option" data-frequency="3">
+              <span class="watering-option-num">3</span>
+              <span class="watering-option-unit">روز</span>
+            </button>
+            <button type="button" class="watering-option" data-frequency="4">
+              <span class="watering-option-num">4</span>
+              <span class="watering-option-unit">روز</span>
+            </button>
+            <button type="button" class="watering-option" data-frequency="5">
+              <span class="watering-option-num">5</span>
+              <span class="watering-option-unit">روز</span>
+            </button>
+            <button type="button" class="watering-option" data-frequency="6">
+              <span class="watering-option-num">6</span>
+              <span class="watering-option-unit">روز</span>
+            </button>
+            <button type="button" class="watering-option" data-frequency="7">
+              <span class="watering-option-num">7</span>
+              <span class="watering-option-unit">روز (هفتگی)</span>
+            </button>
+            <button type="button" class="watering-option" data-frequency="10">
+              <span class="watering-option-num">10</span>
+              <span class="watering-option-unit">روز</span>
+            </button>
+            <button type="button" class="watering-option" data-frequency="14">
+              <span class="watering-option-num">14</span>
+              <span class="watering-option-unit">روز</span>
+            </button>
+          </div>
+          <input type="hidden" id="add-watering-frequency" value="7">
+          <p class="watering-hint">اگر انتخاب نکنی، هفتگی فرض می‌شود.</p>
+        </div>
+
+        <div class="form-group">
           <label for="add-image" class="form-label">تصویر گیاه (اختیاری)</label>
           <input type="file" id="add-image" class="form-input" accept="image/*">
         </div>
@@ -205,6 +249,10 @@
           <div class="plant-info-row">
             <span class="plant-info-label">وضعیت سلامت:</span>
             <span id="details-health" class="plant-info-value">—</span>
+          </div>
+          <div class="plant-info-row">
+            <span class="plant-info-label">فاصله آبیاری:</span>
+            <span id="details-watering-frequency" class="plant-info-value">—</span>
           </div>
         </div>
       </div>

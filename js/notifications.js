@@ -8,6 +8,9 @@
 const NOTIFICATION_KEY = 'plantpal-notifications';
 const NOTIFICATION_TIMES = ['08:00', '18:00'];
 
+const DEFAULT_WATERING_FREQ = 7;
+const FERTILIZING_FREQ = 30;
+
 let notificationCheckInterval = null;
 
 // ============================================
@@ -102,42 +105,24 @@ async function showPlantNotification(title, body) {
 }
 
 // ============================================
-// بخش ۶: بررسی گیاهان نیازمند
+// بخش ۶: توابع کمکی
 // ============================================
 
-async function checkPlantsForReminders() {
-  try {
-    const plants = await getAllPlants();
-
-    const needWater = [];
-    const needFertilize = [];
-
-    for (const plant of plants) {
-      const careLogs = await getCareLogsByPlantId(plant.id);
-
-      const lastWaterDays = getDaysSinceLastActivity(careLogs, 'water');
-      if (lastWaterDays === null || lastWaterDays >= 7) {
-        needWater.push(plant.name);
-      }
-
-      const lastFertilizeDays = getDaysSinceLastActivity(careLogs, 'fertilize');
-      if (lastFertilizeDays === null || lastFertilizeDays >= 30) {
-        needFertilize.push(plant.name);
-      }
-    }
-
-    return { needWater, needFertilize };
-
-  } catch (error) {
-    console.error('✗ خطا در بررسی گیاهان:', error);
-    return { needWater: [], needFertilize: [] };
+function getPlantWateringFreq(plant) {
+  const freq = parseInt(plant && plant.wateringFrequencyDays, 10);
+  if (isNaN(freq) || freq < 1) {
+    return DEFAULT_WATERING_FREQ;
   }
+  return freq;
 }
 
 function getDaysSinceLastActivity(careLogs, type) {
   if (!careLogs || careLogs.length === 0) return null;
 
   const filtered = careLogs.filter(function(log) {
+    if (type === 'water') {
+      return !log.type || log.type === 'water';
+    }
     return log.type === type;
   });
 
@@ -152,7 +137,87 @@ function getDaysSinceLastActivity(careLogs, type) {
 }
 
 // ============================================
-// بخش ۷: بررسی زمان یادآوری
+// بخش ۷: بررسی گیاهان نیازمند
+// ============================================
+
+async function checkPlantsForReminders() {
+  try {
+    const plants = await getAllPlants();
+
+    const needWater = [];
+    const needFertilize = [];
+
+    for (const plant of plants) {
+      const careLogs = await getCareLogsByPlantId(plant.id);
+
+      // فاصله‌ی مخصوص همین گیاه
+      const waterFreq = getPlantWateringFreq(plant);
+
+      const lastWaterDays = getDaysSinceLastActivity(careLogs, 'water');
+
+      if (lastWaterDays === null || lastWaterDays >= waterFreq) {
+        const daysText = lastWaterDays === null
+          ? 'هرگز آبیاری نشده'
+          : lastWaterDays + ' روز از آبیاری گذشته';
+
+        needWater.push({
+          name: plant.name,
+          days: lastWaterDays,
+          text: plant.name + ' (' + daysText + ')'
+        });
+      }
+
+      const lastFertilizeDays = getDaysSinceLastActivity(careLogs, 'fertilize');
+      if (lastFertilizeDays === null || lastFertilizeDays >= FERTILIZING_FREQ) {
+        const daysText = lastFertilizeDays === null
+          ? 'هرگز کوددهی نشده'
+          : lastFertilizeDays + ' روز از کوددهی گذشته';
+
+        needFertilize.push({
+          name: plant.name,
+          days: lastFertilizeDays,
+          text: plant.name + ' (' + daysText + ')'
+        });
+      }
+    }
+
+    return {
+      needWater: needWater,
+      needFertilize: needFertilize
+    };
+
+  } catch (error) {
+    console.error('✗ خطا در بررسی گیاهان:', error);
+    return { needWater: [], needFertilize: [] };
+  }
+}
+
+// ============================================
+// بخش ۸: ساخت متن نوتیفیکیشن
+// ============================================
+
+function buildNotificationBody(reminders) {
+  const parts = [];
+
+  if (reminders.needWater.length > 0) {
+    const names = reminders.needWater.map(function(item) {
+      return '• ' + item.text;
+    }).join('\n');
+    parts.push('💧 نیاز به آبیاری:\n' + names);
+  }
+
+  if (reminders.needFertilize.length > 0) {
+    const names = reminders.needFertilize.map(function(item) {
+      return '• ' + item.text;
+    }).join('\n');
+    parts.push('🍃 نیاز به کوددهی:\n' + names);
+  }
+
+  return parts.join('\n\n');
+}
+
+// ============================================
+// بخش ۹: بررسی زمان یادآوری
 // ============================================
 
 function isNotificationTime() {
@@ -176,7 +241,7 @@ function saveNotificationSent() {
 }
 
 // ============================================
-// بخش ۸: حلقه بررسی
+// بخش ۱۰: حلقه بررسی
 // ============================================
 
 function startNotificationCheck() {
@@ -191,18 +256,8 @@ function startNotificationCheck() {
     const reminders = await checkPlantsForReminders();
 
     if (reminders.needWater.length > 0 || reminders.needFertilize.length > 0) {
-      let body = '';
-
-      if (reminders.needWater.length > 0) {
-        body += '💧 نیاز به آبیاری: ' + reminders.needWater.join('، ');
-      }
-
-      if (reminders.needFertilize.length > 0) {
-        if (body) body += '\n';
-        body += '🍃 نیاز به کوددهی: ' + reminders.needFertilize.join('، ');
-      }
-
-      await showPlantNotification('🌱 PlantPal', body);
+      const body = buildNotificationBody(reminders);
+      await showPlantNotification('🌱 PlantPal — یادآوری', body);
       saveNotificationSent();
     }
   }, 60000);
@@ -219,7 +274,7 @@ function stopNotificationCheck() {
 }
 
 // ============================================
-// بخش ۹: راه‌اندازی
+// بخش ۱۱: راه‌اندازی
 // ============================================
 
 function initNotifications() {
@@ -234,7 +289,7 @@ function initNotifications() {
 }
 
 // ============================================
-// بخش ۱۰: به‌روزرسانی دکمه‌ها
+// بخش ۱۲: به‌روزرسانی دکمه‌ها
 // ============================================
 
 function updateNotificationButtons() {
@@ -264,7 +319,7 @@ function updateNotificationButtons() {
 }
 
 // ============================================
-// بخش ۱۱: فعال/غیرفعال کردن
+// بخش ۱۳: فعال/غیرفعال کردن
 // ============================================
 
 async function toggleNotifications() {
@@ -284,7 +339,7 @@ async function toggleNotifications() {
 }
 
 // ============================================
-// بخش ۱۲: تست یادآوری
+// بخش ۱۴: تست یادآوری
 // ============================================
 
 async function testNotification() {
@@ -297,19 +352,12 @@ async function testNotification() {
 
   let body = '';
 
-  if (reminders.needWater.length > 0) {
-    body += '💧 نیاز به آبیاری: ' + reminders.needWater.join('، ');
-  }
-
-  if (reminders.needFertilize.length > 0) {
-    if (body) body += '\n';
-    body += '🍃 نیاز به کوددهی: ' + reminders.needFertilize.join('، ');
-  }
-
-  if (!body) {
+  if (reminders.needWater.length > 0 || reminders.needFertilize.length > 0) {
+    body = buildNotificationBody(reminders);
+  } else {
     body = '✅ همه گیاهان سالم هستند.';
   }
 
-  await showPlantNotification('🌱 PlantPal', body);
+  await showPlantNotification('🌱 PlantPal — تست', body);
   console.log('✓ یادآوری تست ارسال شد');
 }

@@ -5,7 +5,7 @@
 // بخش ۱: تنظیمات
 // ============================================
 
-const WATERING_THRESHOLD_DAYS = 7;
+const DEFAULT_WATERING_THRESHOLD_DAYS = 7;
 const FERTILIZING_THRESHOLD_DAYS = 30;
 
 // ============================================
@@ -47,10 +47,20 @@ function getDaysSinceLastFertilizing(careLogs) {
   return getDaysSinceLastActivity(careLogs, 'fertilize');
 }
 
-function needsWatering(careLogs) {
+function getPlantWateringFrequency(plant) {
+  const freq = parseInt(plant && plant.wateringFrequencyDays, 10);
+  if (isNaN(freq) || freq < 1) {
+    return DEFAULT_WATERING_THRESHOLD_DAYS;
+  }
+  return freq;
+}
+
+function needsWatering(plant, careLogs) {
   const days = getDaysSinceLastWatering(careLogs);
+  const threshold = getPlantWateringFrequency(plant);
+
   if (days === null) return true;
-  return days >= WATERING_THRESHOLD_DAYS;
+  return days >= threshold;
 }
 
 function needsFertilizing(careLogs) {
@@ -85,6 +95,13 @@ function getLastActivityText(careLogs) {
   if (days === 0) return emoji + ' ' + label + ' — امروز';
   if (days === 1) return emoji + ' ' + label + ' — ۱ روز پیش';
   return emoji + ' ' + label + ' — ' + days + ' روز پیش';
+}
+
+function getWateringScheduleText(plant) {
+  const freq = getPlantWateringFrequency(plant);
+  if (freq === 1) return 'هر روز';
+  if (freq === 7) return 'هفتگی (هر 7 روز)';
+  return 'هر ' + freq + ' روز';
 }
 
 // ============================================
@@ -159,7 +176,7 @@ async function renderDashboard() {
       const waterDays = getDaysSinceLastWatering(careLogs);
       const fertilizeDays = getDaysSinceLastFertilizing(careLogs);
 
-      const waterNeed = needsWatering(careLogs);
+      const waterNeed = needsWatering(plant, careLogs);
       const fertilizeNeed = needsFertilizing(careLogs);
 
       if (waterNeed || fertilizeNeed) {
@@ -240,6 +257,11 @@ function createTodayTaskItem(item) {
   info.appendChild(name);
 
   if (item.waterNeed) {
+    const schedule = document.createElement('span');
+    schedule.className = 'today-task-schedule';
+    schedule.textContent = '📅 ' + getWateringScheduleText(plant) + ' آبیاری می‌شود';
+    info.appendChild(schedule);
+
     const status = document.createElement('span');
     status.className = 'today-task-status';
     status.textContent = '💧 ' + getWateringStatusText(item.waterDays);
