@@ -336,6 +336,15 @@ async function renderLineChart() {
           mode: 'index',
           intersect: false
         },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 1,
+              precision: 0
+            }
+          }
+        },
         plugins: {
           legend: {
             position: 'bottom',
@@ -357,4 +366,104 @@ async function renderLineChart() {
                 return context.dataset.label + ': ' + context.parsed.y + ' بار';
               }
             },
-            titleFont: { family:
+            titleFont: { family: 'Vazirmatn', size: 14 },
+            bodyFont: { family: 'Vazirmatn', size: 13 }
+          }
+        }
+      }
+    });
+
+    console.log('✓ نمودار خطی نمایش داده شد');
+
+  } catch (error) {
+    console.error('✗ خطا در نمایش نمودار خطی:', error);
+  }
+}
+
+// ============================================
+// بخش ۶: آمار کلی
+// ============================================
+
+async function renderStats() {
+  try {
+    const plants = await getAllPlants();
+    const statsList = document.getElementById('stats-list');
+    if (!statsList) return;
+
+    // آمار پایه
+    const totalPlants = plants.length;
+
+    // شمارش بر اساس وضعیت سلامت
+    const healthCounts = { healthy: 0, growing: 0, warning: 0, sick: 0 };
+    plants.forEach(function(plant) {
+      const h = plant.health || 'healthy';
+      if (healthCounts[h] !== undefined) healthCounts[h]++;
+    });
+
+    // جمع‌آوری همه لاگ‌ها و یادداشت‌ها
+    const allLogs = [];
+    let totalNotes = 0;
+
+    for (const plant of plants) {
+      const logs = await getCareLogsByPlantId(plant.id);
+      logs.forEach(function(log) { allLogs.push(log); });
+
+      const notes = await getNotesByPlantId(plant.id);
+      totalNotes += notes.length;
+    }
+
+    // فیلتر فعالیت‌های این ماه
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+
+    const thisMonthLogs = allLogs.filter(function(log) {
+      const d = new Date(log.date);
+      return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
+    });
+
+    const careCounts = { water: 0, fertilize: 0, prune: 0, repot: 0, cutting: 0 };
+    thisMonthLogs.forEach(function(log) {
+      const t = log.type || 'water';
+      if (careCounts[t] !== undefined) careCounts[t]++;
+    });
+
+    // ساخت کارت‌های آماری
+    const stats = [
+      { icon: '🌱', label: 'کل گیاهان',          value: totalPlants,                              color: '#2e7d32' },
+      { icon: '💧', label: 'آبیاری این ماه',      value: careCounts.water,                         color: '#1976d2' },
+      { icon: '🍃', label: 'کوددهی این ماه',      value: careCounts.fertilize,                     color: '#66bb6a' },
+      { icon: '✂️', label: 'هرس این ماه',         value: careCounts.prune,                         color: '#fb8c00' },
+      { icon: '📝', label: 'یادداشت‌ها',           value: totalNotes,                               color: '#8d6e63' },
+      { icon: '✅', label: 'گیاهان سالم',         value: healthCounts.healthy,                     color: '#2e7d32' },
+      { icon: '⚠️', label: 'نیازمند توجه',        value: healthCounts.warning + healthCounts.sick, color: '#e53935' }
+    ];
+
+    statsList.innerHTML = stats.map(function(s) {
+      return (
+        '<div style="' +
+          'display:flex;' +
+          'align-items:center;' +
+          'gap:12px;' +
+          'padding:14px 16px;' +
+          'background:var(--card-bg, #ffffff);' +
+          'border-radius:12px;' +
+          'border-right:4px solid ' + s.color + ';' +
+          'box-shadow:0 2px 6px rgba(0,0,0,0.06);' +
+          'margin-bottom:10px;' +
+        '">' +
+          '<div style="font-size:28px;">' + s.icon + '</div>' +
+          '<div style="flex:1;">' +
+            '<div style="font-size:13px; color:var(--text-secondary, #666);">' + s.label + '</div>' +
+            '<div style="font-size:22px; font-weight:bold; color:' + s.color + ';">' + s.value + '</div>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+
+    console.log('✓ آمار کلی نمایش داده شد');
+
+  } catch (error) {
+    console.error('✗ خطا در نمایش آمار کلی:', error);
+  }
+}
