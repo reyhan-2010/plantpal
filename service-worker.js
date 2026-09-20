@@ -1,7 +1,7 @@
 // PlantPal - Service Worker
 // این فایل مسئول کش کردن فایل‌ها و نمایش نوتیفیکیشن است.
 
-const CACHE_NAME = 'plantpal-v14';
+const CACHE_NAME = 'plantpal-v17';
 
 const CACHE_FILES = [
   './',
@@ -25,6 +25,7 @@ const CACHE_FILES = [
   './js/notifications.js',
   './js/reports.js',
   './js/settings.js',
+  './js/streak.js',
   './js/app.js',
   './assets/images/default-plant.png',
   './assets/icons/icon-512.png',
@@ -37,7 +38,12 @@ const CACHE_FILES = [
   './assets/icons/health-warning.svg',
   './assets/icons/health-sick.svg',
   './assets/icons/magnifying-glass.svg',
-  './assets/icons/funnel.svg'
+  './assets/icons/funnel.svg',
+  './assets/icons/reports.svg',
+  './assets/icons/chart-pie.svg',
+  './assets/icons/chart-line.svg',
+  './assets/icons/chart-bar.svg',
+  './assets/icons/achievements.svg'
 ];
 
 self.addEventListener('install', function(event) {
