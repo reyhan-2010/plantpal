@@ -18,7 +18,6 @@ function initGallery() {
 }
 
 function setupGalleryButtons() {
-  // دکمه افزودن عکس
   const addBtn = document.getElementById('btn-add-photo');
   if (addBtn) {
     addBtn.addEventListener('click', function() {
@@ -29,7 +28,6 @@ function setupGalleryButtons() {
     console.warn('⚠ دکمه btn-add-photo پیدا نشد');
   }
 
-  // Modal افزودن: بستن
   const closeBtn = document.getElementById('btn-close-photo-modal');
   if (closeBtn) {
     closeBtn.addEventListener('click', function() {
@@ -37,7 +35,6 @@ function setupGalleryButtons() {
     });
   }
 
-  // Modal افزودن: انصراف
   const cancelBtn = document.getElementById('btn-cancel-photo');
   if (cancelBtn) {
     cancelBtn.addEventListener('click', function() {
@@ -45,13 +42,11 @@ function setupGalleryButtons() {
     });
   }
 
-  // Modal افزودن: ذخیره
   const form = document.getElementById('form-add-photo');
   if (form) {
     form.addEventListener('submit', handleAddPhoto);
   }
 
-  // Modal نمایش بزرگ: بستن
   const closeViewBtn = document.getElementById('btn-close-view-photo');
   if (closeViewBtn) {
     closeViewBtn.addEventListener('click', function() {
@@ -59,7 +54,6 @@ function setupGalleryButtons() {
     });
   }
 
-  // Modal نمایش بزرگ: انصراف
   const cancelViewBtn = document.getElementById('btn-cancel-view-photo');
   if (cancelViewBtn) {
     cancelViewBtn.addEventListener('click', function() {
@@ -67,7 +61,6 @@ function setupGalleryButtons() {
     });
   }
 
-  // Modal نمایش بزرگ: حذف
   const deleteViewBtn = document.getElementById('btn-delete-photo');
   if (deleteViewBtn) {
     deleteViewBtn.addEventListener('click', function() {
@@ -152,7 +145,6 @@ function createGalleryItem(photo) {
   item.appendChild(image);
   item.appendChild(overlay);
 
-  // کلیک روی عکس → نمایش بزرگ
   item.addEventListener('click', function() {
     openViewPhotoModal(photo.id);
   });
@@ -170,11 +162,9 @@ function openAddPhotoModal() {
     return;
   }
 
-  // پاک کردن فرم
   const form = document.getElementById('form-add-photo');
   if (form) form.reset();
 
-  // پیش‌فرض تاریخ: امروز
   const dateInput = document.getElementById('photo-date');
   if (dateInput) {
     const today = new Date().toISOString().split('T')[0];
@@ -182,11 +172,9 @@ function openAddPhotoModal() {
     dateInput.max = today;
   }
 
-  // پاک کردن یادداشت
   const noteInput = document.getElementById('photo-note');
   if (noteInput) noteInput.value = '';
 
-  // پاک کردن فایل
   const fileInput = document.getElementById('photo-file');
   if (fileInput) fileInput.value = '';
 
@@ -241,9 +229,13 @@ async function handleAddPhoto(event) {
     await savePhoto(photoData);
     console.log('✓ عکس رشد با موفقیت اضافه شد');
 
+    // ✨ به‌روزرسانی XP، Streak و Heatmap
+    if (typeof onActivityAdded === 'function') {
+      await onActivityAdded();
+    }
+
     closeAddPhotoModal();
 
-    // به‌روزرسانی گالری
     await renderGallery(currentGalleryPlantId);
 
   } catch (error) {
@@ -267,19 +259,16 @@ async function openViewPhotoModal(photoId) {
 
     currentViewingPhotoId = photoId;
 
-    // تصویر
     const imageEl = document.getElementById('photo-view-image');
     if (imageEl) {
       imageEl.src = photo.image || 'assets/images/default-plant.png';
     }
 
-    // تاریخ
     const dateEl = document.getElementById('photo-view-date');
     if (dateEl) {
       dateEl.textContent = formatDate(photo.date);
     }
 
-    // یادداشت
     const noteRow = document.getElementById('photo-view-note-row');
     const noteEl = document.getElementById('photo-view-note');
 
@@ -290,7 +279,6 @@ async function openViewPhotoModal(photoId) {
       if (noteRow) noteRow.style.display = 'none';
     }
 
-    // باز کردن Modal
     const modal = document.getElementById('modal-view-photo');
     if (modal) {
       modal.classList.add('active');
@@ -333,7 +321,11 @@ async function handleDeletePhoto() {
 
     closeViewPhotoModal();
 
-    // به‌روزرسانی گالری
+    // ✨ به‌روزرسانی XP، Streak و Heatmap
+    if (typeof onActivityAdded === 'function') {
+      await onActivityAdded();
+    }
+
     await renderGallery(currentGalleryPlantId);
 
   } catch (error) {

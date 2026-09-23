@@ -129,6 +129,11 @@ async function handleAddCare(event) {
     await saveCareLog(careLogData);
     console.log('✓ فعالیت ثبت شد. نوع:', currentCareType);
 
+    // ✨ به‌روزرسانی XP، Streak و Heatmap
+    if (typeof onActivityAdded === 'function') {
+      await onActivityAdded();
+    }
+
     closeAddCareModal();
 
     await renderCareLogs(currentCarePlantId);
@@ -229,6 +234,11 @@ async function handleDeleteCareLog(logId) {
   try {
     await deleteCareLog(logId);
     console.log('✓ فعالیت حذف شد. شناسه:', logId);
+
+    // ✨ به‌روزرسانی XP، Streak و Heatmap
+    if (typeof onActivityAdded === 'function') {
+      await onActivityAdded();
+    }
 
     await renderCareLogs(currentCarePlantId);
     await renderDashboard();

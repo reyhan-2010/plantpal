@@ -307,6 +307,11 @@ async function handleAddPlant(event) {
     await savePlant(plantData);
     console.log('✓ گیاه با موفقیت اضافه شد');
 
+    // ✨ به‌روزرسانی XP، Streak و Heatmap
+    if (typeof onActivityAdded === 'function') {
+      await onActivityAdded();
+    }
+
     clearAddForm();
     showHomePage();
     await renderDashboard();
@@ -429,6 +434,11 @@ async function handleDeletePlant() {
   try {
     await deletePlant(currentPlantId);
     console.log('✓ گیاه حذف شد');
+
+    // ✨ به‌روزرسانی XP، Streak و Heatmap
+    if (typeof onActivityAdded === 'function') {
+      await onActivityAdded();
+    }
 
     currentPlantId = null;
     showHomePage();

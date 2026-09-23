@@ -1,5 +1,5 @@
 // PlantPal - Streak و سیستم انگیزشی
-// این فایل مسئول محاسبه Streak، XP، سطح و نشان‌هاست.
+// این فایل مسئول محاسبه Streak، امتیاز، سطح، نشان‌ها و Heatmap است.
 
 // ============================================
 // بخش ۱: تنظیمات
@@ -65,7 +65,6 @@ function isDatabaseReady() {
 }
 
 function initStreak() {
-  // اگر دیتابیس هنوز آماده نیست، صبر کن و دوباره تلاش کن
   if (!isDatabaseReady()) {
     streakInitAttempts++;
 
@@ -80,16 +79,20 @@ function initStreak() {
 
   streakData = loadStreakData();
 
-  recalculateStreak().then(function() {
-    updateStreakUI();
-    console.log('✓ سیستم Streak راه‌اندازی شد');
-    console.log('  - Streak فعلی:', streakData.currentStreak);
-    console.log('  - رکورد:', streakData.longestStreak);
-    console.log('  - XP:', streakData.totalXP);
-    console.log('  - سطح:', streakData.currentLevel);
-  }).catch(function(error) {
-    console.error('✗ خطا در راه‌اندازی Streak:', error);
-  });
+  recalculateStreak()
+    .then(function() { return recalculateXP(); })
+    .then(function() {
+      updateStreakUI();
+      renderHeatmap();
+      console.log('✓ سیستم Streak راه‌اندازی شد');
+      console.log('  - Streak فعلی:', streakData.currentStreak);
+      console.log('  - رکورد:', streakData.longestStreak);
+      console.log('  - امتیاز:', streakData.totalXP);
+      console.log('  - سطح:', streakData.currentLevel);
+    })
+    .catch(function(error) {
+      console.error('✗ خطا در راه‌اندازی Streak:', error);
+    });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -164,28 +167,7 @@ function daysBetween(dateKey1, dateKey2) {
 
 async function recalculateStreak() {
   try {
-    const allLogs = await getAllCareLogs();
-    const allPlants = await getAllPlants();
-    const allPhotos = await getAllPhotos();
-    const allNotes = await getAllNotes();
-
-    const activityDates = new Set();
-
-    allLogs.forEach(function(log) {
-      if (log.date) activityDates.add(getDateKeyFromISO(log.date));
-    });
-
-    allPlants.forEach(function(plant) {
-      if (plant.createdAt) activityDates.add(getDateKeyFromISO(plant.createdAt));
-    });
-
-    allPhotos.forEach(function(photo) {
-      if (photo.createdAt) activityDates.add(getDateKeyFromISO(photo.createdAt));
-    });
-
-    allNotes.forEach(function(note) {
-      if (note.createdAt) activityDates.add(getDateKeyFromISO(note.createdAt));
-    });
+    const activityDates = await getAllActivityDates();
 
     if (activityDates.size === 0) {
       streakData.currentStreak = 0;
@@ -226,28 +208,86 @@ async function recalculateStreak() {
   }
 }
 
-// ============================================
-// بخش ۷: XP و سطح
-// ============================================
+async function getAllActivityDates() {
+  const allLogs = await getAllCareLogs();
+  const allPlants = await getAllPlants();
+  const allPhotos = await getAllPhotos();
+  const allNotes = await getAllNotes();
 
-function addXP(amount, reason) {
-  if (!streakData) streakData = loadStreakData();
+  const activityDates = new Set();
 
-  const oldLevel = streakData.currentLevel;
-  streakData.totalXP += amount;
+  allLogs.forEach(function(log) {
+    if (log.date) activityDates.add(getDateKeyFromISO(log.date));
+  });
 
-  const newLevel = getLevelFromXP(streakData.totalXP);
-  streakData.currentLevel = newLevel.level;
+  allPlants.forEach(function(plant) {
+    if (plant.createdAt) activityDates.add(getDateKeyFromISO(plant.createdAt));
+  });
 
-  saveStreakData();
+  allPhotos.forEach(function(photo) {
+    if (photo.createdAt) activityDates.add(getDateKeyFromISO(photo.createdAt));
+  });
 
-  if (newLevel.level > oldLevel) {
-    console.log('🎉 سطح بالا رفت! سطح جدید:', newLevel.level, newLevel.name);
-  }
+  allNotes.forEach(function(note) {
+    if (note.createdAt) activityDates.add(getDateKeyFromISO(note.createdAt));
+  });
 
-  updateStreakUI();
-  return newLevel;
+  return activityDates;
 }
+
+// ============================================
+// بخش ۷: بازمحاسبه امتیاز از روی داده‌ها
+// ============================================
+
+async function recalculateXP() {
+  try {
+    const allLogs = await getAllCareLogs();
+    const allPlants = await getAllPlants();
+    const allPhotos = await getAllPhotos();
+    const allNotes = await getAllNotes();
+
+    let xp = 0;
+
+    allLogs.forEach(function(log) {
+      const type = log.type || 'water';
+      xp += XP_REWARDS[type] || 10;
+    });
+
+    allPlants.forEach(function() {
+      xp += XP_REWARDS.plant;
+    });
+
+    allPhotos.forEach(function() {
+      xp += XP_REWARDS.photo;
+    });
+
+    allNotes.forEach(function() {
+      xp += XP_REWARDS.note;
+    });
+
+    const oldLevel = streakData.currentLevel;
+    streakData.totalXP = xp;
+    streakData.currentLevel = getLevelFromXP(xp).level;
+
+    saveStreakData();
+
+    if (streakData.currentLevel > oldLevel) {
+      console.log('🎉 سطح بالا رفت! سطح جدید:', streakData.currentLevel);
+    }
+
+    console.log('✓ امتیاز بازمحاسبه شد:', xp);
+
+    return xp;
+
+  } catch (error) {
+    console.error('✗ خطا در بازمحاسبه امتیاز:', error);
+    return 0;
+  }
+}
+
+// ============================================
+// بخش ۸: امتیاز و سطح
+// ============================================
 
 function getLevelFromXP(xp) {
   let current = LEVELS[0];
@@ -280,13 +320,12 @@ function getPlantStageFromStreak(days) {
 }
 
 // ============================================
-// بخش ۸: به‌روزرسانی UI
+// بخش ۹: به‌روزرسانی UI
 // ============================================
 
 function updateStreakUI() {
   if (!streakData) return;
 
-  // تزریق SVG شعله (فقط یک بار)
   const fireIcon = document.getElementById('streak-fire-icon');
   if (fireIcon && !fireIcon.innerHTML.trim()) {
     fireIcon.innerHTML = SVG_FIRE;
@@ -295,6 +334,7 @@ function updateStreakUI() {
   const currentEl = document.getElementById('streak-current');
   const recordEl = document.getElementById('streak-record');
   const levelEl = document.getElementById('streak-level');
+  const xpTextEl = document.getElementById('streak-xp-text');
   const xpFillEl = document.getElementById('streak-xp-fill');
   const fireEl = document.querySelector('.streak-fire');
 
@@ -312,6 +352,15 @@ function updateStreakUI() {
     }
   }
 
+  // ✨ نمایش عدد امتیاز
+  if (xpTextEl) {
+    if (nextLevel) {
+      xpTextEl.textContent = 'امتیاز: ' + streakData.totalXP + ' / ' + nextLevel.minXP;
+    } else {
+      xpTextEl.textContent = 'امتیاز: ' + streakData.totalXP;
+    }
+  }
+
   if (xpFillEl) {
     if (nextLevel) {
       const xpInLevel = streakData.totalXP - currentLevel.minXP;
@@ -323,7 +372,6 @@ function updateStreakUI() {
     }
   }
 
-  // انیمیشن شعله فقط اگر Streak فعال باشد
   if (fireEl) {
     if (streakData.currentStreak > 0) {
       fireEl.classList.add('active');
@@ -334,11 +382,104 @@ function updateStreakUI() {
 }
 
 // ============================================
-// بخش ۹: هوک بعد از فعالیت جدید
+// بخش ۱۰: Heatmap فعالیت
+// ============================================
+
+async function renderHeatmap() {
+  const container = document.getElementById('heatmap-grid');
+  const totalEl = document.getElementById('heatmap-total');
+  if (!container) return;
+
+  try {
+    const allLogs = await getAllCareLogs();
+    const allPhotos = await getAllPhotos();
+    const allNotes = await getAllNotes();
+    const allPlants = await getAllPlants();
+
+    const activityCounts = {};
+
+    function addDate(iso) {
+      if (!iso) return;
+      const key = getDateKeyFromISO(iso);
+      activityCounts[key] = (activityCounts[key] || 0) + 1;
+    }
+
+    allLogs.forEach(function(log) { addDate(log.date); });
+    allPhotos.forEach(function(p) { addDate(p.createdAt); });
+    allNotes.forEach(function(n) { addDate(n.createdAt); });
+    allPlants.forEach(function(p) { addDate(p.createdAt); });
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const daysSinceSat = (today.getDay() + 1) % 7;
+    const lastSaturday = new Date(today);
+    lastSaturday.setDate(today.getDate() - daysSinceSat);
+
+    const startDate = new Date(lastSaturday);
+    startDate.setDate(startDate.getDate() - 11 * 7);
+
+    container.innerHTML = '';
+
+    let totalCount = 0;
+
+    for (let week = 0; week < 12; week++) {
+      const col = document.createElement('div');
+      col.className = 'heatmap-week';
+
+      for (let day = 0; day < 7; day++) {
+        const cellDate = new Date(startDate);
+        cellDate.setDate(startDate.getDate() + week * 7 + day);
+
+        const key = dateToKey(cellDate);
+        const count = activityCounts[key] || 0;
+        const isFuture = cellDate > today;
+
+        if (!isFuture) totalCount += count;
+
+        const cell = document.createElement('div');
+        cell.className = 'heatmap-cell';
+
+        if (isFuture) {
+          cell.classList.add('future');
+        } else if (count === 0) {
+          cell.classList.add('level-0');
+        } else if (count === 1) {
+          cell.classList.add('level-1');
+        } else if (count <= 3) {
+          cell.classList.add('level-2');
+        } else {
+          cell.classList.add('level-3');
+        }
+
+        cell.title = key + ' — ' + count + ' فعالیت';
+        cell.setAttribute('data-date', key);
+
+        col.appendChild(cell);
+      }
+
+      container.appendChild(col);
+    }
+
+    if (totalEl) {
+      totalEl.textContent = totalCount + ' فعالیت در ۱۲ هفته';
+    }
+
+    console.log('✓ Heatmap رسم شد. مجموع:', totalCount);
+
+  } catch (error) {
+    console.error('✗ خطا در رسم Heatmap:', error);
+  }
+}
+
+// ============================================
+// بخش ۱۱: هوک بعد از تغییر داده‌ها
 // ============================================
 
 async function onActivityAdded() {
   if (!isDatabaseReady()) return;
   await recalculateStreak();
+  await recalculateXP();
   updateStreakUI();
+  await renderHeatmap();
 }

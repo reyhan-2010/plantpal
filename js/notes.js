@@ -101,12 +101,19 @@ async function handleAddNote(event) {
       date: new Date(date).toISOString()
     };
 
-    if (editingNoteId) {
+    const isEditMode = !!editingNoteId;
+
+    if (isEditMode) {
       await updateNote(editingNoteId, noteData);
       console.log('✓ یادداشت ویرایش شد');
     } else {
       await saveNote(noteData);
       console.log('✓ یادداشت ذخیره شد');
+
+      // ✨ به‌روزرسانی XP، Streak و Heatmap فقط برای یادداشت جدید
+      if (typeof onActivityAdded === 'function') {
+        await onActivityAdded();
+      }
     }
 
     closeAddNoteModal();
@@ -216,6 +223,11 @@ async function handleDeleteNote(noteId) {
   try {
     await deleteNote(noteId);
     console.log('✓ یادداشت حذف شد. شناسه:', noteId);
+
+    // ✨ به‌روزرسانی XP، Streak و Heatmap
+    if (typeof onActivityAdded === 'function') {
+      await onActivityAdded();
+    }
 
     await renderNotes(currentPlantId);
 
