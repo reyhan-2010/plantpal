@@ -1961,7 +1961,7 @@
    نوار Streak
    ============================================ */
 
-.streak-bar {
+. {
   background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
   border: 2px solid #ffb74d;
   border-radius: var(--radius-md);
@@ -1979,7 +1979,7 @@
 .streak-bar-content {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1rem;streak-bar
   margin-bottom: 0.8rem;
 }
 
@@ -2286,6 +2286,159 @@
   }
 
   .heatmap-total {
+    font-size: 0.75rem;
+  }
+}
+/* ============================================
+   نوار Streak
+   ============================================ */
+
+.streak-bar {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  border: 2px solid #ffb74d;
+  border-radius: var(--radius-md);
+  padding: 1rem 1.2rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.15);
+  transition: var(--transition);
+}
+
+[data-theme="dark"] .streak-bar {
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.18) 0%, rgba(255, 111, 0, 0.22) 100%);
+  border-color: rgba(255, 152, 0, 0.5);
+}
+
+.streak-bar-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+}
+
+.streak-fire {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  transition: var(--transition);
+}
+
+[data-theme="dark"] .streak-fire {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.streak-fire.active {
+  animation: firePulse 1.6s ease-in-out infinite;
+}
+
+.streak-fire-svg {
+  width: 36px;
+  height: 36px;
+  display: block;
+}
+
+@keyframes firePulse {
+  0%, 100% { transform: scale(1); filter: brightness(1) drop-shadow(0 0 2px rgba(255, 111, 0, 0.4)); }
+  50% { transform: scale(1.08); filter: brightness(1.15) drop-shadow(0 0 8px rgba(255, 111, 0, 0.7)); }
+}
+
+.streak-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.streak-main {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.streak-number {
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: #e65100;
+  line-height: 1;
+  font-family: 'Vazirmatn', inherit;
+}
+
+[data-theme="dark"] .streak-number {
+  color: #ffb74d;
+}
+
+.streak-label {
+  font-size: 0.9rem;
+  color: #bf360c;
+  font-weight: 500;
+}
+
+[data-theme="dark"] .streak-label {
+  color: #ffcc80;
+}
+
+.streak-meta {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: #6d4c41;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+[data-theme="dark"] .streak-meta {
+  color: #bcaaa4;
+}
+
+.streak-divider {
+  opacity: 0.5;
+}
+
+.streak-xp-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .streak-xp-bar {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.streak-xp-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #ff8f00, #ffc107);
+  border-radius: 4px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (max-width: 600px) {
+  .streak-bar {
+    padding: 0.8rem 1rem;
+  }
+
+  .streak-fire {
+    width: 44px;
+    height: 44px;
+  }
+
+  .streak-fire-svg {
+    width: 30px;
+    height: 30px;
+  }
+
+  .streak-number {
+    font-size: 1.5rem;
+  }
+
+  .streak-meta {
     font-size: 0.75rem;
   }
 }
