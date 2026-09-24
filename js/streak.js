@@ -1,7 +1,9 @@
-/* PlantPal - Streak و سیستم انگیزشی */
-/* این فایل مسئول محاسبه Streak، امتیاز، سطح، نشان‌ها و Heatmap است. */
+// PlantPal - Streak و سیستم انگیزشی
+// این فایل مسئول محاسبه Streak، امتیاز، سطح، نشان‌ها و Heatmap است.
 
-/* بخش ۱: تنظیمات */
+// ============================================
+// بخش ۱: تنظیمات
+// ============================================
 
 const STREAK_KEY = 'plantpal-streak-data';
 
@@ -54,8 +56,13 @@ const BADGES = [
 let streakData = null;
 let streakInitAttempts = 0;
 const MAX_INIT_ATTEMPTS = 30;
+let motivationIntervalId = null;
 
 const SVG_FIRE = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="streak-fire-svg"><path d="M12 2 C12 2 8 7 8 12 C8 13 8 14 8 14 C8 14 7 13 6 11 C5 13 4 15 4 17 C4 20 8 22 12 22 C16 22 20 20 20 17 C20 15 19 13 18 11 C17 13 16 14 16 14 C16 14 16 13 16 12 C16 7 12 2 12 2 Z" fill="#d32f2f"/><path d="M12 4 C12 4 9 8 9 12 C9 13 9 14 9 14 C9 14 8 13 7.5 12 C7 13.5 6 15.5 6 17 C6 19.5 9 21 12 21 C15 21 18 19.5 18 17 C18 15.5 17 13.5 16.5 12 C16 13 15 14 15 14 C15 14 15 13 15 12 C15 8 12 4 12 4 Z" fill="#ff6f00"/><path d="M12 7 C12 7 10 10 10 13 C10 13.5 10 14 10 14 C10 14 9.5 13.5 9 13 C8.5 14 8 15.5 8 16.5 C8 18.5 10 20 12 20 C14 20 16 18.5 16 16.5 C16 15.5 15.5 14 15 13 C14.5 13.5 14 14 14 14 C14 14 14 13.5 14 13 C14 10 12 7 12 7 Z" fill="#ffab00"/><path d="M12 11 C12 11 11 13 11 14 C11 14.5 11.5 15 12 15 C12.5 15 13 14.5 13 14 C13 13 12 11 12 11 Z" fill="#fff8e1"/></svg>';
+
+// ============================================
+// بخش ۲: راه‌اندازی
+// ============================================
 
 function isDatabaseReady() {
   return typeof db !== 'undefined' && db !== null;
@@ -64,23 +71,30 @@ function isDatabaseReady() {
 function initStreak() {
   if (!isDatabaseReady()) {
     streakInitAttempts++;
+
     if (streakInitAttempts >= MAX_INIT_ATTEMPTS) {
       console.error('✗ دیتابیس آماده نشد پس از ' + MAX_INIT_ATTEMPTS + ' تلاش');
       return;
     }
+
     setTimeout(initStreak, 100);
     return;
   }
 
   streakData = loadStreakData();
+
   setupAchievementsButton();
-    setupCelebrationButton();
+  setupCelebrationButton();
+
   recalculateStreak()
     .then(function() { return recalculateXP(); })
     .then(function() { return checkBadges(); })
     .then(function() {
       updateStreakUI();
+      updateStreakUILarge();
       renderHeatmap();
+      renderMotivationalBanner();
+      startMotivationRefresh();
       console.log('✓ سیستم Streak راه‌اندازی شد');
       console.log('  - Streak فعلی:', streakData.currentStreak);
       console.log('  - رکورد:', streakData.longestStreak);
@@ -96,6 +110,10 @@ function initStreak() {
 document.addEventListener('DOMContentLoaded', function() {
   initStreak();
 });
+
+// ============================================
+// بخش ۳: ذخیره و بازیابی
+// ============================================
 
 function getDefaultStreakData() {
   return {
@@ -129,6 +147,10 @@ function saveStreakData() {
   }
 }
 
+// ============================================
+// بخش ۴: توابع کمکی تاریخ
+// ============================================
+
 function getTodayKey() {
   return dateToKey(new Date());
 }
@@ -150,6 +172,10 @@ function daysBetween(dateKey1, dateKey2) {
   const diffMs = Math.abs(d2 - d1);
   return Math.round(diffMs / (1000 * 60 * 60 * 24));
 }
+
+// ============================================
+// بخش ۵: محاسبه Streak
+// ============================================
 
 async function recalculateStreak() {
   try {
@@ -188,6 +214,7 @@ async function recalculateStreak() {
     }
 
     saveStreakData();
+
   } catch (error) {
     console.error('✗ خطا در محاسبه Streak:', error);
   }
@@ -219,6 +246,10 @@ async function getAllActivityDates() {
 
   return activityDates;
 }
+
+// ============================================
+// بخش ۶: بازمحاسبه امتیاز
+// ============================================
 
 async function recalculateXP() {
   try {
@@ -264,6 +295,10 @@ async function recalculateXP() {
   }
 }
 
+// ============================================
+// بخش ۷: امتیاز و سطح
+// ============================================
+
 function getLevelFromXP(xp) {
   let current = LEVELS[0];
   for (let i = 0; i < LEVELS.length; i++) {
@@ -293,6 +328,10 @@ function getPlantStageFromStreak(days) {
   }
   return stage;
 }
+
+// ============================================
+// بخش ۸: سیستم نشان‌ها
+// ============================================
 
 async function getBadgeStats() {
   const allLogs = await getAllCareLogs();
@@ -367,10 +406,13 @@ function getUnlockedBadges() {
   });
 }
 
+// ============================================
+// بخش ۹: به‌روزرسانی UI
+// ============================================
+
 function updateStreakUI() {
   if (!streakData) return;
 
-  // کادر بزرگ (صفحه دستاوردها)
   const fireIconLarge = document.getElementById('streak-fire-icon-large');
   if (fireIconLarge && !fireIconLarge.innerHTML.trim()) {
     fireIconLarge.innerHTML = SVG_FIRE;
@@ -431,7 +473,6 @@ function updateStreakUI() {
   updateBadgesCountUI();
 }
 
-  updateStreakUILarge();
 function updateBadgesCountUI() {
   const el = document.getElementById('streak-badges');
   if (!el || !streakData) return;
@@ -441,6 +482,198 @@ function updateBadgesCountUI() {
 
   el.textContent = '🏆 ' + unlocked + ' / ' + total + ' نشان';
 }
+
+function updateStreakUILarge() {
+  if (!streakData) return;
+
+  const fireIconLarge = document.getElementById('streak-fire-icon-large');
+  if (fireIconLarge && !fireIconLarge.innerHTML.trim()) {
+    fireIconLarge.innerHTML = SVG_FIRE;
+  }
+
+  const currentLevel = getLevelFromXP(streakData.totalXP);
+  const nextLevel = getNextLevel(currentLevel.level);
+
+  const currentEl = document.getElementById('streak-current-large');
+  const recordEl = document.getElementById('streak-record-large');
+  const levelEl = document.getElementById('streak-level-large');
+  const xpEl = document.getElementById('streak-xp-large');
+  const badgesEl = document.getElementById('streak-badges-large');
+  const xpFillEl = document.getElementById('streak-xp-fill-large');
+  const fireEl = document.querySelector('.streak-bar-large-fire');
+
+  if (currentEl) currentEl.textContent = String(streakData.currentStreak);
+  if (recordEl) recordEl.textContent = streakData.longestStreak + ' روز';
+
+  if (levelEl) {
+    if (nextLevel) {
+      levelEl.textContent = currentLevel.level + ': ' + currentLevel.name;
+    } else {
+      levelEl.textContent = currentLevel.level + ': ' + currentLevel.name + ' 🏆';
+    }
+  }
+
+  if (xpEl) {
+    if (nextLevel) {
+      xpEl.textContent = streakData.totalXP + ' / ' + nextLevel.minXP;
+    } else {
+      xpEl.textContent = String(streakData.totalXP);
+    }
+  }
+
+  if (badgesEl) {
+    badgesEl.textContent = streakData.unlockedBadges.length + ' / ' + BADGES.length;
+  }
+
+  if (xpFillEl) {
+    if (nextLevel) {
+      const xpInLevel = streakData.totalXP - currentLevel.minXP;
+      const xpNeeded = nextLevel.minXP - currentLevel.minXP;
+      const percent = Math.min(100, (xpInLevel / xpNeeded) * 100);
+      xpFillEl.style.width = percent + '%';
+    } else {
+      xpFillEl.style.width = '100%';
+    }
+  }
+
+  if (fireEl) {
+    if (streakData.currentStreak > 0) {
+      fireEl.classList.add('active');
+    } else {
+      fireEl.classList.remove('active');
+    }
+  }
+}
+
+// ============================================
+// بخش ۱۰: پیام انگیزشی
+// ============================================
+
+function getMotivationalMessage() {
+  const hour = new Date().getHours();
+  const todayKey = getTodayKey();
+  const lastActivity = streakData.lastActivityDate;
+  const streak = streakData.currentStreak;
+
+  // اگر هیچ فعالیتی امروز نبود و آخرین فعالیت دیروز بود
+  const didActivityToday = (lastActivity === todayKey);
+
+  // شب (۲۱ تا ۶)
+  if (hour >= 21 || hour < 6) {
+    if (didActivityToday) {
+      return {
+        icon: '🌙',
+        text: 'شب بخیر! امروز خوب از گیاهانت مراقبت کردی',
+        type: 'night'
+      };
+    }
+    return {
+      icon: '🌙',
+      text: 'قبل از خواب، یه سر به گیاهانت بزن',
+      type: 'night'
+    };
+  }
+
+  // صبح (۶ تا ۱۲)
+  if (hour < 12) {
+    if (streak === 0) {
+      return {
+        icon: '🌅',
+        text: 'صبح بخیر! امروز یه فعالیت ثبت کن تا Streak شروع بشه',
+        type: 'info'
+      };
+    }
+    if (!didActivityToday) {
+      return {
+        icon: '🌅',
+        text: 'صبح بخیر! وقت آبیاری گیاهانت رسیده',
+        type: 'info'
+      };
+    }
+    return {
+      icon: '🌅',
+      text: 'صبح بخیر! امروز کارت رو انجام دادی، آفرین',
+      type: 'success'
+    };
+  }
+
+  // بعد از ظهر/عصر
+  if (streak === 0) {
+    return {
+      icon: '🌱',
+      text: 'امروز روز جدیدیه! یه فعالیت ثبت کن تا Streak شروع بشه',
+      type: 'info'
+    };
+  }
+
+  if (!didActivityToday) {
+    return {
+      icon: '🔥',
+      text: 'امروز فعالیتی ثبت نکردی — نذار Streakت پاره بشه!',
+      type: 'warning'
+    };
+  }
+
+  if (streak >= 7) {
+    return {
+      icon: '🏆',
+      text: 'عالیه! ' + streak + ' روز پشت‌سرهم! تو یه قهرمانی',
+      type: 'success'
+    };
+  }
+
+  if (streak >= 3) {
+    return {
+      icon: '🌟',
+      text: 'آفرین! ' + streak + ' روزه داری تلاش می‌کنی',
+      type: 'success'
+    };
+  }
+
+  return {
+    icon: '💪',
+    text: 'شروع خوبی داشتی! ادامه بده',
+    type: 'info'
+  };
+}
+
+function renderMotivationalBanner() {
+  const banner = document.getElementById('motivation-banner');
+  const iconEl = document.getElementById('motivation-icon');
+  const textEl = document.getElementById('motivation-text');
+
+  if (!banner || !iconEl || !textEl) return;
+  if (!streakData) return;
+
+  const msg = getMotivationalMessage();
+
+  banner.className = 'motivation-banner ' + msg.type;
+  iconEl.textContent = msg.icon;
+  textEl.textContent = msg.text;
+
+  banner.style.display = 'flex';
+}
+
+function startMotivationRefresh() {
+  if (motivationIntervalId) {
+    clearInterval(motivationIntervalId);
+  }
+
+  // هر ۶۰ دقیقه به‌روزرسانی
+  motivationIntervalId = setInterval(function() {
+    renderMotivationalBanner();
+  }, 60 * 60 * 1000);
+}
+
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden && streakData) {
+    renderMotivationalBanner();
+  }
+});
+
+// ============================================
+// بخش ۱۱: Heatmap
+// ============================================
 
 async function renderHeatmap() {
   const container = document.getElementById('heatmap-grid');
@@ -528,14 +761,10 @@ async function renderHeatmap() {
   }
 }
 
-async function onActivityAdded() {
-  if (!isDatabaseReady()) return;
-  await recalculateStreak();
-  await recalculateXP();
-  await checkBadges();
-  updateStreakUI();
-  await renderHeatmap();
-}
+// ============================================
+// بخش ۱۲: دستاوردها
+// ============================================
+
 function setupAchievementsButton() {
   const btn = document.getElementById('btn-open-achievements');
   if (btn) {
@@ -620,62 +849,11 @@ function renderAchievements() {
 
   console.log('✓ دستاوردها نمایش داده شد. باز شده:', unlockedCount, 'از', BADGES.length);
 }
-function updateStreakUILarge() {
-  if (!streakData) return;
 
-  const currentLevel = getLevelFromXP(streakData.totalXP);
-  const nextLevel = getNextLevel(currentLevel.level);
+// ============================================
+// بخش ۱۳: Modal جشن
+// ============================================
 
-  const currentEl = document.getElementById('streak-current-large');
-  const recordEl = document.getElementById('streak-record-large');
-  const levelEl = document.getElementById('streak-level-large');
-  const xpEl = document.getElementById('streak-xp-large');
-  const badgesEl = document.getElementById('streak-badges-large');
-  const xpFillEl = document.getElementById('streak-xp-fill-large');
-  const fireEl = document.querySelector('.streak-bar-large-fire');
-
-  if (currentEl) currentEl.textContent = String(streakData.currentStreak);
-  if (recordEl) recordEl.textContent = streakData.longestStreak + ' روز';
-
-  if (levelEl) {
-    if (nextLevel) {
-      levelEl.textContent = currentLevel.level + ': ' + currentLevel.name;
-    } else {
-      levelEl.textContent = currentLevel.level + ': ' + currentLevel.name + ' 🏆';
-    }
-  }
-
-  if (xpEl) {
-    if (nextLevel) {
-      xpEl.textContent = streakData.totalXP + ' / ' + nextLevel.minXP;
-    } else {
-      xpEl.textContent = String(streakData.totalXP);
-    }
-  }
-
-  if (badgesEl) {
-    badgesEl.textContent = streakData.unlockedBadges.length + ' / ' + BADGES.length;
-  }
-
-  if (xpFillEl) {
-    if (nextLevel) {
-      const xpInLevel = streakData.totalXP - currentLevel.minXP;
-      const xpNeeded = nextLevel.minXP - currentLevel.minXP;
-      const percent = Math.min(100, (xpInLevel / xpNeeded) * 100);
-      xpFillEl.style.width = percent + '%';
-    } else {
-      xpFillEl.style.width = '100%';
-    }
-  }
-
-  if (fireEl) {
-    if (streakData.currentStreak > 0) {
-      fireEl.classList.add('active');
-    } else {
-      fireEl.classList.remove('active');
-    }
-  }
-}
 function showCelebrationModal(badges) {
   if (!badges || badges.length === 0) return;
 
@@ -759,4 +937,19 @@ function setupCelebrationButton() {
       closeCelebrationModal();
     });
   }
+}
+
+// ============================================
+// بخش ۱۴: هوک بعد از تغییر داده‌ها
+// ============================================
+
+async function onActivityAdded() {
+  if (!isDatabaseReady()) return;
+  await recalculateStreak();
+  await recalculateXP();
+  await checkBadges();
+  updateStreakUI();
+  updateStreakUILarge();
+  renderMotivationalBanner();
+  await renderHeatmap();
 }

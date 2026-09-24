@@ -1,7 +1,7 @@
 // PlantPal - Service Worker
 // این فایل مسئول کش کردن فایل‌ها و نمایش نوتیفیکیشن است.
 
-const CACHE_NAME = 'plantpal-v26';
+const CACHE_NAME = 'plantpal-v27';
 
 const CACHE_FILES = [
   './',

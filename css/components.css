@@ -3942,3 +3942,101 @@
     align-items: center;
   }
 }
+/* ============================================
+   بنر پیام انگیزشی
+   ============================================ */
+
+.motivation-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  animation: pageFadeIn 0.5s ease;
+  border: 2px solid transparent;
+}
+
+.motivation-banner.info {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  border-color: #64b5f6;
+  color: #1565c0;
+}
+
+.motivation-banner.success {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border-color: #66bb6a;
+  color: #2e7d32;
+}
+
+.motivation-banner.warning {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  border-color: #ffb74d;
+  color: #e65100;
+}
+
+.motivation-banner.night {
+  background: linear-gradient(135deg, #ede7f6 0%, #d1c4e9 100%);
+  border-color: #9575cd;
+  color: #4527a0;
+}
+
+[data-theme="dark"] .motivation-banner.info {
+  background: linear-gradient(135deg, rgba(100, 181, 246, 0.18) 0%, rgba(66, 165, 245, 0.22) 100%);
+  border-color: rgba(100, 181, 246, 0.5);
+  color: #90caf9;
+}
+
+[data-theme="dark"] .motivation-banner.success {
+  background: linear-gradient(135deg, rgba(102, 187, 106, 0.18) 0%, rgba(76, 175, 80, 0.22) 100%);
+  border-color: rgba(102, 187, 106, 0.5);
+  color: #81c784;
+}
+
+[data-theme="dark"] .motivation-banner.warning {
+  background: linear-gradient(135deg, rgba(255, 183, 77, 0.18) 0%, rgba(255, 152, 0, 0.22) 100%);
+  border-color: rgba(255, 183, 77, 0.5);
+  color: #ffb74d;
+}
+
+[data-theme="dark"] .motivation-banner.night {
+  background: linear-gradient(135deg, rgba(149, 117, 205, 0.18) 0%, rgba(126, 87, 194, 0.22) 100%);
+  border-color: rgba(149, 117, 205, 0.5);
+  color: #b39ddb;
+}
+
+.motivation-icon {
+  font-size: 1.9rem;
+  line-height: 1;
+  flex-shrink: 0;
+  animation: motivationIconPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes motivationIconPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
+
+.motivation-text {
+  flex: 1;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+  .motivation-banner {
+    padding: 0.85rem 1rem;
+    gap: 0.7rem;
+  }
+
+  .motivation-icon {
+    font-size: 1.6rem;
+  }
+
+  .motivation-text {
+    font-size: 0.88rem;
+  }
+}
