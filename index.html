@@ -396,6 +396,71 @@
       </div>
     </section>
 
+    <section id="page-achievements" class="page" aria-label="دستاوردها">
+      <div class="page-header">
+        <button id="btn-back-from-achievements" class="btn btn-back" aria-label="بازگشت به صفحه اصلی">
+          <span class="icon" data-icon="arrow-left"></span>
+          بازگشت
+        </button>
+        <h2 class="page-title">
+          <span class="icon" data-icon="achievements"></span>
+          دستاوردها
+        </h2>
+      </div>
+
+      <div class="streak-bar-large">
+        <div class="streak-bar-large-header">
+          <div class="streak-bar-large-fire">
+            <div id="streak-fire-icon-large"></div>
+          </div>
+          <div class="streak-bar-large-info">
+            <div class="streak-bar-large-main">
+              <span id="streak-current-large" class="streak-bar-large-number">0</span>
+              <span class="streak-bar-large-label">روز پشت‌سرهم</span>
+            </div>
+            <div class="streak-bar-large-subtitle">به تلاش کردن ادامه بده! 🔥</div>
+          </div>
+        </div>
+
+        <div class="streak-bar-large-grid">
+          <div class="streak-bar-large-item">
+            <span class="streak-bar-large-item-label">🏅 رکورد</span>
+            <span id="streak-record-large" class="streak-bar-large-item-value">0 روز</span>
+          </div>
+          <div class="streak-bar-large-item">
+            <span class="streak-bar-large-item-label">⭐ سطح</span>
+            <span id="streak-level-large" class="streak-bar-large-item-value">1: تازه‌کار</span>
+          </div>
+          <div class="streak-bar-large-item">
+            <span class="streak-bar-large-item-label">✨ امتیاز</span>
+            <span id="streak-xp-large" class="streak-bar-large-item-value">0 / 100</span>
+          </div>
+          <div class="streak-bar-large-item">
+            <span class="streak-bar-large-item-label">🏆 نشان‌ها</span>
+            <span id="streak-badges-large" class="streak-bar-large-item-value">0 / 10</span>
+          </div>
+        </div>
+
+        <div class="streak-bar-large-xp-bar">
+          <div id="streak-xp-fill-large" class="streak-bar-large-xp-fill"></div>
+        </div>
+      </div>
+
+      <div class="achievements-summary">
+        <div class="achievements-summary-icon">🏆</div>
+        <div class="achievements-summary-info">
+          <div class="achievements-summary-count">
+            <span id="achievements-count">0</span>
+            <span class="achievements-summary-of"> از </span>
+            <span id="achievements-total">10</span>
+          </div>
+          <div class="achievements-summary-label">نشان باز شده</div>
+        </div>
+      </div>
+
+      <div id="achievements-list" class="achievements-list"></div>
+    </section>
+
     <section id="page-settings" class="page" aria-label="تنظیمات">
       <div class="page-header">
         <button id="btn-back-from-settings" class="btn btn-back" aria-label="بازگشت به صفحه اصلی">
@@ -751,6 +816,18 @@
           <button id="btn-cancel-import" class="btn btn-secondary">انصراف</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <div id="modal-celebration" class="modal modal-celebration-wrapper" role="dialog" aria-modal="true" aria-labelledby="celebration-title">
+    <div class="celebration-confetti" id="celebration-confetti"></div>
+    <div class="celebration-content">
+      <div class="celebration-title" id="celebration-title">🎉 تبریک!</div>
+      <div class="celebration-badge-icon" id="celebration-badge-icon">🏆</div>
+      <div class="celebration-badge-name" id="celebration-badge-name">—</div>
+      <div class="celebration-badge-description" id="celebration-badge-description">—</div>
+      <div class="celebration-extra" id="celebration-extra" style="display: none;">—</div>
+      <button id="btn-celebration-close" class="btn btn-primary celebration-btn">عالیه!</button>
     </div>
   </div>
 

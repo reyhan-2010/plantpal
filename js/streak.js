@@ -73,7 +73,8 @@ function initStreak() {
   }
 
   streakData = loadStreakData();
-
+  setupAchievementsButton();
+    setupCelebrationButton();
   recalculateStreak()
     .then(function() { return recalculateXP(); })
     .then(function() { return checkBadges(); })
@@ -347,10 +348,12 @@ async function checkBadges() {
       newlyUnlocked.forEach(function(b) {
         console.log('🏆 نشان جدید:', b.icon, b.name, '—', b.description);
       });
+      showCelebrationModal(newlyUnlocked);
     }
 
     updateBadgesCountUI();
     return newlyUnlocked;
+
   } catch (error) {
     console.error('✗ خطا در بررسی نشان‌ها:', error);
     return [];
@@ -367,6 +370,11 @@ function getUnlockedBadges() {
 function updateStreakUI() {
   if (!streakData) return;
 
+  // کادر بزرگ (صفحه دستاوردها)
+  const fireIconLarge = document.getElementById('streak-fire-icon-large');
+  if (fireIconLarge && !fireIconLarge.innerHTML.trim()) {
+    fireIconLarge.innerHTML = SVG_FIRE;
+  }
   const fireIcon = document.getElementById('streak-fire-icon');
   if (fireIcon && !fireIcon.innerHTML.trim()) {
     fireIcon.innerHTML = SVG_FIRE;
@@ -423,6 +431,7 @@ function updateStreakUI() {
   updateBadgesCountUI();
 }
 
+  updateStreakUILarge();
 function updateBadgesCountUI() {
   const el = document.getElementById('streak-badges');
   if (!el || !streakData) return;
@@ -526,4 +535,228 @@ async function onActivityAdded() {
   await checkBadges();
   updateStreakUI();
   await renderHeatmap();
+}
+function setupAchievementsButton() {
+  const btn = document.getElementById('btn-open-achievements');
+  if (btn) {
+    btn.addEventListener('click', function() {
+      showAchievementsPage();
+    });
+    console.log('✓ دکمه دستاوردها متصل شد');
+  }
+
+  const backBtn = document.getElementById('btn-back-from-achievements');
+  if (backBtn) {
+    backBtn.addEventListener('click', function() {
+      showHomePage();
+    });
+  }
+}
+
+function showAchievementsPage() {
+  if (typeof showPage === 'function') {
+    showPage('page-achievements');
+  } else {
+    document.querySelectorAll('.page').forEach(function(p) {
+      p.classList.remove('active');
+    });
+    const target = document.getElementById('page-achievements');
+    if (target) {
+      target.classList.add('active');
+      window.scrollTo(0, 0);
+    }
+  }
+  renderAchievements();
+  updateStreakUILarge();
+}
+
+function renderAchievements() {
+  const container = document.getElementById('achievements-list');
+  const countEl = document.getElementById('achievements-count');
+  const totalEl = document.getElementById('achievements-total');
+
+  if (!container || !streakData) return;
+
+  const unlockedCount = streakData.unlockedBadges.length;
+  if (countEl) countEl.textContent = String(unlockedCount);
+  if (totalEl) totalEl.textContent = String(BADGES.length);
+
+  container.innerHTML = '';
+
+  BADGES.forEach(function(badge) {
+    const unlocked = streakData.unlockedBadges.indexOf(badge.id) !== -1;
+
+    const card = document.createElement('div');
+    card.className = 'badge-card ' + (unlocked ? 'unlocked' : 'locked');
+
+    const iconEl = document.createElement('div');
+    iconEl.className = 'badge-icon';
+    iconEl.textContent = badge.icon;
+
+    const infoEl = document.createElement('div');
+    infoEl.className = 'badge-info';
+
+    const nameEl = document.createElement('div');
+    nameEl.className = 'badge-name';
+    nameEl.textContent = badge.name;
+
+    const descEl = document.createElement('div');
+    descEl.className = 'badge-description';
+    descEl.textContent = badge.description;
+
+    infoEl.appendChild(nameEl);
+    infoEl.appendChild(descEl);
+
+    const statusEl = document.createElement('div');
+    statusEl.className = 'badge-status';
+    statusEl.textContent = unlocked ? '✅' : '🔒';
+
+    card.appendChild(iconEl);
+    card.appendChild(infoEl);
+    card.appendChild(statusEl);
+
+    container.appendChild(card);
+  });
+
+  console.log('✓ دستاوردها نمایش داده شد. باز شده:', unlockedCount, 'از', BADGES.length);
+}
+function updateStreakUILarge() {
+  if (!streakData) return;
+
+  const currentLevel = getLevelFromXP(streakData.totalXP);
+  const nextLevel = getNextLevel(currentLevel.level);
+
+  const currentEl = document.getElementById('streak-current-large');
+  const recordEl = document.getElementById('streak-record-large');
+  const levelEl = document.getElementById('streak-level-large');
+  const xpEl = document.getElementById('streak-xp-large');
+  const badgesEl = document.getElementById('streak-badges-large');
+  const xpFillEl = document.getElementById('streak-xp-fill-large');
+  const fireEl = document.querySelector('.streak-bar-large-fire');
+
+  if (currentEl) currentEl.textContent = String(streakData.currentStreak);
+  if (recordEl) recordEl.textContent = streakData.longestStreak + ' روز';
+
+  if (levelEl) {
+    if (nextLevel) {
+      levelEl.textContent = currentLevel.level + ': ' + currentLevel.name;
+    } else {
+      levelEl.textContent = currentLevel.level + ': ' + currentLevel.name + ' 🏆';
+    }
+  }
+
+  if (xpEl) {
+    if (nextLevel) {
+      xpEl.textContent = streakData.totalXP + ' / ' + nextLevel.minXP;
+    } else {
+      xpEl.textContent = String(streakData.totalXP);
+    }
+  }
+
+  if (badgesEl) {
+    badgesEl.textContent = streakData.unlockedBadges.length + ' / ' + BADGES.length;
+  }
+
+  if (xpFillEl) {
+    if (nextLevel) {
+      const xpInLevel = streakData.totalXP - currentLevel.minXP;
+      const xpNeeded = nextLevel.minXP - currentLevel.minXP;
+      const percent = Math.min(100, (xpInLevel / xpNeeded) * 100);
+      xpFillEl.style.width = percent + '%';
+    } else {
+      xpFillEl.style.width = '100%';
+    }
+  }
+
+  if (fireEl) {
+    if (streakData.currentStreak > 0) {
+      fireEl.classList.add('active');
+    } else {
+      fireEl.classList.remove('active');
+    }
+  }
+}
+function showCelebrationModal(badges) {
+  if (!badges || badges.length === 0) return;
+
+  const modal = document.getElementById('modal-celebration');
+  if (!modal) return;
+
+  const firstBadge = badges[0];
+  const remaining = badges.length - 1;
+
+  const iconEl = document.getElementById('celebration-badge-icon');
+  const nameEl = document.getElementById('celebration-badge-name');
+  const descEl = document.getElementById('celebration-badge-description');
+  const extraEl = document.getElementById('celebration-extra');
+
+  if (iconEl) iconEl.textContent = firstBadge.icon;
+  if (nameEl) nameEl.textContent = firstBadge.name;
+  if (descEl) descEl.textContent = firstBadge.description;
+
+  if (remaining > 0 && extraEl) {
+    extraEl.textContent = 'و ' + remaining + ' نشان دیگر هم باز شد! 🎊';
+    extraEl.style.display = 'block';
+  } else if (extraEl) {
+    extraEl.style.display = 'none';
+  }
+
+  generateConfetti();
+
+  modal.classList.add('active');
+  console.log('🎉 Modal جشن باز شد برای:', firstBadge.name);
+}
+
+function closeCelebrationModal() {
+  const modal = document.getElementById('modal-celebration');
+  if (modal) {
+    modal.classList.remove('active');
+  }
+  const confettiContainer = document.getElementById('celebration-confetti');
+  if (confettiContainer) {
+    confettiContainer.innerHTML = '';
+  }
+}
+
+function generateConfetti() {
+  const container = document.getElementById('celebration-confetti');
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  const colors = ['#ff6f00', '#ffc107', '#4caf50', '#2196f3', '#e91e63', '#9c27b0', '#00bcd4', '#ff5722'];
+  const totalConfetti = 50;
+
+  for (let i = 0; i < totalConfetti; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const left = Math.random() * 100;
+    const delay = Math.random() * 1.5;
+    const duration = 2 + Math.random() * 2;
+    const size = 6 + Math.random() * 8;
+
+    piece.style.left = left + '%';
+    piece.style.backgroundColor = color;
+    piece.style.width = size + 'px';
+    piece.style.height = size + 'px';
+    piece.style.animationDelay = delay + 's';
+    piece.style.animationDuration = duration + 's';
+
+    if (Math.random() > 0.5) {
+      piece.style.borderRadius = '50%';
+    }
+
+    container.appendChild(piece);
+  }
+}
+
+function setupCelebrationButton() {
+  const btn = document.getElementById('btn-celebration-close');
+  if (btn) {
+    btn.addEventListener('click', function() {
+      closeCelebrationModal();
+    });
+  }
 }
