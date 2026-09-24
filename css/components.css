@@ -7,12 +7,18 @@
 
 .page.active {
   display: block;
-  animation: fadeIn 0.3s ease;
+  animation: pageFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* هدر صفحه */
@@ -30,28 +36,54 @@
   font-size: 1.5rem;
   font-weight: 700;
   margin: 0;
+  letter-spacing: -0.3px;
 }
 
-/* دکمه‌ها */
+/* ============================================
+   دکمه‌ها
+   ============================================ */
+
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.65rem 1.3rem;
+  padding: 0.7rem 1.4rem;
   border: none;
   border-radius: var(--radius-sm);
   font-family: inherit;
   font-size: 0.95rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
   text-decoration: none;
-  gap: 0.4rem;
+  gap: 0.45rem;
+  position: relative;
+  overflow: hidden;
+  letter-spacing: 0.2px;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.5s ease, height 0.5s ease;
+}
+
+.btn:active::before {
+  width: 300px;
+  height: 300px;
+  transition: width 0s, height 0s;
 }
 
 .btn:focus-visible {
   outline: 3px solid var(--color-primary);
-  outline-offset: 2px;
+  outline-offset: 3px;
 }
 
 .btn:hover {
@@ -59,65 +91,102 @@
   box-shadow: var(--shadow-md);
 }
 
-.btn:active { transform: translateY(0); }
+.btn:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
 
 .btn-primary {
-  background: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
   color: white;
+  box-shadow:
+    0 2px 4px rgba(46, 125, 50, 0.2),
+    0 4px 12px rgba(46, 125, 50, 0.15);
 }
 
-.btn-primary:hover { background: var(--color-primary-dark); }
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--color-primary-dark) 0%, #14501a 100%);
+  box-shadow:
+    0 4px 8px rgba(46, 125, 50, 0.25),
+    0 12px 24px rgba(46, 125, 50, 0.2);
+}
 
 .btn-secondary {
-  background: var(--color-border);
+  background: var(--color-card);
   color: var(--color-text);
+  border: 2px solid var(--color-border);
 }
 
-.btn-secondary:hover { background: var(--color-text-muted); }
+.btn-secondary:hover {
+  border-color: var(--color-primary-light);
+  color: var(--color-primary);
+  background: var(--color-primary-bg);
+}
 
 .btn-danger {
-  background: var(--color-danger);
+  background: linear-gradient(135deg, var(--color-danger) 0%, var(--color-danger-dark) 100%);
   color: white;
+  box-shadow:
+    0 2px 4px rgba(229, 57, 53, 0.2),
+    0 4px 12px rgba(229, 57, 53, 0.15);
 }
 
-.btn-danger:hover { background: var(--color-danger-dark); }
+.btn-danger:hover {
+  box-shadow:
+    0 4px 8px rgba(229, 57, 53, 0.25),
+    0 12px 24px rgba(229, 57, 53, 0.2);
+}
 
 .btn-back {
   background: transparent;
   color: var(--color-primary);
-  padding: 0.4rem 0.8rem;
+  padding: 0.45rem 0.9rem;
   font-size: 1rem;
+  font-weight: 500;
 }
 
 .btn-back:hover {
   background: var(--color-primary-bg);
   box-shadow: none;
-  transform: none;
+  transform: translateX(-4px);
 }
 
-/* فرم‌ها */
+.btn-back .icon {
+  transition: transform 0.3s ease;
+}
+
+.btn-back:hover .icon {
+  transform: translateX(-2px);
+}
+
+/* ============================================
+   فرم‌ها
+   ============================================ */
+
 .plant-form {
   background: var(--color-card);
-  padding: 1.5rem;
-  border-radius: var(--radius-md);
+  padding: 1.75rem;
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   transition: background 0.3s ease;
+  border: 1px solid var(--color-border-light);
 }
 
-.form-group { margin-bottom: 1.2rem; }
+.form-group { margin-bottom: 1.3rem; }
 
 .form-label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.55rem;
   color: var(--color-primary);
   font-weight: 700;
   font-size: 0.95rem;
+  letter-spacing: 0.2px;
 }
 
 .form-input,
 .form-textarea {
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.8rem 0.95rem;
   border: 2px solid var(--color-border);
   border-radius: var(--radius-sm);
   font-family: inherit;
@@ -128,11 +197,17 @@
   color: var(--color-text);
 }
 
+.form-input:hover,
+.form-textarea:hover {
+  border-color: var(--color-primary-light);
+}
+
 .form-input:focus,
 .form-textarea:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+  box-shadow: var(--shadow-glow);
+  background: var(--color-card);
 }
 
 .form-textarea {
@@ -146,65 +221,102 @@
   margin-top: 1.5rem;
 }
 
-/* فهرست گیاهان */
+/* ============================================
+   فهرست گیاهان
+   ============================================ */
+
 .plants-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1.2rem;
+  gap: 1.3rem;
 }
 
 .plant-card {
   background: var(--color-card);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-md);
   cursor: pointer;
   transition: var(--transition);
+  border: 1px solid var(--color-border-light);
+  position: relative;
+}
+
+.plant-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 0 0 0 var(--color-primary);
+  transition: box-shadow 0.3s ease;
+  pointer-events: none;
 }
 
 .plant-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-6px) scale(1.01);
   box-shadow: var(--shadow-lg);
+  border-color: var(--color-primary-soft);
+}
+
+.plant-card:hover::after {
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
+}
+
+.plant-card:active {
+  transform: translateY(-2px) scale(0.99);
 }
 
 .plant-card:focus-visible {
   outline: 3px solid var(--color-primary);
-  outline-offset: 2px;
+  outline-offset: 3px;
 }
 
 .plant-card-image {
   width: 100%;
-  height: 160px;
+  height: 170px;
   object-fit: cover;
   background: var(--color-primary-bg);
+  transition: transform 0.5s ease;
 }
 
-.plant-card-content { padding: 1rem; }
+.plant-card:hover .plant-card-image {
+  transform: scale(1.05);
+}
+
+.plant-card-content { padding: 1.1rem; }
 
 .plant-card-name {
   color: var(--color-primary);
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 700;
   margin: 0 0 0.4rem 0;
+  letter-spacing: -0.2px;
 }
 
 .plant-card-location {
   color: var(--color-text-light);
   font-size: 0.9rem;
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 
-/* صفحه جزئیات */
+/* ============================================
+   صفحه جزئیات
+   ============================================ */
+
 .plant-details {
   display: flex;
   gap: 1.5rem;
   background: var(--color-card);
-  padding: 1.5rem;
-  border-radius: var(--radius-md);
+  padding: 1.75rem;
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   margin-bottom: 1.5rem;
   flex-wrap: wrap;
   transition: background 0.3s ease;
+  border: 1px solid var(--color-border-light);
 }
 
 .plant-details-image { flex: 0 0 200px; }
@@ -215,6 +327,7 @@
   object-fit: cover;
   border-radius: var(--radius-md);
   background: var(--color-primary-bg);
+  box-shadow: var(--shadow-sm);
 }
 
 .plant-details-info {
@@ -224,9 +337,18 @@
 
 .plant-info-row {
   display: flex;
-  padding: 0.7rem 0;
+  padding: 0.75rem 0;
   border-bottom: 1px solid var(--color-border-light);
   align-items: flex-start;
+  transition: var(--transition);
+}
+
+.plant-info-row:hover {
+  background: var(--color-border-light);
+  margin: 0 -0.5rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  border-radius: var(--radius-sm);
 }
 
 .plant-info-row:last-child { border-bottom: none; }
@@ -249,13 +371,17 @@
   margin-bottom: 1.5rem;
 }
 
-/* تاریخچه فعالیت‌ها */
+/* ============================================
+   تاریخچه فعالیت‌ها
+   ============================================ */
+
 .care-history {
   background: var(--color-card);
-  padding: 1.5rem;
-  border-radius: var(--radius-md);
+  padding: 1.75rem;
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   transition: background 0.3s ease;
+  border: 1px solid var(--color-border-light);
 }
 
 .care-history-title {
@@ -271,8 +397,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.8rem;
+  padding: 0.85rem 0.8rem;
   border-bottom: 1px solid var(--color-border-light);
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+
+.care-log-item:hover {
+  background: var(--color-border-light);
 }
 
 .care-log-item:last-child { border-bottom: none; }
@@ -306,31 +438,43 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
   transition: var(--transition);
   flex-shrink: 0;
 }
 
 .care-log-delete:hover {
   background: var(--color-danger-bg);
-  transform: scale(1.1);
+  transform: scale(1.15) rotate(90deg);
 }
 
-/* حالت خالی */
+/* ============================================
+   حالت خالی
+   ============================================ */
+
 .empty-state {
   text-align: center;
-  padding: 3rem 1rem;
+  padding: 3rem 1.5rem;
   color: var(--color-text-light);
   background: var(--color-card);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   border: 2px dashed var(--color-border);
-  transition: background 0.3s ease;
+  transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 .empty-state p { margin: 0.5rem 0; }
 
-/* Modal */
+.empty-state p:first-child {
+  font-size: 1.05rem;
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+/* ============================================
+   Modal
+   ============================================ */
+
 .modal {
   display: none;
   position: fixed;
@@ -338,17 +482,23 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--color-overlay);
   z-index: 1000;
   justify-content: center;
   align-items: center;
   padding: 1rem;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .modal.active {
   display: flex;
-  animation: fadeIn 0.2s ease;
+  animation: modalBackdropIn 0.25s ease;
+}
+
+@keyframes modalBackdropIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .modal-content {
@@ -359,20 +509,27 @@
   max-width: 450px;
   max-height: 90vh;
   overflow-y: auto;
-  animation: modalSlideIn 0.3s ease;
+  animation: modalSlideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   color: var(--color-text);
+  border: 1px solid var(--color-border-light);
 }
 
 @keyframes modalSlideIn {
-  from { opacity: 0; transform: translateY(-30px) scale(0.95); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(-40px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.2rem 1.5rem;
+  padding: 1.25rem 1.5rem;
   border-bottom: 1px solid var(--color-border-light);
 }
 
@@ -381,6 +538,7 @@
   font-size: 1.2rem;
   font-weight: 700;
   margin: 0;
+  letter-spacing: -0.2px;
 }
 
 .modal-close {
@@ -390,31 +548,42 @@
   color: var(--color-text-muted);
   cursor: pointer;
   padding: 0;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
   transition: var(--transition);
 }
 
 .modal-close:hover {
-  background: var(--color-border-light);
-  color: var(--color-text);
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+  transform: rotate(90deg);
 }
 
 .modal-form { padding: 1.5rem; }
 
-/* کارهای امروز */
+/* ============================================
+   کارهای امروز
+   ============================================ */
+
 .today-tasks {
-  background: var(--color-warning-bg);
+  background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
   border: 2px solid var(--color-warning);
-  border-radius: var(--radius-md);
-  padding: 1.2rem;
+  border-radius: var(--radius-lg);
+  padding: 1.3rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 2px 8px rgba(251, 140, 0, 0.15);
+  box-shadow:
+    0 4px 8px rgba(251, 140, 0, 0.1),
+    0 8px 24px rgba(251, 140, 0, 0.08);
   transition: background 0.3s ease;
+}
+
+[data-theme="dark"] .today-tasks {
+  background: linear-gradient(135deg, rgba(255, 183, 77, 0.15) 0%, rgba(230, 81, 0, 0.2) 100%);
+  border-color: rgba(255, 183, 77, 0.5);
 }
 
 .today-tasks-title {
@@ -435,7 +604,7 @@
 
 .today-task-item {
   background: var(--color-card);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   padding: 1rem;
   display: flex;
   justify-content: space-between;
@@ -444,11 +613,13 @@
   flex-wrap: wrap;
   box-shadow: var(--shadow-sm);
   transition: var(--transition);
+  border: 1px solid var(--color-border-light);
 }
 
 .today-task-item:hover {
   box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  border-color: var(--color-warning);
 }
 
 .today-task-info {
@@ -465,9 +636,13 @@
   font-weight: 700;
   margin: 0;
   cursor: pointer;
+  transition: var(--transition);
 }
 
-.today-task-name:hover { text-decoration: underline; }
+.today-task-name:hover {
+  text-decoration: underline;
+  color: var(--color-primary-dark);
+}
 
 .today-task-schedule {
   color: var(--color-text-light);
@@ -477,6 +652,7 @@
 .today-task-status {
   color: var(--color-warning-dark);
   font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .today-task-actions {
@@ -484,20 +660,23 @@
   gap: 0.5rem;
 }
 
-/* بخش گیاهان نیازمند توجه */
+/* ============================================
+   گیاهان نیازمند توجه
+   ============================================ */
+
 .attention-section {
-  background: rgba(229, 57, 53, 0.06);
-  border: 2px solid rgba(229, 57, 53, 0.3);
-  border-radius: var(--radius-md);
-  padding: 1.2rem;
+  background: linear-gradient(135deg, rgba(229, 57, 53, 0.08) 0%, rgba(198, 40, 40, 0.12) 100%);
+  border: 2px solid rgba(229, 57, 53, 0.35);
+  border-radius: var(--radius-lg);
+  padding: 1.3rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 2px 8px rgba(229, 57, 53, 0.08);
+  box-shadow: 0 4px 16px rgba(229, 57, 53, 0.08);
   transition: background 0.3s ease;
 }
 
 [data-theme="dark"] .attention-section {
-  background: rgba(229, 57, 53, 0.12);
-  border-color: rgba(229, 57, 53, 0.45);
+  background: linear-gradient(135deg, rgba(229, 57, 53, 0.15) 0%, rgba(198, 40, 40, 0.2) 100%);
+  border-color: rgba(229, 57, 53, 0.5);
 }
 
 .attention-section-title {
@@ -522,29 +701,32 @@
 
 .attention-item {
   background: var(--color-card);
-  border-radius: var(--radius-sm);
-  padding: 0.9rem 1rem;
+  border-radius: var(--radius-md);
+  padding: 0.95rem 1.1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
   box-shadow: var(--shadow-sm);
-  border-right: 4px solid #fb8c00;
+  border-right: 4px solid var(--color-warning);
   transition: var(--transition);
   cursor: pointer;
+  border-top: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-light);
+  border-left: 1px solid var(--color-border-light);
 }
 
 .attention-item:hover {
   box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
+  transform: translateX(-4px);
 }
 
 .attention-item[data-health="sick"] {
-  border-right-color: #e53935;
+  border-right-color: var(--color-danger);
 }
 
 .attention-item[data-health="warning"] {
-  border-right-color: #fb8c00;
+  border-right-color: var(--color-warning);
 }
 
 .attention-info {
@@ -584,11 +766,11 @@
 }
 
 .attention-item[data-health="sick"] .attention-status {
-  color: #e53935;
+  color: var(--color-danger);
 }
 
 .attention-item[data-health="warning"] .attention-status {
-  color: #fb8c00;
+  color: var(--color-warning);
 }
 
 [data-theme="dark"] .attention-item[data-health="sick"] .attention-status {
@@ -603,12 +785,15 @@
   flex-shrink: 0;
 }
 
-/* بخش گیاهان من */
+/* ============================================
+   بخش گیاهان من
+   ============================================ */
+
 .plants-section { margin-top: 1.5rem; }
 
 .plants-section-title {
   color: var(--color-primary);
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 700;
   margin: 0 0 1rem 0;
   display: flex;
@@ -616,14 +801,18 @@
   gap: 0.5rem;
 }
 
-/* صفحه تنظیمات */
+/* ============================================
+   صفحه تنظیمات
+   ============================================ */
+
 .settings-section {
   background: var(--color-card);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   padding: 1.5rem;
   margin-bottom: 1.5rem;
   transition: background 0.3s ease;
+  border: 1px solid var(--color-border-light);
 }
 
 .settings-section-title {
@@ -634,7 +823,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding-bottom: 0.8rem;
+  padding-bottom: 0.85rem;
   border-bottom: 2px solid var(--color-border-light);
 }
 
@@ -651,7 +840,7 @@
   padding: 1rem 1.2rem;
   background: var(--color-bg);
   border: 2px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: var(--transition);
   font-family: inherit;
@@ -664,12 +853,14 @@
 .theme-option-btn:hover {
   border-color: var(--color-primary-light);
   transform: translateX(-4px);
+  background: var(--color-card);
+  box-shadow: var(--shadow-sm);
 }
 
 .theme-option-btn.active {
   border-color: var(--color-primary);
   background: var(--color-primary-bg);
-  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+  box-shadow: var(--shadow-glow);
 }
 
 .theme-option-icon {
@@ -698,14 +889,19 @@
   color: var(--color-primary);
   font-size: 1.3rem;
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  transform: scale(0.5);
 }
 
 .theme-option-btn.active .theme-option-check {
   opacity: 1;
+  transform: scale(1);
 }
 
-/* آیکون‌ها */
+/* ============================================
+   آیکون‌ها
+   ============================================ */
+
 .icon {
   display: inline-flex;
   align-items: center;
@@ -728,10 +924,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
 }
 
-.app-title .icon { font-size: 1.6rem; }
+.app-title .icon { font-size: 1.7rem; }
 
 .btn-settings .icon { font-size: 1.3rem; }
 
@@ -745,7 +941,10 @@
 
 .modal-close .icon { font-size: 1.2rem; }
 
-/* وضعیت سلامت گیاه */
+/* ============================================
+   وضعیت سلامت گیاه
+   ============================================ */
+
 .health-options {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -757,27 +956,29 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.9rem 1rem;
+  padding: 0.95rem 1rem;
   background: var(--color-bg);
   border: 2px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-family: inherit;
   font-size: 0.95rem;
   color: var(--color-text);
   transition: var(--transition);
   text-align: center;
+  font-weight: 500;
 }
 
 .health-option:hover {
   border-color: var(--color-primary-light);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-sm);
 }
 
 .health-option.active {
   border-color: var(--color-primary);
   background: var(--color-primary-bg);
-  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+  box-shadow: var(--shadow-glow);
 }
 
 .health-option .icon { font-size: 1.3rem; }
@@ -804,9 +1005,9 @@
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  margin-top: 0.5rem;
-  padding: 0.3rem 0.6rem;
-  border-radius: var(--radius-sm);
+  margin-top: 0.6rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: var(--radius-pill);
   font-size: 0.85rem;
   font-weight: 500;
 }
@@ -818,12 +1019,15 @@
 .plant-card-health.health-warning { background: rgba(251, 140, 0, 0.15); color: #fb8c00; }
 .plant-card-health.health-sick { background: rgba(229, 57, 53, 0.15); color: #e53935; }
 
-[data-theme="dark"] .plant-card-health.health-healthy { background: rgba(102, 187, 106, 0.2); color: #81c784; }
-[data-theme="dark"] .plant-card-health.health-growing { background: rgba(100, 181, 246, 0.2); color: #90caf9; }
-[data-theme="dark"] .plant-card-health.health-warning { background: rgba(255, 183, 77, 0.2); color: #ffcc80; }
-[data-theme="dark"] .plant-card-health.health-sick { background: rgba(239, 83, 80, 0.2); color: #e57373; }
+[data-theme="dark"] .plant-card-health.health-healthy { background: rgba(102, 187, 106, 0.25); color: #81c784; }
+[data-theme="dark"] .plant-card-health.health-growing { background: rgba(100, 181, 246, 0.25); color: #90caf9; }
+[data-theme="dark"] .plant-card-health.health-warning { background: rgba(255, 183, 77, 0.25); color: #ffcc80; }
+[data-theme="dark"] .plant-card-health.health-sick { background: rgba(239, 83, 80, 0.25); color: #e57373; }
 
-/* نوار جستجو و فیلتر */
+/* ============================================
+   نوار جستجو و فیلتر
+   ============================================ */
+
 .search-filter-bar {
   display: flex;
   gap: 0.8rem;
@@ -844,13 +1048,18 @@
   color: var(--color-text-light);
   font-size: 1.1rem;
   pointer-events: none;
+  transition: color 0.3s ease;
+}
+
+.search-box:focus-within .search-icon {
+  color: var(--color-primary);
 }
 
 .search-input {
   width: 100%;
-  padding: 0.75rem 2.8rem 0.75rem 1rem;
+  padding: 0.8rem 2.8rem 0.8rem 1rem;
   border: 2px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-pill);
   font-family: inherit;
   font-size: 1rem;
   background: var(--color-card);
@@ -858,10 +1067,14 @@
   transition: var(--transition);
 }
 
+.search-input:hover {
+  border-color: var(--color-primary-light);
+}
+
 .search-input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+  box-shadow: var(--shadow-glow);
 }
 
 .btn-clear-search {
@@ -871,9 +1084,9 @@
   border: none;
   color: var(--color-text-light);
   font-size: 0.9rem;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-pill);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -882,8 +1095,9 @@
 }
 
 .btn-clear-search:hover {
-  background: var(--color-border-light);
-  color: var(--color-text);
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+  transform: rotate(90deg);
 }
 
 .btn-toggle-filters {
@@ -891,17 +1105,19 @@
   align-items: center;
   gap: 0.4rem;
   white-space: nowrap;
+  border-radius: var(--radius-pill);
 }
 
 .btn-toggle-filters .icon { font-size: 1rem; }
 
 .filters-panel {
   background: var(--color-card);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
-  padding: 1rem;
+  padding: 1.1rem;
   margin-bottom: 1rem;
-  animation: fadeIn 0.3s ease;
+  animation: pageFadeIn 0.3s ease;
+  border: 1px solid var(--color-border-light);
 }
 
 .filter-group {
@@ -923,27 +1139,35 @@
 }
 
 .filter-btn {
-  padding: 0.5rem 0.9rem;
+  padding: 0.55rem 0.95rem;
   background: var(--color-bg);
   border: 2px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-pill);
   cursor: pointer;
   font-family: inherit;
   font-size: 0.9rem;
   color: var(--color-text);
   transition: var(--transition);
   white-space: nowrap;
+  font-weight: 500;
 }
 
-.filter-btn:hover { border-color: var(--color-primary-light); }
+.filter-btn:hover {
+  border-color: var(--color-primary-light);
+  transform: translateY(-2px);
+}
 
 .filter-btn.active {
-  background: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
   color: white;
   border-color: var(--color-primary);
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);
 }
 
-/* انواع فعالیت */
+/* ============================================
+   انواع فعالیت
+   ============================================ */
+
 .care-type-options {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -955,28 +1179,30 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.3rem;
-  padding: 0.8rem 0.5rem;
+  gap: 0.35rem;
+  padding: 0.85rem 0.5rem;
   background: var(--color-bg);
   border: 2px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-family: inherit;
   font-size: 0.9rem;
   color: var(--color-text);
   transition: var(--transition);
   text-align: center;
+  font-weight: 500;
 }
 
 .care-type-option:hover {
   border-color: var(--color-primary-light);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-sm);
 }
 
 .care-type-option.active {
   border-color: var(--color-primary);
   background: var(--color-primary-bg);
-  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+  box-shadow: var(--shadow-glow);
 }
 
 .care-type-emoji {
@@ -991,7 +1217,7 @@
 }
 
 /* ============================================
-   فاصله آبیاری (نسخه زیبا و متعادل)
+   فاصله آبیاری
    ============================================ */
 
 .watering-options {
@@ -1010,7 +1236,7 @@
   min-height: 82px;
   background: var(--color-bg);
   border: 2px solid var(--color-border);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-family: 'Vazirmatn', inherit;
   color: var(--color-text);
@@ -1029,7 +1255,9 @@
 .watering-option.active {
   border-color: #1976d2;
   background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.2), 0 6px 16px rgba(25, 118, 210, 0.25);
+  box-shadow:
+    0 0 0 3px rgba(25, 118, 210, 0.2),
+    0 6px 16px rgba(25, 118, 210, 0.25);
   transform: translateY(-2px);
 }
 
@@ -1092,7 +1320,6 @@
   font-style: italic;
 }
 
-/* حالت تاریک */
 [data-theme="dark"] .watering-option:hover {
   border-color: #64b5f6;
   box-shadow: 0 8px 20px rgba(100, 181, 246, 0.2);
@@ -1101,7 +1328,6 @@
 [data-theme="dark"] .watering-option.active {
   background: linear-gradient(135deg, rgba(25, 118, 210, 0.3) 0%, rgba(100, 181, 246, 0.4) 100%);
   border-color: #64b5f6;
-  box-shadow: 0 0 0 3px rgba(100, 181, 246, 0.25), 0 6px 16px rgba(100, 181, 246, 0.25);
 }
 
 [data-theme="dark"] .watering-option.active::after {
@@ -1124,23 +1350,26 @@
 .stat-card {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
+  gap: 14px;
+  padding: 16px 18px;
   background: var(--color-card);
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
   margin-bottom: 10px;
   border-right: 4px solid var(--color-primary);
   transition: var(--transition);
+  border-top: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-light);
+  border-left: 1px solid var(--color-border-light);
 }
 
 .stat-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
 }
 
 .stat-card-icon {
-  font-size: 28px;
+  font-size: 30px;
   line-height: 1;
   flex-shrink: 0;
 }
@@ -1152,12 +1381,13 @@
 .stat-card-label {
   font-size: 13px;
   color: var(--color-text-light);
-  margin-bottom: 2px;
+  margin-bottom: 3px;
+  font-weight: 500;
 }
 
 .stat-card-value {
-  font-size: 22px;
-  font-weight: bold;
+  font-size: 24px;
+  font-weight: 700;
   color: var(--color-primary);
   line-height: 1.1;
 }
@@ -1180,118 +1410,18 @@
 .stat-card.stat-color-red { border-right-color: #e53935; }
 .stat-card.stat-color-red .stat-card-value { color: #e53935; }
 
-/* واکنش‌گرا */
-@media (max-width: 600px) {
-  .plants-list { grid-template-columns: 1fr; }
-
-  .plant-card {
-    display: flex;
-    align-items: center;
-  }
-
-  .plant-card-image {
-    width: 80px;
-    height: 80px;
-    flex-shrink: 0;
-  }
-
-  .plant-card-content { padding: 0.8rem; }
-
-  .plant-details {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-
-  .plant-details-image img {
-    width: 150px;
-    height: 150px;
-  }
-
-  .plant-info-row {
-    flex-direction: column;
-    align-items: flex-start;
-    text-align: right;
-  }
-
-  .plant-info-label {
-    min-width: auto;
-    margin-bottom: 0.2rem;
-  }
-
-  .plant-details-actions { justify-content: center; }
-
-  .today-task-item {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .today-task-actions { justify-content: flex-end; }
-
-  .attention-item {
-    padding: 0.8rem;
-  }
-
-  .attention-emoji {
-    font-size: 1.4rem;
-  }
-
-  .attention-name {
-    font-size: 1rem;
-  }
-
-  .settings-section { padding: 1rem; }
-
-  .theme-option-btn { padding: 0.8rem 1rem; }
-
-  .theme-option-icon { font-size: 1.3rem; }
-
-  .search-filter-bar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .btn-toggle-filters {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .filter-buttons {
-    justify-content: center;
-  }
-
-  .watering-options {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.6rem;
-  }
-
-  .watering-option {
-    padding: 0.85rem 0.5rem;
-    min-height: 75px;
-  }
-
-  .watering-option-num {
-    font-size: 1.5rem;
-  }
-}
-
-@media (max-width: 380px) {
-  .watering-options {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
 /* ============================================
    یادداشت‌ها
    ============================================ */
 
 .notes-section {
   background: var(--color-card);
-  padding: 1.5rem;
-  border-radius: var(--radius-md);
+  padding: 1.75rem;
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   margin-bottom: 1.5rem;
   transition: background 0.3s ease;
+  border: 1px solid var(--color-border-light);
 }
 
 .notes-title {
@@ -1310,8 +1440,8 @@
 
 .note-item {
   background: var(--color-bg);
-  border-radius: var(--radius-sm);
-  padding: 1rem;
+  border-radius: var(--radius-md);
+  padding: 1.1rem;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -1323,6 +1453,7 @@
 .note-item:hover {
   border-color: var(--color-primary-light);
   box-shadow: var(--shadow-sm);
+  transform: translateX(-3px);
 }
 
 .note-content {
@@ -1341,7 +1472,7 @@
 .note-text {
   color: var(--color-text);
   font-size: 0.95rem;
-  line-height: 1.6;
+  line-height: 1.7;
   white-space: pre-wrap;
   word-break: break-word;
 }
@@ -1358,12 +1489,12 @@
   border: none;
   cursor: pointer;
   padding: 0;
-  width: 30px;
-  height: 30px;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
   transition: var(--transition);
   font-size: 1rem;
 }
@@ -1374,7 +1505,7 @@
 
 .note-edit:hover {
   background: var(--color-primary-bg);
-  transform: scale(1.1);
+  transform: scale(1.15) rotate(-10deg);
 }
 
 .note-delete {
@@ -1384,373 +1515,21 @@
 
 .note-delete:hover {
   background: var(--color-danger-bg);
-  transform: scale(1.1);
+  transform: scale(1.15) rotate(90deg);
 }
 
-@media (max-width: 600px) {
-  .notes-section {
-    padding: 1rem;
-  }
-
-  .note-item {
-    padding: 0.8rem;
-  }
-}
-
-/* ============================================
-   صفحه گزارش‌ها
-   ============================================ */
-
-.header-actions {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-.reports-tabs {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-  background: var(--color-card);
-  padding: 0.5rem;
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-}
-
-.report-tab {
-  flex: 1;
-  padding: 0.8rem 1rem;
-  background: transparent;
-  border: 2px solid transparent;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--color-text-light);
-  transition: var(--transition);
-}
-
-.report-tab:hover {
-  background: var(--color-bg);
-  color: var(--color-text);
-}
-
-.report-tab.active {
-  background: var(--color-primary);
-  color: white;
-  border-color: var(--color-primary);
-}
-
-.chart-container {
-  background: var(--color-card);
-  padding: 1.5rem;
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
-  margin-bottom: 1.5rem;
-  min-height: 400px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.chart-container canvas {
-  max-width: 100%;
-  max-height: 500px;
-}
-
-.stats-section {
-  background: var(--color-card);
-  padding: 1.5rem;
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
-}
-
-.stats-title {
-  color: var(--color-primary);
-  font-size: 1.2rem;
-  font-weight: 700;
-  margin: 0 0 1rem 0;
-  padding-bottom: 0.8rem;
-  border-bottom: 2px solid var(--color-border-light);
-}
-
-.stats-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-.stat-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.7rem 0;
-  border-bottom: 1px solid var(--color-border-light);
-}
-
-.stat-item:last-child {
-  border-bottom: none;
-}
-
-.stat-label {
-  font-weight: 700;
-  color: var(--color-text);
-}
-
-.stat-value {
-  font-weight: 700;
-  color: var(--color-primary);
-  font-size: 1.05rem;
-}
-
-@media (max-width: 600px) {
-  .reports-tabs {
-    flex-direction: column;
-  }
-
-  .chart-container {
-    padding: 1rem;
-    min-height: 300px;
-  }
-
-  .stat-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.3rem;
-  }
-}
-/* ============================================
-   پشتیبان‌گیری و بازیابی
-   ============================================ */
-
-.backup-description {
-  margin: 0 0 1rem 0;
-  color: var(--color-text);
-  font-size: 0.95rem;
-  line-height: 1.6;
-}
-
-.backup-stats {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  padding: 1rem;
-  background: var(--color-bg);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border-light);
-  margin-bottom: 1rem;
-}
-
-.backup-stat-item {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 0.95rem;
-}
-
-.backup-stat-icon {
-  font-size: 1.2rem;
-  line-height: 1;
-  flex-shrink: 0;
-}
-
-.backup-stat-label {
-  color: var(--color-text-light);
-  font-weight: 500;
-}
-
-.backup-stat-value {
-  color: var(--color-primary);
-  font-weight: 700;
-  margin-right: auto;
-  font-size: 1.05rem;
-}
-
-.backup-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
-}
-
-.backup-actions .btn {
-  width: 100%;
-  justify-content: center;
-  padding: 0.9rem 1rem;
-  font-size: 1rem;
-}
-
-.backup-actions .btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.backup-warning {
-  margin: 1rem 0 0 0;
-  padding: 0.8rem;
-  background: rgba(229, 57, 53, 0.08);
-  border-right: 4px solid #e53935;
-  border-radius: var(--radius-sm);
-  font-size: 0.85rem;
-  color: #c62828;
-  line-height: 1.5;
-}
-
-[data-theme="dark"] .backup-warning {
-  background: rgba(229, 57, 53, 0.15);
-  color: #ef9a9a;
-}
-
-/* Modal Export */
-.export-description {
-  margin: 0 0 1rem 0;
-  color: var(--color-text);
-  line-height: 1.6;
-}
-
-.checkbox-option {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  padding: 0.9rem 1rem;
-  background: var(--color-bg);
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: var(--transition);
-  user-select: none;
-}
-
-.checkbox-option:hover {
-  border-color: var(--color-primary-light);
-}
-
-.checkbox-option input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-  accent-color: var(--color-primary);
-  flex-shrink: 0;
-}
-
-.checkbox-label {
-  font-weight: 600;
-  color: var(--color-text);
-  font-size: 1rem;
-}
-
-.checkbox-hint {
-  margin: 0.6rem 0 0 0;
-  font-size: 0.85rem;
-  color: var(--color-text-light);
-  line-height: 1.5;
-  font-style: italic;
-}
-
-@media (max-width: 600px) {
-  .backup-stat-item {
-    font-size: 0.9rem;
-  }
-
-  .backup-stat-icon {
-    font-size: 1.1rem;
-  }
-
-  .backup-actions .btn {
-    padding: 0.8rem 0.9rem;
-    font-size: 0.95rem;
-  }
-}
-/* ============================================
-   Modal بازیابی از فایل (Import)
-   ============================================ */
-
-.import-warning {
-  padding: 1rem;
-  background: rgba(229, 57, 53, 0.1);
-  border: 2px solid #e53935;
-  border-radius: var(--radius-sm);
-  color: #c62828;
-  font-size: 0.9rem;
-  line-height: 1.7;
-  margin-bottom: 1rem;
-}
-
-.import-warning strong {
-  color: #b71c1c;
-  font-weight: 700;
-}
-
-[data-theme="dark"] .import-warning {
-  background: rgba(229, 57, 53, 0.18);
-  border-color: #ef5350;
-  color: #ef9a9a;
-}
-
-[data-theme="dark"] .import-warning strong {
-  color: #ff8a80;
-}
-
-.import-file-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 1rem;
-  background: var(--color-bg);
-  border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-sm);
-  margin-bottom: 1rem;
-}
-
-.import-file-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.8rem;
-  font-size: 0.9rem;
-}
-
-.import-file-label {
-  color: var(--color-text-light);
-  font-weight: 500;
-}
-
-.import-file-value {
-  color: var(--color-text);
-  font-weight: 700;
-  direction: ltr;
-  text-align: left;
-  word-break: break-all;
-  max-width: 60%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-@media (max-width: 600px) {
-  .import-file-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.2rem;
-  }
-
-  .import-file-value {
-    max-width: 100%;
-    white-space: normal;
-  }
-}
 /* ============================================
    گالری رشد گیاه
    ============================================ */
 
 .gallery-section {
   background: var(--color-card);
-  padding: 1.5rem;
-  border-radius: var(--radius-md);
+  padding: 1.75rem;
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   margin-bottom: 1.5rem;
   transition: background 0.3s ease;
+  border: 1px solid var(--color-border-light);
 }
 
 .gallery-header {
@@ -1777,9 +1556,9 @@
 
 .gallery-item {
   position: relative;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   overflow: hidden;
-  cursor: pointer;
+  cursor: zoom-in;
   aspect-ratio: 1 / 1;
   background: var(--color-bg);
   box-shadow: var(--shadow-sm);
@@ -1787,8 +1566,12 @@
 }
 
 .gallery-item:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: var(--shadow-lg);
+}
+
+.gallery-item:active {
+  transform: scale(0.98);
 }
 
 .gallery-thumb {
@@ -1796,6 +1579,11 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  transition: transform 0.5s ease;
+}
+
+.gallery-item:hover .gallery-thumb {
+  transform: scale(1.08);
 }
 
 .gallery-overlay {
@@ -1803,11 +1591,11 @@
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 0.5rem 0.6rem;
+  padding: 0.6rem 0.7rem;
   background: linear-gradient(
     to top,
-    rgba(0, 0, 0, 0.75) 0%,
-    rgba(0, 0, 0, 0.4) 60%,
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(0, 0, 0, 0.45) 60%,
     transparent 100%
   );
   color: white;
@@ -1820,36 +1608,18 @@
 .gallery-date {
   font-size: 0.8rem;
   font-weight: 700;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
 }
 
 .gallery-note {
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.95);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
 }
 
-@media (max-width: 600px) {
-  .gallery-section {
-    padding: 1rem;
-  }
-
-  .gallery-list {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.6rem;
-  }
-
-  .gallery-date {
-    font-size: 0.75rem;
-  }
-
-  .gallery-note {
-    font-size: 0.7rem;
-  }
-}
 /* ============================================
    Modal نمایش بزرگ عکس
    ============================================ */
@@ -1894,9 +1664,9 @@
   display: flex;
   gap: 0.5rem;
   align-items: flex-start;
-  padding: 0.6rem 0.8rem;
+  padding: 0.7rem 0.9rem;
   background: var(--color-bg);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   border-right: 3px solid var(--color-primary);
 }
 
@@ -1926,60 +1696,345 @@
   justify-content: center;
 }
 
-.gallery-item {
-  cursor: zoom-in;
+/* ============================================
+   گزارش‌ها
+   ============================================ */
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
 }
 
-.gallery-item:active {
-  transform: scale(0.98);
+.reports-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  background: var(--color-card);
+  padding: 0.55rem;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border-light);
 }
 
-@media (max-width: 600px) {
-  .photo-view-body {
-    padding: 1rem;
-  }
-
-  .photo-view-image-wrapper {
-    max-height: 50vh;
-  }
-
-  .photo-view-image-wrapper img {
-    max-height: 50vh;
-  }
-
-  .photo-view-actions {
-    flex-direction: column;
-    padding: 1rem;
-  }
-
-  .photo-view-row {
-    flex-direction: column;
-    gap: 0.3rem;
-  }
+.report-tab {
+  flex: 1;
+  padding: 0.85rem 1rem;
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text-light);
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
 }
+
+.report-tab:hover {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.report-tab.active {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: white;
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);
+}
+
+.report-tab-icon {
+  font-size: 1.25rem;
+}
+
+.chart-container {
+  background: var(--color-card);
+  padding: 1.75rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  margin-bottom: 1.5rem;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border-light);
+}
+
+.chart-container canvas {
+  max-width: 100%;
+  max-height: 500px;
+}
+
+.stats-section {
+  background: var(--color-card);
+  padding: 1.75rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border-light);
+}
+
+.stats-title {
+  color: var(--color-primary);
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.85rem;
+  border-bottom: 2px solid var(--color-border-light);
+}
+
+.stats-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.stat-item:last-child {
+  border-bottom: none;
+}
+
+.stat-label {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.stat-value {
+  font-weight: 700;
+  color: var(--color-primary);
+  font-size: 1.05rem;
+}
+
+/* ============================================
+   پشتیبان‌گیری و بازیابی
+   ============================================ */
+
+.backup-description {
+  margin: 0 0 1rem 0;
+  color: var(--color-text);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.backup-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1.1rem;
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-light);
+  margin-bottom: 1rem;
+}
+
+.backup-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.95rem;
+}
+
+.backup-stat-icon {
+  font-size: 1.2rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.backup-stat-label {
+  color: var(--color-text-light);
+  font-weight: 500;
+}
+
+.backup-stat-value {
+  color: var(--color-primary);
+  font-weight: 700;
+  margin-right: auto;
+  font-size: 1.05rem;
+}
+
+.backup-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.backup-actions .btn {
+  width: 100%;
+  justify-content: center;
+  padding: 0.95rem 1rem;
+  font-size: 1rem;
+}
+
+.backup-actions .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.backup-warning {
+  margin: 1rem 0 0 0;
+  padding: 0.85rem;
+  background: linear-gradient(135deg, rgba(229, 57, 53, 0.08) 0%, rgba(198, 40, 40, 0.12) 100%);
+  border-right: 4px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  color: var(--color-danger-dark);
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+[data-theme="dark"] .backup-warning {
+  background: rgba(229, 57, 53, 0.15);
+  color: #ef9a9a;
+}
+
+.export-description {
+  margin: 0 0 1rem 0;
+  color: var(--color-text);
+  line-height: 1.6;
+}
+
+.checkbox-option {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.95rem 1rem;
+  background: var(--color-bg);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition);
+  user-select: none;
+}
+
+.checkbox-option:hover {
+  border-color: var(--color-primary-light);
+  background: var(--color-card);
+}
+
+.checkbox-option input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  accent-color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.checkbox-label {
+  font-weight: 600;
+  color: var(--color-text);
+  font-size: 1rem;
+}
+
+.checkbox-hint {
+  margin: 0.6rem 0 0 0;
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+  line-height: 1.5;
+  font-style: italic;
+}
+
+/* Modal بازیابی */
+.import-warning {
+  padding: 1.1rem;
+  background: linear-gradient(135deg, rgba(229, 57, 53, 0.1) 0%, rgba(198, 40, 40, 0.15) 100%);
+  border: 2px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  color: var(--color-danger-dark);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.import-warning strong {
+  color: var(--color-danger-dark);
+  font-weight: 700;
+}
+
+[data-theme="dark"] .import-warning {
+  background: rgba(229, 57, 53, 0.2);
+  border-color: #ef5350;
+  color: #ef9a9a;
+}
+
+[data-theme="dark"] .import-warning strong {
+  color: #ff8a80;
+}
+
+.import-file-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.1rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  margin-bottom: 1rem;
+}
+
+.import-file-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 0.9rem;
+}
+
+.import-file-label {
+  color: var(--color-text-light);
+  font-weight: 500;
+}
+
+.import-file-value {
+  color: var(--color-text);
+  font-weight: 700;
+  direction: ltr;
+  text-align: left;
+  word-break: break-all;
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ============================================
    نوار Streak
    ============================================ */
 
-. {
+.streak-bar {
   background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
   border: 2px solid #ffb74d;
-  border-radius: var(--radius-md);
-  padding: 1rem 1.2rem;
+  border-radius: var(--radius-lg);
+  padding: 1.1rem 1.3rem;
   margin-bottom: 1rem;
-  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.15);
+  box-shadow:
+    0 4px 8px rgba(255, 152, 0, 0.1),
+    0 8px 24px rgba(255, 152, 0, 0.08);
   transition: var(--transition);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 [data-theme="dark"] .streak-bar {
-  background: linear-gradient(135deg, rgba(255, 152, 0, 0.18) 0%, rgba(255, 111, 0, 0.22) 100%);
-  border-color: rgba(255, 152, 0, 0.5);
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.2) 0%, rgba(255, 111, 0, 0.25) 100%);
+  border-color: rgba(255, 152, 0, 0.55);
 }
 
 .streak-bar-content {
   display: flex;
   align-items: center;
-  gap: 1rem;streak-bar
+  gap: 1rem;
   margin-bottom: 0.8rem;
 }
 
@@ -1991,12 +2046,15 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   transition: var(--transition);
+  box-shadow: 0 2px 8px rgba(255, 111, 0, 0.15);
 }
 
 [data-theme="dark"] .streak-fire {
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.3);
 }
 
 .streak-fire.active {
@@ -2010,8 +2068,14 @@
 }
 
 @keyframes firePulse {
-  0%, 100% { transform: scale(1); filter: brightness(1) drop-shadow(0 0 2px rgba(255, 111, 0, 0.4)); }
-  50% { transform: scale(1.08); filter: brightness(1.15) drop-shadow(0 0 8px rgba(255, 111, 0, 0.7)); }
+  0%, 100% {
+    transform: scale(1);
+    filter: brightness(1) drop-shadow(0 0 2px rgba(255, 111, 0, 0.4));
+  }
+  50% {
+    transform: scale(1.08);
+    filter: brightness(1.15) drop-shadow(0 0 8px rgba(255, 111, 0, 0.7));
+  }
 }
 
 .streak-info {
@@ -2029,11 +2093,12 @@
 }
 
 .streak-number {
-  font-size: 1.85rem;
+  font-size: 1.9rem;
   font-weight: 700;
   color: #e65100;
   line-height: 1;
   font-family: 'Vazirmatn', inherit;
+  text-shadow: 0 2px 8px rgba(255, 152, 0, 0.15);
 }
 
 [data-theme="dark"] .streak-number {
@@ -2070,57 +2135,36 @@
 .streak-xp-bar {
   width: 100%;
   height: 8px;
-  background: rgba(255, 255, 255, 0.55);
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: var(--radius-pill);
   overflow: hidden;
 }
 
 [data-theme="dark"] .streak-xp-bar {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.35);
 }
 
 .streak-xp-fill {
   height: 100%;
   width: 0%;
   background: linear-gradient(90deg, #ff8f00, #ffc107);
-  border-radius: 4px;
+  border-radius: var(--radius-pill);
   transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 12px rgba(255, 193, 7, 0.5);
 }
 
-@media (max-width: 600px) {
-  .streak-bar {
-    padding: 0.8rem 1rem;
-  }
-
-  .streak-fire {
-    width: 44px;
-    height: 44px;
-  }
-
-  .streak-fire-svg {
-    width: 30px;
-    height: 30px;
-  }
-
-  .streak-number {
-    font-size: 1.5rem;
-  }
-
-  .streak-meta {
-    font-size: 0.75rem;
-  }
-}
 /* ============================================
-   Heatmap فعالیت (۱۲ هفته)
+   Heatmap فعالیت
    ============================================ */
 
 .heatmap-section {
   background: var(--color-card);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
-  padding: 1.2rem;
+  padding: 1.3rem;
   margin-bottom: 1rem;
   transition: var(--transition);
+  border: 1px solid var(--color-border-light);
 }
 
 .heatmap-header {
@@ -2184,15 +2228,17 @@
 .heatmap-cell {
   width: 16px;
   height: 16px;
-  border-radius: 3px;
+  border-radius: 4px;
   background: var(--color-border-light);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  cursor: pointer;
 }
 
 .heatmap-cell:hover {
-  transform: scale(1.35);
-  box-shadow: 0 0 6px rgba(46, 125, 50, 0.5);
-  cursor: pointer;
+  transform: scale(1.4);
+  box-shadow: 0 0 8px rgba(46, 125, 50, 0.6);
+  z-index: 2;
+  position: relative;
 }
 
 .heatmap-cell.level-0 {
@@ -2209,17 +2255,23 @@
 
 .heatmap-cell.level-3 {
   background: #2e7d32;
+  box-shadow: 0 0 6px rgba(46, 125, 50, 0.3);
 }
 
 .heatmap-cell.future {
   background: transparent;
   border: 1px dashed var(--color-border-light);
   opacity: 0.4;
+  cursor: default;
 }
 
-/* حالت تاریک */
+.heatmap-cell.future:hover {
+  transform: none;
+  box-shadow: none;
+}
+
 [data-theme="dark"] .heatmap-cell.level-0 {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 [data-theme="dark"] .heatmap-cell.level-1 {
@@ -2255,7 +2307,7 @@
 .legend-cell.level-2 { background: #66bb6a; }
 .legend-cell.level-3 { background: #2e7d32; }
 
-[data-theme="dark"] .legend-cell.level-0 { background: rgba(255, 255, 255, 0.06); }
+[data-theme="dark"] .legend-cell.level-0 { background: rgba(255, 255, 255, 0.08); }
 [data-theme="dark"] .legend-cell.level-1 { background: #2e7d32; }
 [data-theme="dark"] .legend-cell.level-2 { background: #4caf50; }
 [data-theme="dark"] .legend-cell.level-3 { background: #81c784; }
@@ -2265,380 +2317,27 @@
   font-size: 0.7rem;
 }
 
-@media (max-width: 600px) {
-  .heatmap-section {
-    padding: 1rem;
-  }
-
-  .heatmap-cell {
-    width: 14px;
-    height: 14px;
-  }
-
-  .heatmap-day-labels span {
-    height: 14px;
-    line-height: 14px;
-    font-size: 0.65rem;
-  }
-
-  .heatmap-title {
-    font-size: 0.9rem;
-  }
-
-  .heatmap-total {
-    font-size: 0.75rem;
-  }
-}
 /* ============================================
-   نوار Streak
-   ============================================ */
-
-.streak-bar {
-  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
-  border: 2px solid #ffb74d;
-  border-radius: var(--radius-md);
-  padding: 1rem 1.2rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.15);
-  transition: var(--transition);
-}
-
-[data-theme="dark"] .streak-bar {
-  background: linear-gradient(135deg, rgba(255, 152, 0, 0.18) 0%, rgba(255, 111, 0, 0.22) 100%);
-  border-color: rgba(255, 152, 0, 0.5);
-}
-
-.streak-bar-content {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 0.8rem;
-}
-
-.streak-fire {
-  width: 52px;
-  height: 52px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.55);
-  transition: var(--transition);
-}
-
-[data-theme="dark"] .streak-fire {
-  background: rgba(0, 0, 0, 0.25);
-}
-
-.streak-fire.active {
-  animation: firePulse 1.6s ease-in-out infinite;
-}
-
-.streak-fire-svg {
-  width: 36px;
-  height: 36px;
-  display: block;
-}
-
-@keyframes firePulse {
-  0%, 100% { transform: scale(1); filter: brightness(1) drop-shadow(0 0 2px rgba(255, 111, 0, 0.4)); }
-  50% { transform: scale(1.08); filter: brightness(1.15) drop-shadow(0 0 8px rgba(255, 111, 0, 0.7)); }
-}
-
-.streak-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  min-width: 0;
-}
-
-.streak-main {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-}
-
-.streak-number {
-  font-size: 1.85rem;
-  font-weight: 700;
-  color: #e65100;
-  line-height: 1;
-  font-family: 'Vazirmatn', inherit;
-}
-
-[data-theme="dark"] .streak-number {
-  color: #ffb74d;
-}
-
-.streak-label {
-  font-size: 0.9rem;
-  color: #bf360c;
-  font-weight: 500;
-}
-
-[data-theme="dark"] .streak-label {
-  color: #ffcc80;
-}
-
-.streak-meta {
-  display: flex;
-  gap: 0.5rem;
-  font-size: 0.82rem;
-  color: #6d4c41;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-[data-theme="dark"] .streak-meta {
-  color: #bcaaa4;
-}
-
-.streak-divider {
-  opacity: 0.5;
-}
-
-.streak-xp-bar {
-  width: 100%;
-  height: 8px;
-  background: rgba(255, 255, 255, 0.55);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-[data-theme="dark"] .streak-xp-bar {
-  background: rgba(0, 0, 0, 0.3);
-}
-
-.streak-xp-fill {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #ff8f00, #ffc107);
-  border-radius: 4px;
-  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@media (max-width: 600px) {
-  .streak-bar {
-    padding: 0.8rem 1rem;
-  }
-
-  .streak-fire {
-    width: 44px;
-    height: 44px;
-  }
-
-  .streak-fire-svg {
-    width: 30px;
-    height: 30px;
-  }
-
-  .streak-number {
-    font-size: 1.5rem;
-  }
-
-  .streak-meta {
-    font-size: 0.75rem;
-  }
-}
-/* ============================================
-   صفحه دستاوردها
-   ============================================ */
-
-.achievements-summary {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
-  border: 2px solid #ffc107;
-  border-radius: var(--radius-md);
-  padding: 1.2rem 1.4rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.15);
-  transition: var(--transition);
-}
-
-[data-theme="dark"] .achievements-summary {
-  background: linear-gradient(135deg, rgba(255, 193, 7, 0.15) 0%, rgba(255, 152, 0, 0.2) 100%);
-  border-color: rgba(255, 193, 7, 0.5);
-}
-
-.achievements-summary-icon {
-  font-size: 2.5rem;
-  line-height: 1;
-  flex-shrink: 0;
-}
-
-.achievements-summary-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
-
-.achievements-summary-count {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #e65100;
-  font-family: 'Vazirmatn', inherit;
-}
-
-[data-theme="dark"] .achievements-summary-count {
-  color: #ffb74d;
-}
-
-.achievements-summary-of {
-  font-size: 1.1rem;
-  opacity: 0.7;
-}
-
-.achievements-summary-label {
-  font-size: 0.9rem;
-  color: #6d4c41;
-  font-weight: 500;
-}
-
-[data-theme="dark"] .achievements-summary-label {
-  color: #bcaaa4;
-}
-
-.achievements-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-}
-
-.badge-card {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.2rem;
-  background: var(--color-card);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-  border: 2px solid var(--color-border-light);
-  transition: var(--transition);
-}
-
-.badge-card.unlocked {
-  border-color: #ffc107;
-  background: linear-gradient(135deg, var(--color-card) 0%, #fffbf0 100%);
-}
-
-[data-theme="dark"] .badge-card.unlocked {
-  background: linear-gradient(135deg, var(--color-card) 0%, rgba(255, 193, 7, 0.1) 100%);
-  border-color: rgba(255, 193, 7, 0.6);
-}
-
-.badge-card.locked {
-  opacity: 0.55;
-  filter: grayscale(0.6);
-}
-
-.badge-card.locked .badge-icon {
-  filter: grayscale(1) opacity(0.5);
-}
-
-.badge-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.badge-icon {
-  font-size: 2.2rem;
-  line-height: 1;
-  flex-shrink: 0;
-  width: 50px;
-  text-align: center;
-}
-
-.badge-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  min-width: 0;
-}
-
-.badge-name {
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--color-text);
-}
-
-.badge-card.unlocked .badge-name {
-  color: #e65100;
-}
-
-[data-theme="dark"] .badge-card.unlocked .badge-name {
-  color: #ffb74d;
-}
-
-.badge-description {
-  font-size: 0.85rem;
-  color: var(--color-text-light);
-  line-height: 1.4;
-}
-
-.badge-status {
-  font-size: 1.5rem;
-  line-height: 1;
-  flex-shrink: 0;
-}
-
-@media (max-width: 600px) {
-  .achievements-summary {
-    padding: 1rem 1.1rem;
-  }
-
-  .achievements-summary-icon {
-    font-size: 2rem;
-  }
-
-  .achievements-summary-count {
-    font-size: 1.3rem;
-  }
-
-  .badge-card {
-    padding: 0.9rem 1rem;
-    gap: 0.8rem;
-  }
-
-  .badge-icon {
-    font-size: 1.8rem;
-    width: 42px;
-  }
-
-  .badge-name {
-    font-size: 0.95rem;
-  }
-
-  .badge-description {
-    font-size: 0.8rem;
-  }
-
-  .badge-status {
-    font-size: 1.3rem;
-  }
-}
-/* ============================================
-   کادر بزرگ Streak در صفحه دستاوردها
+   صفحه دستاوردها — کادر بزرگ
    ============================================ */
 
 .streak-bar-large {
   background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
   border: 3px solid #ffb74d;
-  border-radius: 18px;
-  padding: 1.5rem;
+  border-radius: var(--radius-xl);
+  padding: 1.6rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 6px 20px rgba(255, 152, 0, 0.2);
+  box-shadow:
+    0 6px 12px rgba(255, 152, 0, 0.12),
+    0 16px 40px rgba(255, 152, 0, 0.1);
   transition: var(--transition);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 [data-theme="dark"] .streak-bar-large {
-  background: linear-gradient(135deg, rgba(255, 152, 0, 0.18) 0%, rgba(255, 111, 0, 0.22) 100%);
-  border-color: rgba(255, 152, 0, 0.5);
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.2) 0%, rgba(255, 111, 0, 0.25) 100%);
+  border-color: rgba(255, 152, 0, 0.55);
 }
 
 .streak-bar-large-header {
@@ -2656,13 +2355,15 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.7);
-  box-shadow: 0 3px 12px rgba(255, 111, 0, 0.25);
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(255, 111, 0, 0.25);
   transition: var(--transition);
 }
 
 [data-theme="dark"] .streak-bar-large-fire {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.35);
 }
 
 .streak-bar-large-fire.active {
@@ -2693,6 +2394,7 @@
   color: #e65100;
   line-height: 1;
   font-family: 'Vazirmatn', inherit;
+  text-shadow: 0 3px 12px rgba(255, 152, 0, 0.2);
 }
 
 [data-theme="dark"] .streak-bar-large-number {
@@ -2727,18 +2429,27 @@
 }
 
 .streak-bar-large-item {
-  background: rgba(255, 255, 255, 0.6);
-  border-radius: 12px;
-  padding: 0.8rem 1rem;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
   transition: var(--transition);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 [data-theme="dark"] .streak-bar-large-item {
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.streak-bar-large-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(255, 152, 0, 0.15);
 }
 
 .streak-bar-large-item-label {
@@ -2765,70 +2476,212 @@
 .streak-bar-large-xp-bar {
   width: 100%;
   height: 12px;
-  background: rgba(255, 255, 255, 0.6);
-  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: var(--radius-pill);
   overflow: hidden;
 }
 
 [data-theme="dark"] .streak-bar-large-xp-bar {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.35);
 }
 
 .streak-bar-large-xp-fill {
   height: 100%;
   width: 0%;
   background: linear-gradient(90deg, #ff8f00, #ffc107);
-  border-radius: 6px;
+  border-radius: var(--radius-pill);
   transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 16px rgba(255, 193, 7, 0.6);
 }
 
-@media (max-width: 600px) {
-  .streak-bar-large {
-    padding: 1.1rem;
-  }
+/* ============================================
+   صفحه دستاوردها — کارت نشان‌ها
+   ============================================ */
 
-  .streak-bar-large-fire {
-    width: 64px;
-    height: 64px;
-  }
-
-  .streak-bar-large-fire svg {
-    width: 44px;
-    height: 44px;
-  }
-
-  .streak-bar-large-number {
-    font-size: 2.1rem;
-  }
-
-  .streak-bar-large-label {
-    font-size: 0.95rem;
-  }
-
-  .streak-bar-large-subtitle {
-    font-size: 0.8rem;
-  }
-
-  .streak-bar-large-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.6rem;
-  }
-
-  .streak-bar-large-item {
-    padding: 0.6rem 0.8rem;
-  }
-
-  .streak-bar-large-item-value {
-    font-size: 1rem;
-  }
+.achievements-summary {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+  border: 2px solid #ffc107;
+  border-radius: var(--radius-lg);
+  padding: 1.3rem 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow:
+    0 4px 8px rgba(255, 193, 7, 0.15),
+    0 12px 32px rgba(255, 193, 7, 0.1);
+  transition: var(--transition);
 }
+
+[data-theme="dark"] .achievements-summary {
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.18) 0%, rgba(255, 152, 0, 0.22) 100%);
+  border-color: rgba(255, 193, 7, 0.55);
+}
+
+.achievements-summary-icon {
+  font-size: 2.6rem;
+  line-height: 1;
+  flex-shrink: 0;
+  filter: drop-shadow(0 3px 8px rgba(255, 193, 7, 0.3));
+}
+
+.achievements-summary-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.achievements-summary-count {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #e65100;
+  font-family: 'Vazirmatn', inherit;
+}
+
+[data-theme="dark"] .achievements-summary-count {
+  color: #ffb74d;
+}
+
+.achievements-summary-of {
+  font-size: 1.1rem;
+  opacity: 0.7;
+}
+
+.achievements-summary-label {
+  font-size: 0.9rem;
+  color: #6d4c41;
+  font-weight: 500;
+}
+
+[data-theme="dark"] .achievements-summary-label {
+  color: #bcaaa4;
+}
+
+.achievements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.badge-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.1rem 1.3rem;
+  background: var(--color-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  border: 2px solid var(--color-border-light);
+  transition: var(--transition);
+}
+
+.badge-card.unlocked {
+  border-color: #ffc107;
+  background: linear-gradient(135deg, var(--color-card) 0%, #fffbf0 100%);
+  box-shadow:
+    0 2px 6px rgba(255, 193, 7, 0.15),
+    0 8px 24px rgba(255, 193, 7, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.badge-card.unlocked::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -30%;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(255, 193, 7, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+[data-theme="dark"] .badge-card.unlocked {
+  background: linear-gradient(135deg, var(--color-card) 0%, rgba(255, 193, 7, 0.12) 100%);
+  border-color: rgba(255, 193, 7, 0.6);
+}
+
+.badge-card.locked {
+  opacity: 0.55;
+  filter: grayscale(0.7);
+}
+
+.badge-card.locked .badge-icon {
+  filter: grayscale(1) opacity(0.5);
+}
+
+.badge-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.badge-card.unlocked:hover {
+  box-shadow:
+    0 4px 8px rgba(255, 193, 7, 0.2),
+    0 12px 32px rgba(255, 193, 7, 0.15);
+}
+
+.badge-icon {
+  font-size: 2.2rem;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 50px;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.badge-card.unlocked:hover .badge-icon {
+  transform: scale(1.15) rotate(-5deg);
+}
+
+.badge-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.badge-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.badge-card.unlocked .badge-name {
+  color: #e65100;
+}
+
+[data-theme="dark"] .badge-card.unlocked .badge-name {
+  color: #ffb74d;
+}
+
+.badge-description {
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+  line-height: 1.4;
+}
+
+.badge-status {
+  font-size: 1.5rem;
+  line-height: 1;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
 /* ============================================
    Modal جشن (وقتی نشان جدید باز می‌شود)
    ============================================ */
 
 .modal-celebration-wrapper {
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   overflow: hidden;
   position: fixed;
   top: 0;
@@ -2880,19 +2733,23 @@
   z-index: 2;
   background: linear-gradient(135deg, #ffffff 0%, #fff8e1 100%);
   border: 4px solid #ffc107;
-  border-radius: 24px;
-  padding: 2rem 2.5rem;
+  border-radius: var(--radius-xl);
+  padding: 2.2rem 2.5rem;
   max-width: 400px;
   width: 90%;
   text-align: center;
-  box-shadow: 0 20px 60px rgba(255, 152, 0, 0.4), 0 0 0 8px rgba(255, 193, 7, 0.2);
+  box-shadow:
+    0 20px 60px rgba(255, 152, 0, 0.4),
+    0 0 0 8px rgba(255, 193, 7, 0.2);
   animation: celebrationPop 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
 }
 
 [data-theme="dark"] .celebration-content {
   background: linear-gradient(135deg, #2a2a2a 0%, #3a3020 100%);
   border-color: #ffc107;
-  box-shadow: 0 20px 60px rgba(255, 152, 0, 0.4), 0 0 0 8px rgba(255, 193, 7, 0.15);
+  box-shadow:
+    0 20px 60px rgba(255, 152, 0, 0.4),
+    0 0 0 8px rgba(255, 193, 7, 0.15);
 }
 
 @keyframes celebrationPop {
@@ -2938,7 +2795,7 @@
 .celebration-badge-name {
   font-size: 1.4rem;
   font-weight: 700;
-  color: #2e7d32;
+  color: var(--color-primary);
   margin-bottom: 0.6rem;
   font-family: 'Vazirmatn', inherit;
 }
@@ -2949,13 +2806,9 @@
 
 .celebration-badge-description {
   font-size: 1rem;
-  color: #555;
+  color: var(--color-text-light);
   line-height: 1.6;
   margin-bottom: 1rem;
-}
-
-[data-theme="dark"] .celebration-badge-description {
-  color: #bcaaa4;
 }
 
 .celebration-extra {
@@ -2963,9 +2816,9 @@
   color: #ff6f00;
   font-weight: 600;
   margin-bottom: 1rem;
-  padding: 0.6rem 1rem;
+  padding: 0.65rem 1rem;
   background: rgba(255, 193, 7, 0.15);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   border: 1px dashed #ffc107;
 }
 
@@ -2974,10 +2827,10 @@
 }
 
 .celebration-btn {
-  padding: 0.9rem 2.5rem;
+  padding: 0.95rem 2.5rem;
   font-size: 1.1rem;
   font-weight: 700;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: linear-gradient(135deg, #ff8f00, #ffc107);
   color: white;
   border: none;
@@ -2992,30 +2845,658 @@
   box-shadow: 0 8px 25px rgba(255, 152, 0, 0.6);
 }
 
+.celebration-btn:active {
+  transform: translateY(-1px) scale(0.99);
+}
+
+/* ============================================
+   واکنش‌گرا
+   ============================================ */
+
 @media (max-width: 600px) {
-  .celebration-content {
-    padding: 1.5rem 1.5rem;
-    border-radius: 20px;
+  .plants-list { grid-template-columns: 1fr; }
+
+  .plant-card {
+    display: flex;
+    align-items: center;
   }
 
-  .celebration-title {
+  .plant-card-image {
+    width: 90px;
+    height: 90px;
+    flex-shrink: 0;
+  }
+
+  .plant-card-content { padding: 0.9rem; }
+
+  .plant-details {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .plant-details-image img {
+    width: 150px;
+    height: 150px;
+  }
+
+  .plant-info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: right;
+  }
+
+  .plant-info-label {
+    min-width: auto;
+    margin-bottom: 0.2rem;
+  }
+
+  .plant-details-actions { justify-content: center; }
+
+  .today-task-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .today-task-actions { justify-content: flex-end; }
+
+  .attention-item {
+    padding: 0.85rem;
+  }
+
+  .attention-emoji {
+    font-size: 1.4rem;
+  }
+
+  .attention-name {
+    font-size: 1rem;
+  }
+
+  .settings-section { padding: 1.1rem; }
+
+  .theme-option-btn { padding: 0.9rem 1rem; }
+
+  .theme-option-icon { font-size: 1.3rem; }
+
+  .search-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-toggle-filters {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .filter-buttons {
+    justify-content: center;
+  }
+
+  .watering-options {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.6rem;
+  }
+
+  .watering-option {
+    padding: 0.85rem 0.5rem;
+    min-height: 75px;
+  }
+
+  .watering-option-num {
     font-size: 1.5rem;
   }
 
-  .celebration-badge-icon {
-    font-size: 4rem;
+  .notes-section { padding: 1.1rem; }
+
+  .note-item { padding: 0.9rem; }
+
+  .gallery-section { padding: 1.1rem; }
+
+  .gallery-list {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
   }
 
-  .celebration-badge-name {
-    font-size: 1.2rem;
+  .gallery-date { font-size: 0.75rem; }
+
+  .gallery-note { font-size: 0.7rem; }
+
+  .photo-view-body { padding: 1rem; }
+
+  .photo-view-image-wrapper { max-height: 50vh; }
+
+  .photo-view-image-wrapper img { max-height: 50vh; }
+
+  .photo-view-actions {
+    flex-direction: column;
+    padding: 1rem;
   }
 
-  .celebration-badge-description {
-    font-size: 0.9rem;
+  .photo-view-row {
+    flex-direction: column;
+    gap: 0.3rem;
   }
+
+  .reports-tabs {
+    flex-direction: column;
+    border-radius: var(--radius-md);
+  }
+
+  .report-tab {
+    border-radius: var(--radius-sm);
+  }
+
+  .chart-container {
+    padding: 1.1rem;
+    min-height: 300px;
+  }
+
+  .stat-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+  }
+
+  .backup-stat-item { font-size: 0.9rem; }
+
+  .backup-stat-icon { font-size: 1.1rem; }
+
+  .backup-actions .btn {
+    padding: 0.85rem 0.9rem;
+    font-size: 0.95rem;
+  }
+
+  .import-file-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+  }
+
+  .import-file-value {
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  .streak-bar {
+    padding: 0.9rem 1rem;
+  }
+
+  .streak-fire {
+    width: 44px;
+    height: 44px;
+  }
+
+  .streak-fire-svg {
+    width: 30px;
+    height: 30px;
+  }
+
+  .streak-number {
+    font-size: 1.5rem;
+  }
+
+  .streak-meta {
+    font-size: 0.75rem;
+  }
+
+  .heatmap-section { padding: 1rem; }
+
+  .heatmap-cell {
+    width: 14px;
+    height: 14px;
+  }
+
+  .heatmap-day-labels span {
+    height: 14px;
+    line-height: 14px;
+    font-size: 0.65rem;
+  }
+
+  .heatmap-title { font-size: 0.9rem; }
+
+  .heatmap-total { font-size: 0.75rem; }
+
+  .streak-bar-large { padding: 1.2rem; }
+
+  .streak-bar-large-fire {
+    width: 64px;
+    height: 64px;
+  }
+
+  .streak-bar-large-fire svg {
+    width: 44px;
+    height: 44px;
+  }
+
+  .streak-bar-large-number { font-size: 2.1rem; }
+
+  .streak-bar-large-label { font-size: 0.95rem; }
+
+  .streak-bar-large-subtitle { font-size: 0.8rem; }
+
+  .streak-bar-large-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+  }
+
+  .streak-bar-large-item {
+    padding: 0.65rem 0.8rem;
+  }
+
+  .streak-bar-large-item-value { font-size: 1rem; }
+
+  .achievements-summary { padding: 1.1rem 1.2rem; }
+
+  .achievements-summary-icon { font-size: 2rem; }
+
+  .achievements-summary-count { font-size: 1.3rem; }
+
+  .badge-card {
+    padding: 0.95rem 1rem;
+    gap: 0.8rem;
+  }
+
+  .badge-icon {
+    font-size: 1.8rem;
+    width: 42px;
+  }
+
+  .badge-name { font-size: 0.95rem; }
+
+  .badge-description { font-size: 0.8rem; }
+
+  .badge-status { font-size: 1.3rem; }
+
+  .celebration-content {
+    padding: 1.5rem 1.5rem;
+    border-radius: var(--radius-lg);
+  }
+
+  .celebration-title { font-size: 1.5rem; }
+
+  .celebration-badge-icon { font-size: 4rem; }
+
+  .celebration-badge-name { font-size: 1.2rem; }
+
+  .celebration-badge-description { font-size: 0.9rem; }
 
   .celebration-btn {
-    padding: 0.8rem 2rem;
+    padding: 0.85rem 2rem;
     font-size: 1rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .watering-options {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+/* ============================================
+   انیمیشن‌های ظریف و ریزه‌کاری
+   ============================================ */
+
+/* ورود پله‌ای کارت گیاهان */
+.plants-list .plant-card {
+  animation: cardSlideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+
+.plants-list .plant-card:nth-child(1) { animation-delay: 0.05s; }
+.plants-list .plant-card:nth-child(2) { animation-delay: 0.1s; }
+.plants-list .plant-card:nth-child(3) { animation-delay: 0.15s; }
+.plants-list .plant-card:nth-child(4) { animation-delay: 0.2s; }
+.plants-list .plant-card:nth-child(5) { animation-delay: 0.25s; }
+.plants-list .plant-card:nth-child(6) { animation-delay: 0.3s; }
+.plants-list .plant-card:nth-child(7) { animation-delay: 0.35s; }
+.plants-list .plant-card:nth-child(8) { animation-delay: 0.4s; }
+.plants-list .plant-card:nth-child(n+9) { animation-delay: 0.45s; }
+
+@keyframes cardSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ورود پله‌ای کارت‌های نشان */
+.achievements-list .badge-card {
+  animation: cardSlideUp 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+
+.achievements-list .badge-card:nth-child(1) { animation-delay: 0.03s; }
+.achievements-list .badge-card:nth-child(2) { animation-delay: 0.06s; }
+.achievements-list .badge-card:nth-child(3) { animation-delay: 0.09s; }
+.achievements-list .badge-card:nth-child(4) { animation-delay: 0.12s; }
+.achievements-list .badge-card:nth-child(5) { animation-delay: 0.15s; }
+.achievements-list .badge-card:nth-child(6) { animation-delay: 0.18s; }
+.achievements-list .badge-card:nth-child(7) { animation-delay: 0.21s; }
+.achievements-list .badge-card:nth-child(8) { animation-delay: 0.24s; }
+.achievements-list .badge-card:nth-child(9) { animation-delay: 0.27s; }
+.achievements-list .badge-card:nth-child(10) { animation-delay: 0.3s; }
+
+/* ورود پله‌ای یادداشت‌ها */
+.notes-list .note-item {
+  animation: cardSlideUp 0.4s ease backwards;
+}
+
+.notes-list .note-item:nth-child(1) { animation-delay: 0.03s; }
+.notes-list .note-item:nth-child(2) { animation-delay: 0.08s; }
+.notes-list .note-item:nth-child(3) { animation-delay: 0.13s; }
+.notes-list .note-item:nth-child(4) { animation-delay: 0.18s; }
+.notes-list .note-item:nth-child(n+5) { animation-delay: 0.22s; }
+
+/* ورود پله‌ای عکس‌های گالری */
+.gallery-list .gallery-item {
+  animation: galleryPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+
+.gallery-list .gallery-item:nth-child(1) { animation-delay: 0.03s; }
+.gallery-list .gallery-item:nth-child(2) { animation-delay: 0.06s; }
+.gallery-list .gallery-item:nth-child(3) { animation-delay: 0.09s; }
+.gallery-list .gallery-item:nth-child(4) { animation-delay: 0.12s; }
+.gallery-list .gallery-item:nth-child(5) { animation-delay: 0.15s; }
+.gallery-list .gallery-item:nth-child(6) { animation-delay: 0.18s; }
+.gallery-list .gallery-item:nth-child(n+7) { animation-delay: 0.22s; }
+
+@keyframes galleryPop {
+  from {
+    opacity: 0;
+    transform: scale(0.7) rotate(-5deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* ورود پله‌ای فعالیت‌ها */
+.care-logs-list .care-log-item {
+  animation: slideFromRight 0.4s ease backwards;
+}
+
+.care-logs-list .care-log-item:nth-child(1) { animation-delay: 0.03s; }
+.care-logs-list .care-log-item:nth-child(2) { animation-delay: 0.07s; }
+.care-logs-list .care-log-item:nth-child(3) { animation-delay: 0.11s; }
+.care-logs-list .care-log-item:nth-child(4) { animation-delay: 0.15s; }
+.care-logs-list .care-log-item:nth-child(n+5) { animation-delay: 0.18s; }
+
+@keyframes slideFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ورود پله‌ای کارت‌های آمار */
+.stats-list .stat-card {
+  animation: cardSlideUp 0.4s ease backwards;
+}
+
+.stats-list .stat-card:nth-child(1) { animation-delay: 0.03s; }
+.stats-list .stat-card:nth-child(2) { animation-delay: 0.06s; }
+.stats-list .stat-card:nth-child(3) { animation-delay: 0.09s; }
+.stats-list .stat-card:nth-child(4) { animation-delay: 0.12s; }
+.stats-list .stat-card:nth-child(5) { animation-delay: 0.15s; }
+.stats-list .stat-card:nth-child(6) { animation-delay: 0.18s; }
+.stats-list .stat-card:nth-child(n+7) { animation-delay: 0.21s; }
+
+/* ورود پله‌ای کارهای امروز */
+.today-tasks-list .today-task-item {
+  animation: cardSlideUp 0.4s ease backwards;
+}
+
+.today-tasks-list .today-task-item:nth-child(1) { animation-delay: 0.05s; }
+.today-tasks-list .today-task-item:nth-child(2) { animation-delay: 0.1s; }
+.today-tasks-list .today-task-item:nth-child(3) { animation-delay: 0.15s; }
+.today-tasks-list .today-task-item:nth-child(n+4) { animation-delay: 0.2s; }
+
+/* ============================================
+   درخشش نوار پیشرفت (Shimmer)
+   ============================================ */
+
+.streak-xp-fill,
+.streak-bar-large-xp-fill {
+  position: relative;
+  overflow: hidden;
+}
+
+.streak-xp-fill::after,
+.streak-bar-large-xp-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.5) 50%,
+    transparent 100%
+  );
+  animation: shimmerMove 2.2s ease-in-out infinite;
+}
+
+@keyframes shimmerMove {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* ============================================
+   Loading Skeleton برای تصاویر
+   ============================================ */
+
+.plant-card-image,
+.details-image,
+.gallery-thumb {
+  background: linear-gradient(
+    90deg,
+    var(--color-border-light) 0%,
+    var(--color-border) 50%,
+    var(--color-border-light) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeletonPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes skeletonPulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ============================================
+   پالس برای Streak عدد
+   ============================================ */
+
+.streak-number,
+.streak-bar-large-number {
+  display: inline-block;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ============================================
+   Empty State با آیکون SVG پس‌زمینه
+   ============================================ */
+
+.empty-state {
+  position: relative;
+  overflow: hidden;
+}
+
+.empty-state::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 180px;
+  height: 180px;
+  transform: translate(-50%, -50%) rotate(-8deg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2366bb6a' stroke-width='0.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 22c0-6 4-10 4-10s-2-2-4-2-4 2-4 2 4 4 4 10z'/%3E%3Cpath d='M12 12c0-4 3-7 3-7s-3-1-5 1-2 4-2 4 4 1 4 2z'/%3E%3Cpath d='M12 12c0-4-3-7-3-7s3-1 5 1 2 4 2 4-4 1-4 2z'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.empty-state p {
+  position: relative;
+  z-index: 1;
+}
+
+/* ============================================
+   انیمیشن برای Modal و باز شدن
+   ============================================ */
+
+.modal.active .modal-content {
+  animation: modalContentPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modalContentPop {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.9);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(5px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ============================================
+   افکت روی کارت‌های آمار
+   ============================================ */
+
+.stat-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  transition: left 0.6s ease;
+}
+
+.stat-card:hover::after {
+  left: 100%;
+}
+
+/* ============================================
+   درخشش روی نشان‌های باز‌شده
+   ============================================ */
+
+.badge-card.unlocked .badge-icon {
+  animation: badgeGlow 2.4s ease-in-out infinite;
+}
+
+@keyframes badgeGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px rgba(255, 193, 7, 0.4));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(255, 193, 7, 0.8));
+  }
+}
+
+/* ============================================
+   انیمیشن برای دکمه‌های فعال
+   ============================================ */
+
+.btn-primary:active {
+  transform: scale(0.97);
+}
+
+.btn-secondary:active {
+  transform: scale(0.97);
+}
+
+/* ============================================
+   هاور روی آیکون‌های هدر
+   ============================================ */
+
+.btn-settings:hover .icon,
+.btn-settings:hover span:not(.icon) {
+  animation: iconWiggle 0.5s ease;
+}
+
+@keyframes iconWiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-8deg); }
+  75% { transform: rotate(8deg); }
+}
+
+/* ============================================
+   انیمیشن برای تب‌های گزارش
+   ============================================ */
+
+.report-tab.active {
+  animation: tabActivePulse 0.4s ease;
+}
+
+@keyframes tabActivePulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+/* ============================================
+   درخشش روی Streak fire
+   ============================================ */
+
+.streak-fire.active,
+.streak-bar-large-fire.active {
+  animation: firePulse 1.6s ease-in-out infinite, fireGlow 2.5s ease-in-out infinite;
+}
+
+@keyframes fireGlow {
+  0%, 100% { box-shadow: 0 0 8px rgba(255, 111, 0, 0.3); }
+  50% { box-shadow: 0 0 24px rgba(255, 111, 0, 0.6), 0 0 40px rgba(255, 193, 7, 0.3); }
+}
+
+/* ============================================
+   کاهش انیمیشن برای کاربران حساس
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================
+   بهبود موبایل برای انیمیشن‌ها
+   ============================================ */
+
+@media (max-width: 600px) {
+  .plants-list .plant-card,
+  .achievements-list .badge-card,
+  .gallery-list .gallery-item {
+    animation-duration: 0.35s;
   }
 }
