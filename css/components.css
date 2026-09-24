@@ -3873,3 +3873,72 @@
     align-items: center;
   }
 }
+/* ============================================
+   انتخاب‌گر گروه‌بندی / بازه زمانی
+   ============================================ */
+
+.bar-grouping-selector {
+  background: var(--color-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 1rem 1.2rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--color-border-light);
+  animation: pageFadeIn 0.3s ease;
+}
+
+.bar-grouping-label {
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 0.7rem;
+}
+
+.bar-grouping-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.bar-group-btn {
+  padding: 0.6rem 1rem;
+  background: var(--color-bg);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.88rem;
+  color: var(--color-text);
+  font-weight: 600;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.bar-group-btn:hover {
+  border-color: var(--color-primary-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.bar-group-btn.active {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: white;
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);
+}
+
+@media (max-width: 600px) {
+  .bar-grouping-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .bar-group-btn {
+    padding: 0.55rem 0.7rem;
+    font-size: 0.8rem;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+  }
+}

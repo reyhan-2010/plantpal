@@ -10,6 +10,7 @@ let lineChart = null;
 let barChart = null;
 let currentChartType = 'pie';
 let currentBarGroupBy = 'location';
+let currentLineRange = 30;
 
 const HEALTH_COLORS = {
   healthy: '#2e7d32',
@@ -74,6 +75,7 @@ const BAR_COLORS = [
 function initReports() {
   setupReportTabs();
   setupBarGroupingButtons();
+  setupLineRangeButtons();
   console.log('✓ گزارش‌ها راه‌اندازی شد');
 }
 
@@ -111,6 +113,16 @@ function setupBarGroupingButtons() {
   });
 }
 
+function setupLineRangeButtons() {
+  const buttons = document.querySelectorAll('[data-line-range]');
+  buttons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      const range = parseInt(btn.getAttribute('data-line-range'), 10);
+      setLineRange(range);
+    });
+  });
+}
+
 function setBarGrouping(groupBy) {
   currentBarGroupBy = groupBy;
 
@@ -128,6 +140,23 @@ function setBarGrouping(groupBy) {
   console.log('✓ گروه‌بندی نمودار میله‌ای:', groupBy);
 }
 
+function setLineRange(days) {
+  currentLineRange = days;
+
+  const buttons = document.querySelectorAll('[data-line-range]');
+  buttons.forEach(function(btn) {
+    const btnRange = parseInt(btn.getAttribute('data-line-range'), 10);
+    if (btnRange === days) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+
+  renderLineChart();
+  console.log('✓ بازه نمودار خطی:', days, 'روز');
+}
+
 function switchChart(type) {
   currentChartType = type;
 
@@ -137,7 +166,8 @@ function switchChart(type) {
   const chartPie = document.getElementById('chart-pie');
   const chartLine = document.getElementById('chart-line');
   const chartBar = document.getElementById('chart-bar');
-  const groupingSelector = document.getElementById('bar-grouping-selector');
+  const barSelector = document.getElementById('bar-grouping-selector');
+  const lineSelector = document.getElementById('line-range-selector');
 
   if (tabPie) tabPie.classList.remove('active');
   if (tabLine) tabLine.classList.remove('active');
@@ -145,7 +175,8 @@ function switchChart(type) {
   if (chartPie) chartPie.style.display = 'none';
   if (chartLine) chartLine.style.display = 'none';
   if (chartBar) chartBar.style.display = 'none';
-  if (groupingSelector) groupingSelector.style.display = 'none';
+  if (barSelector) barSelector.style.display = 'none';
+  if (lineSelector) lineSelector.style.display = 'none';
 
   if (type === 'pie') {
     if (tabPie) tabPie.classList.add('active');
@@ -154,11 +185,12 @@ function switchChart(type) {
   } else if (type === 'line') {
     if (tabLine) tabLine.classList.add('active');
     if (chartLine) chartLine.style.display = 'block';
+    if (lineSelector) lineSelector.style.display = 'block';
     renderLineChart();
   } else if (type === 'bar') {
     if (tabBar) tabBar.classList.add('active');
     if (chartBar) chartBar.style.display = 'block';
-    if (groupingSelector) groupingSelector.style.display = 'block';
+    if (barSelector) barSelector.style.display = 'block';
     renderBarChart();
   }
 
@@ -199,7 +231,31 @@ async function renderReports() {
 }
 
 // ============================================
-// بخش ۴: نمودار دایره‌ای
+// بخش ۴: توابع کمکی تاریخ
+// ============================================
+
+function reportDateToKey(d) {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return year + '-' + month + '-' + day;
+}
+
+function reportGetDateKeyFromISO(isoString) {
+  return reportDateToKey(new Date(isoString));
+}
+
+function reportDisplayDateFromKey(key) {
+  const parts = key.split('-');
+  const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+  if (typeof formatDate === 'function') {
+    return formatDate(d.toISOString());
+  }
+  return key;
+}
+
+// ============================================
+// بخش ۵: نمودار دایره‌ای
 // ============================================
 
 async function renderPieChart() {
@@ -293,96 +349,73 @@ async function renderPieChart() {
 }
 
 // ============================================
-// بخش ۵: نمودار خطی
+// بخش ۶: نمودار خطی (روزانه)
 // ============================================
 
 async function renderLineChart() {
   try {
     const plants = await getAllPlants();
-
     if (plants.length === 0) return;
 
     const allLogs = [];
-
     for (const plant of plants) {
       const logs = await getCareLogsByPlantId(plant.id);
-      logs.forEach(function(log) {
-        allLogs.push(log);
-      });
+      logs.forEach(function(log) { allLogs.push(log); });
     }
 
-    if (allLogs.length === 0) {
-      const ctx = document.getElementById('chart-line');
-      if (ctx) {
-        if (lineChart) lineChart.destroy();
-        lineChart = new Chart(ctx, {
-          type: 'line',
-          data: { labels: [], datasets: [] },
-          options: {
-            responsive: true,
-            plugins: {
-              title: {
-                display: true,
-                text: 'هنوز فعالیتی ثبت نشده است',
-                font: { family: 'Vazirmatn', size: 16 }
-              }
-            }
-          }
-        });
-      }
-      return;
+    // ساخت لیست روزها
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const dayKeys = [];
+    for (let i = currentLineRange - 1; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      dayKeys.push(reportDateToKey(d));
     }
 
-    const monthlyData = {};
+    // نقشه روز → شمارش هر نوع
+    const dayCounts = {};
+    dayKeys.forEach(function(k) {
+      dayCounts[k] = { water: 0, fertilize: 0, prune: 0, repot: 0, cutting: 0 };
+    });
 
     allLogs.forEach(function(log) {
-      const date = new Date(log.date);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const key = year + '/' + month;
-
-      const type = log.type || 'water';
-
-      if (!monthlyData[key]) {
-        monthlyData[key] = {
-          water: 0,
-          fertilize: 0,
-          prune: 0,
-          repot: 0,
-          cutting: 0
-        };
-      }
-
-      if (monthlyData[key][type] !== undefined) {
-        monthlyData[key][type]++;
+      const key = reportGetDateKeyFromISO(log.date);
+      if (dayCounts[key] !== undefined) {
+        const type = log.type || 'water';
+        if (dayCounts[key][type] !== undefined) {
+          dayCounts[key][type]++;
+        }
       }
     });
 
-    const sortedKeys = Object.keys(monthlyData).sort();
+    // برچسب‌ها
+    const labels = dayKeys.map(function(k) {
+      return reportDisplayDateFromKey(k);
+    });
 
+    // دیتاست‌ها
     const datasets = [];
-
     CARE_TYPE_ORDER.forEach(function(type) {
-      const hasData = sortedKeys.some(function(key) {
-        return monthlyData[key][type] > 0;
+      const hasData = dayKeys.some(function(k) {
+        return dayCounts[k][type] > 0;
       });
 
       if (hasData) {
         datasets.push({
           label: CARE_TYPE_LABELS[type],
-          data: sortedKeys.map(function(key) {
-            return monthlyData[key][type];
-          }),
+          data: dayKeys.map(function(k) { return dayCounts[k][type]; }),
           borderColor: CARE_TYPE_COLORS[type],
           backgroundColor: CARE_TYPE_COLORS[type] + '33',
-          tension: 0.4,
+          tension: 0.3,
           fill: false,
-          borderWidth: 3,
-          pointRadius: 6,
-          pointHoverRadius: 8,
+          borderWidth: 2.5,
+          pointRadius: currentLineRange <= 14 ? 5 : 3,
+          pointHoverRadius: 7,
           pointBackgroundColor: CARE_TYPE_COLORS[type],
           pointBorderColor: '#ffffff',
-          pointBorderWidth: 2
+          pointBorderWidth: 1.5
         });
       }
     });
@@ -390,14 +423,46 @@ async function renderLineChart() {
     const ctx = document.getElementById('chart-line');
     if (!ctx) return;
 
-    if (lineChart) {
-      lineChart.destroy();
+    if (lineChart) lineChart.destroy();
+
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const textColor = isDark ? '#e8f0e8' : '#1f2d2a';
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
+
+        let rangeTitle = currentLineRange + ' روز اخیر';
+    if (currentLineRange === 2) rangeTitle = '۲ روز اخیر';
+    else if (currentLineRange === 7) rangeTitle = '۷ روز اخیر';
+    else if (currentLineRange === 14) rangeTitle = '۱۴ روز اخیر';
+    else if (currentLineRange === 30) rangeTitle = '۳۰ روز اخیر';
+    else if (currentLineRange === 90) rangeTitle = '۹۰ روز اخیر';
+    // اگر هیچ فعالیتی نیست
+    if (datasets.length === 0) {
+      lineChart = new Chart(ctx, {
+        type: 'line',
+        data: { labels: labels, datasets: [] },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            title: {
+              display: true,
+              text: 'در ' + rangeTitle + ' فعالیتی ثبت نشده است',
+              font: { family: 'Vazirmatn', size: 16, weight: 'bold' },
+              padding: 20,
+              color: textColor
+            },
+            legend: { display: false }
+          }
+        }
+      });
+      console.log('✓ نمودار خطی: خالی | بازه:', currentLineRange);
+      return;
     }
 
     lineChart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: sortedKeys,
+        labels: labels,
         datasets: datasets
       },
       options: {
@@ -412,7 +477,27 @@ async function renderLineChart() {
             beginAtZero: true,
             ticks: {
               stepSize: 1,
-              precision: 0
+              precision: 0,
+              color: textColor,
+              font: { family: 'Vazirmatn', size: 11 }
+            },
+            grid: {
+              color: gridColor,
+              drawBorder: false
+            }
+          },
+          x: {
+            ticks: {
+              color: textColor,
+              font: { family: 'Vazirmatn', size: 10 },
+              maxRotation: 60,
+              minRotation: 0,
+              autoSkip: true,
+              autoSkipPadding: 12
+            },
+            grid: {
+              display: false,
+              drawBorder: false
             }
           }
         },
@@ -427,9 +512,10 @@ async function renderLineChart() {
           },
           title: {
             display: true,
-            text: 'تاریخچه فعالیت‌ها بر اساس ماه',
+            text: 'فعالیت‌ها در ' + rangeTitle,
             font: { family: 'Vazirmatn', size: 16, weight: 'bold' },
-            padding: 20
+            padding: 20,
+            color: textColor
           },
           tooltip: {
             callbacks: {
@@ -444,7 +530,7 @@ async function renderLineChart() {
       }
     });
 
-    console.log('✓ نمودار خطی نمایش داده شد');
+    console.log('✓ نمودار خطی نمایش داده شد. بازه:', currentLineRange, 'روز | نقاط:', labels.length, '| خطوط:', datasets.length);
 
   } catch (error) {
     console.error('✗ خطا در نمایش نمودار خطی:', error);
@@ -452,7 +538,7 @@ async function renderLineChart() {
 }
 
 // ============================================
-// بخش ۶: نمودار میله‌ای با گروه‌بندی
+// بخش ۷: نمودار میله‌ای با گروه‌بندی
 // ============================================
 
 function getGroupKeyAndLabel(plant, groupBy) {
@@ -490,12 +576,10 @@ async function renderBarChart() {
 
     if (plants.length === 0) return;
 
-    // حالت فعالیت‌ها (بر اساس careLogs)
     if (currentBarGroupBy === 'activity') {
       return await renderActivityBarChart();
     }
 
-    // حالت‌های based-plant (location / health)
     const groupCounts = {};
     const groupLabels = {};
 
@@ -567,6 +651,8 @@ async function renderActivityBarChart() {
       const ctx = document.getElementById('chart-bar');
       if (ctx) {
         if (barChart) barChart.destroy();
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const textColor = isDark ? '#e8f0e8' : '#1f2d2a';
         barChart = new Chart(ctx, {
           type: 'bar',
           data: { labels: [], datasets: [] },
@@ -576,7 +662,8 @@ async function renderActivityBarChart() {
               title: {
                 display: true,
                 text: 'هنوز فعالیتی ثبت نشده است',
-                font: { family: 'Vazirmatn', size: 16 }
+                font: { family: 'Vazirmatn', size: 16 },
+                color: textColor
               }
             }
           }
@@ -587,7 +674,6 @@ async function renderActivityBarChart() {
     }
 
     drawBarChart(labels, data, colors);
-
     console.log('✓ نمودار فعالیت‌ها نمایش داده شد. تعداد نوع:', labels.length, '| کل فعالیت:', allLogs.length);
   } catch (error) {
     console.error('✗ خطا در نمایش نمودار فعالیت‌ها:', error);
@@ -618,8 +704,8 @@ function drawBarChart(labels, data, colors) {
         borderWidth: 0,
         borderRadius: 10,
         borderSkipped: false,
-        barPercentage: 0.7,
-        categoryPercentage: 0.8
+               barPercentage: 0.4,
+        categoryPercentage: 0.5
       }]
     },
     options: {
@@ -678,7 +764,7 @@ function drawBarChart(labels, data, colors) {
 }
 
 // ============================================
-// بخش ۷: آمار کلی
+// بخش ۸: آمار کلی
 // ============================================
 
 async function renderStats() {
