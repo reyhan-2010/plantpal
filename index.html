@@ -338,9 +338,13 @@
 
       <div class="gallery-section">
         <div class="gallery-header">
-          <h3 class="gallery-title">📸 گالری رشد</h3>
-          <button id="btn-add-photo" class="btn btn-primary" aria-label="افزودن عکس">+ افزودن عکس</button>
-        </div>
+  <h3 class="gallery-title">📸 گالری رشد</h3>
+  <div class="gallery-header-actions">
+    <button id="btn-compare-photos" class="btn btn-secondary" aria-label="مقایسه عکس‌ها" style="display: none;">🔀 مقایسه</button>
+    <button id="btn-add-photo" class="btn btn-primary" aria-label="افزودن عکس">+ افزودن عکس</button>
+  </div>
+</div>
+<div id="compare-status-bar" class="compare-status-bar" style="display: none;">📸 ۰ از ۲ عکس انتخاب شده</div>
         <div id="gallery-list" class="gallery-list"></div>
         <div id="empty-gallery" class="empty-state" style="display: none;" role="status">
           <p>هنوز عکسی ثبت نشده است.</p>
@@ -815,6 +819,51 @@
           <button id="btn-confirm-import" class="btn btn-danger">⚠️ بله، بازیابی کن</button>
           <button id="btn-cancel-import" class="btn btn-secondary">انصراف</button>
         </div>
+      </div>
+    </div>
+  </div>
+  <div id="modal-compare-photos" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-compare-title">
+    <div class="modal-content modal-compare-view">
+      <div class="modal-header">
+        <h3 id="modal-compare-title" class="modal-title">🔀 مقایسه عکس‌ها</h3>
+        <button id="btn-close-compare-modal" class="modal-close" aria-label="بستن">
+          <span class="icon" data-icon="x"></span>
+        </button>
+      </div>
+
+      <div class="compare-body">
+        <div id="compare-images-container" class="compare-images-container">
+          <div class="compare-image compare-image-after">
+            <img id="compare-img-after" src="" alt="بعد">
+          </div>
+          <div class="compare-image compare-image-before">
+            <img id="compare-img-before" src="" alt="قبل">
+          </div>
+          <div class="compare-divider"></div>
+        </div>
+
+        <div class="compare-labels">
+          <div class="compare-label">
+            <span class="compare-label-title">📍 قبل</span>
+            <span id="compare-date-before" class="compare-label-date">—</span>
+            <span id="compare-note-before" class="compare-label-note" style="display: none;">—</span>
+          </div>
+          <div class="compare-label">
+            <span class="compare-label-title">📍 بعد</span>
+            <span id="compare-date-after" class="compare-label-date">—</span>
+            <span id="compare-note-after" class="compare-label-note" style="display: none;">—</span>
+          </div>
+        </div>
+
+        <div class="compare-slider-wrapper">
+          <input type="range" id="compare-slider" class="compare-slider" min="0" max="100" value="50">
+        </div>
+
+        <div id="compare-diff-text" class="compare-diff-text">—</div>
+      </div>
+
+      <div class="compare-actions">
+        <button id="btn-cancel-compare" class="btn btn-secondary">بستن</button>
       </div>
     </div>
   </div>

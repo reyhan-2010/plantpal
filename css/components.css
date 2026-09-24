@@ -3500,3 +3500,307 @@
     animation-duration: 0.35s;
   }
 }
+/* ============================================
+   دکمه‌های header گالری
+   ============================================ */
+
+.gallery-header-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+#btn-compare-photos.active {
+  background: linear-gradient(135deg, #1976d2 0%, #0d47a1 100%);
+  color: white;
+  border-color: #1976d2;
+}
+
+.compare-status-bar {
+  background: linear-gradient(135deg, rgba(25, 118, 210, 0.1) 0%, rgba(13, 71, 161, 0.15) 100%);
+  border: 2px dashed #1976d2;
+  border-radius: var(--radius-md);
+  padding: 0.8rem 1rem;
+  margin-bottom: 0.8rem;
+  color: #1565c0;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  animation: pageFadeIn 0.3s ease;
+}
+
+[data-theme="dark"] .compare-status-bar {
+  background: rgba(25, 118, 210, 0.2);
+  color: #90caf9;
+  border-color: #64b5f6;
+}
+
+/* ============================================
+   حالت انتخاب عکس‌ها
+   ============================================ */
+
+.gallery-item.selected {
+  outline: 3px solid #1976d2;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px rgba(25, 118, 210, 0.2);
+}
+
+.gallery-compare-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #1976d2;
+  color: white;
+  font-weight: 700;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.5);
+  z-index: 3;
+  animation: checkmarkPop 0.35s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+/* ============================================
+   Modal مقایسه — با اسلایدر
+   ============================================ */
+
+.modal-compare-view {
+  max-width: 800px;
+  width: 100%;
+}
+
+.compare-body {
+  padding: 1.2rem 1.5rem 0.5rem 1.5rem;
+}
+
+.compare-images-container {
+  --compare-pos: 50%;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-bg);
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow-md);
+  user-select: none;
+}
+
+.compare-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.compare-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+}
+
+.compare-image-before {
+  clip-path: inset(0 calc(100% - var(--compare-pos)) 0 0);
+  z-index: 2;
+}
+
+.compare-image-after {
+  z-index: 1;
+}
+
+.compare-divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--compare-pos);
+  width: 4px;
+  background: white;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
+  z-index: 3;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.compare-divider::before {
+  content: '⇄';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: white;
+  color: #1976d2;
+  font-size: 1.3rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.compare-slider-wrapper {
+  margin-bottom: 1rem;
+  padding: 0 0.2rem;
+}
+
+.compare-slider {
+  width: 100%;
+  height: 8px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: linear-gradient(90deg, #1976d2 0%, #64b5f6 100%);
+  border-radius: var(--radius-pill);
+  outline: none;
+  cursor: pointer;
+}
+
+.compare-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: white;
+  border: 3px solid #1976d2;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.4);
+  transition: transform 0.2s ease;
+}
+
+.compare-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+.compare-slider::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: white;
+  border: 3px solid #1976d2;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.4);
+}
+
+.compare-labels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.compare-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.7rem 0.9rem;
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  border-right: 3px solid #1976d2;
+}
+
+.compare-label-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #1976d2;
+}
+
+.compare-label-date {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.compare-label-note {
+  font-size: 0.8rem;
+  color: var(--color-text-light);
+  font-style: italic;
+  margin-top: 0.2rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.compare-diff-text {
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #e65100;
+  padding: 0.7rem 1rem;
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.1) 0%, rgba(255, 193, 7, 0.15) 100%);
+  border-radius: var(--radius-md);
+  border: 1px dashed #ffb74d;
+}
+
+[data-theme="dark"] .compare-diff-text {
+  color: #ffb74d;
+  background: rgba(255, 152, 0, 0.15);
+}
+
+.compare-actions {
+  display: flex;
+  gap: 0.8rem;
+  padding: 1rem 1.5rem 1.5rem 1.5rem;
+  border-top: 1px solid var(--color-border-light);
+  justify-content: center;
+}
+
+.compare-actions .btn {
+  min-width: 140px;
+  justify-content: center;
+}
+
+/* ============================================
+   واکنش‌گرا برای مقایسه
+   ============================================ */
+
+@media (max-width: 600px) {
+  .gallery-header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .gallery-header-actions .btn {
+    flex: 1;
+    padding: 0.6rem 0.7rem;
+    font-size: 0.85rem;
+  }
+
+  .compare-body {
+    padding: 1rem;
+  }
+
+  .compare-images-container {
+    aspect-ratio: 3 / 4;
+  }
+
+  .compare-divider::before {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+  }
+
+  .compare-labels {
+    grid-template-columns: 1fr;
+  }
+
+  .compare-actions {
+    padding: 0.8rem 1rem 1.2rem 1rem;
+  }
+
+  .compare-actions .btn {
+    min-width: 100px;
+  }
+}

@@ -1,5 +1,5 @@
 // PlantPal - گالری رشد گیاه
-// این فایل مسئول نمایش، افزودن، نمایش بزرگ و حذف عکس‌های رشد است.
+// این فایل مسئول نمایش، افزودن، نمایش بزرگ، مقایسه و حذف عکس‌های رشد است.
 
 // ============================================
 // بخش ۱: متغیرهای سراسری
@@ -7,6 +7,8 @@
 
 let currentGalleryPlantId = null;
 let currentViewingPhotoId = null;
+let compareModeActive = false;
+let compareSelection = [];
 
 // ============================================
 // بخش ۲: راه‌اندازی
@@ -26,6 +28,14 @@ function setupGalleryButtons() {
     console.log('✓ دکمه افزودن عکس متصل شد');
   } else {
     console.warn('⚠ دکمه btn-add-photo پیدا نشد');
+  }
+
+  const compareBtn = document.getElementById('btn-compare-photos');
+  if (compareBtn) {
+    compareBtn.addEventListener('click', function() {
+      toggleCompareMode();
+    });
+    console.log('✓ دکمه مقایسه متصل شد');
   }
 
   const closeBtn = document.getElementById('btn-close-photo-modal');
@@ -67,6 +77,27 @@ function setupGalleryButtons() {
       handleDeletePhoto();
     });
   }
+
+  const closeCompareBtn = document.getElementById('btn-close-compare-modal');
+  if (closeCompareBtn) {
+    closeCompareBtn.addEventListener('click', function() {
+      closeCompareModal();
+    });
+  }
+
+  const cancelCompareBtn = document.getElementById('btn-cancel-compare');
+  if (cancelCompareBtn) {
+    cancelCompareBtn.addEventListener('click', function() {
+      closeCompareModal();
+    });
+  }
+
+  const slider = document.getElementById('compare-slider');
+  if (slider) {
+    slider.addEventListener('input', function() {
+      updateCompareSlider(slider.value);
+    });
+  }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -85,6 +116,7 @@ async function renderGallery(plantId) {
 
     const listContainer = document.getElementById('gallery-list');
     const emptyState = document.getElementById('empty-gallery');
+    const compareBtn = document.getElementById('btn-compare-photos');
 
     if (!listContainer) return;
 
@@ -93,11 +125,22 @@ async function renderGallery(plantId) {
     if (photos.length === 0) {
       if (emptyState) emptyState.style.display = 'block';
       listContainer.style.display = 'none';
+      if (compareBtn) compareBtn.style.display = 'none';
       return;
     }
 
     if (emptyState) emptyState.style.display = 'none';
     listContainer.style.display = 'grid';
+
+    if (compareBtn) {
+      if (photos.length >= 2) {
+        compareBtn.style.display = 'inline-flex';
+      } else {
+        compareBtn.style.display = 'none';
+      }
+    }
+
+    // ⚠️ بلوک پاک کردن انتخاب‌ها حذف شد — این همان باگ بود
 
     photos.forEach(function(photo) {
       const item = createGalleryItem(photo);
@@ -145,15 +188,218 @@ function createGalleryItem(photo) {
   item.appendChild(image);
   item.appendChild(overlay);
 
+  // در حالت مقایسه، نشان انتخاب
+  if (compareModeActive) {
+    const check = document.createElement('div');
+    check.className = 'gallery-compare-check';
+
+    const index = compareSelection.indexOf(photo.id);
+    if (index !== -1) {
+      item.classList.add('selected');
+      check.textContent = String(index + 1);
+      check.style.display = 'flex';
+    } else {
+      check.style.display = 'none';
+    }
+
+    item.appendChild(check);
+  }
+
+  // کلیک
   item.addEventListener('click', function() {
-    openViewPhotoModal(photo.id);
+    if (compareModeActive) {
+      handleCompareClick(photo.id);
+    } else {
+      openViewPhotoModal(photo.id);
+    }
   });
 
   return item;
 }
 
 // ============================================
-// بخش ۴: Modal افزودن عکس
+// بخش ۴: حالت مقایسه
+// ============================================
+
+function toggleCompareMode() {
+  compareModeActive = !compareModeActive;
+  compareSelection = [];
+
+  const compareBtn = document.getElementById('btn-compare-photos');
+  const statusBar = document.getElementById('compare-status-bar');
+
+  if (compareModeActive) {
+    if (compareBtn) {
+      compareBtn.classList.add('active');
+      compareBtn.textContent = '✕ لغو مقایسه';
+    }
+    if (statusBar) statusBar.style.display = 'flex';
+    updateCompareStatus();
+    console.log('✓ حالت مقایسه فعال شد');
+  } else {
+    if (compareBtn) {
+      compareBtn.classList.remove('active');
+      compareBtn.textContent = '🔀 مقایسه';
+    }
+    if (statusBar) statusBar.style.display = 'none';
+    console.log('✓ حالت مقایسه غیرفعال شد');
+  }
+
+  renderGallery(currentGalleryPlantId);
+}
+
+function handleCompareClick(photoId) {
+  const index = compareSelection.indexOf(photoId);
+
+  if (index !== -1) {
+    // قبلاً انتخاب شده → حذف
+    compareSelection.splice(index, 1);
+  } else {
+    if (compareSelection.length >= 2) {
+      // دو مورد انتخاب شده → شروع از نو
+      compareSelection = [photoId];
+    } else {
+      compareSelection.push(photoId);
+    }
+  }
+
+  updateCompareStatus();
+  renderGallery(currentGalleryPlantId);
+
+  // اگر دو مورد انتخاب شد → باز کن Modal
+  if (compareSelection.length === 2) {
+    setTimeout(function() {
+      openCompareModal(compareSelection[0], compareSelection[1]);
+    }, 300);
+  }
+}
+
+function updateCompareStatus() {
+  const statusBar = document.getElementById('compare-status-bar');
+  if (!statusBar) return;
+
+  const count = compareSelection.length;
+  statusBar.textContent = '📸 ' + count + ' از ۲ عکس انتخاب شده';
+}
+
+// ============================================
+// بخش ۵: Modal مقایسه
+// ============================================
+
+async function openCompareModal(photoId1, photoId2) {
+  try {
+    const photo1 = await getPhotoById(photoId1);
+    const photo2 = await getPhotoById(photoId2);
+
+    if (!photo1 || !photo2) {
+      alert('عکس‌ها پیدا نشدند.');
+      return;
+    }
+
+    const d1 = new Date(photo1.date);
+    const d2 = new Date(photo2.date);
+    const older = d1 <= d2 ? photo1 : photo2;
+    const newer = d1 <= d2 ? photo2 : photo1;
+
+    const imgBefore = document.getElementById('compare-img-before');
+    const imgAfter = document.getElementById('compare-img-after');
+    const dateBefore = document.getElementById('compare-date-before');
+    const dateAfter = document.getElementById('compare-date-after');
+    const noteBefore = document.getElementById('compare-note-before');
+    const noteAfter = document.getElementById('compare-note-after');
+
+    if (imgBefore) imgBefore.src = older.image || 'assets/images/default-plant.png';
+    if (imgAfter) imgAfter.src = newer.image || 'assets/images/default-plant.png';
+    if (dateBefore) dateBefore.textContent = formatDate(older.date);
+    if (dateAfter) dateAfter.textContent = formatDate(newer.date);
+
+    if (noteBefore) {
+      if (older.note && older.note.trim()) {
+        noteBefore.textContent = older.note;
+        noteBefore.style.display = 'block';
+      } else {
+        noteBefore.style.display = 'none';
+      }
+    }
+
+    if (noteAfter) {
+      if (newer.note && newer.note.trim()) {
+        noteAfter.textContent = newer.note;
+        noteAfter.style.display = 'block';
+      } else {
+        noteAfter.style.display = 'none';
+      }
+    }
+
+    const diffMs = Math.abs(d2 - d1);
+    const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+    const diffEl = document.getElementById('compare-diff-text');
+
+    if (diffEl) {
+      if (diffDays === 0) {
+        diffEl.textContent = 'هر دو عکس در یک روز گرفته شده‌اند';
+      } else if (diffDays === 1) {
+        diffEl.textContent = '۱ روز بین دو عکس';
+      } else if (diffDays < 30) {
+        diffEl.textContent = diffDays + ' روز بین دو عکس';
+      } else if (diffDays < 365) {
+        const months = Math.round(diffDays / 30);
+        diffEl.textContent = months + ' ماه بین دو عکس';
+      } else {
+        const years = (diffDays / 365).toFixed(1);
+        diffEl.textContent = years + ' سال بین دو عکس';
+      }
+    }
+
+    const slider = document.getElementById('compare-slider');
+    if (slider) {
+      slider.value = 50;
+      updateCompareSlider(50);
+    }
+
+    const modal = document.getElementById('modal-compare-photos');
+    if (modal) {
+      modal.classList.add('active');
+      console.log('✓ Modal مقایسه باز شد');
+    }
+
+  } catch (error) {
+    console.error('✗ خطا در باز کردن Modal مقایسه:', error);
+  }
+}
+
+function closeCompareModal() {
+  const modal = document.getElementById('modal-compare-photos');
+  if (modal) {
+    modal.classList.remove('active');
+  }
+
+  compareModeActive = false;
+  compareSelection = [];
+
+  const compareBtn = document.getElementById('btn-compare-photos');
+  const statusBar = document.getElementById('compare-status-bar');
+
+  if (compareBtn) {
+    compareBtn.classList.remove('active');
+    compareBtn.textContent = '🔀 مقایسه';
+  }
+  if (statusBar) statusBar.style.display = 'none';
+
+  renderGallery(currentGalleryPlantId);
+  console.log('✓ Modal مقایسه بسته شد');
+}
+
+function updateCompareSlider(value) {
+  const container = document.getElementById('compare-images-container');
+  if (!container) return;
+
+  const percent = parseInt(value, 10);
+  container.style.setProperty('--compare-pos', percent + '%');
+}
+
+// ============================================
+// بخش ۶: Modal افزودن عکس
 // ============================================
 
 function openAddPhotoModal() {
@@ -194,7 +440,7 @@ function closeAddPhotoModal() {
 }
 
 // ============================================
-// بخش ۵: ذخیره عکس جدید
+// بخش ۷: ذخیره عکس جدید
 // ============================================
 
 async function handleAddPhoto(event) {
@@ -229,7 +475,6 @@ async function handleAddPhoto(event) {
     await savePhoto(photoData);
     console.log('✓ عکس رشد با موفقیت اضافه شد');
 
-    // ✨ به‌روزرسانی XP، Streak و Heatmap
     if (typeof onActivityAdded === 'function') {
       await onActivityAdded();
     }
@@ -245,7 +490,7 @@ async function handleAddPhoto(event) {
 }
 
 // ============================================
-// بخش ۶: نمایش بزرگ عکس
+// بخش ۸: نمایش بزرگ عکس
 // ============================================
 
 async function openViewPhotoModal(photoId) {
@@ -302,7 +547,7 @@ function closeViewPhotoModal() {
 }
 
 // ============================================
-// بخش ۷: حذف عکس
+// بخش ۹: حذف عکس
 // ============================================
 
 async function handleDeletePhoto() {
@@ -321,7 +566,6 @@ async function handleDeletePhoto() {
 
     closeViewPhotoModal();
 
-    // ✨ به‌روزرسانی XP، Streak و Heatmap
     if (typeof onActivityAdded === 'function') {
       await onActivityAdded();
     }
