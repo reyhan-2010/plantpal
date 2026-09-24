@@ -14,7 +14,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="PlantPal">
+  <meta name="mobile-web-app-title" content="PlantPal">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,6 +38,9 @@
         <p class="app-subtitle">گیاه‌یار — همراه شما در مراقبت از گیاهان</p>
       </div>
       <div class="header-actions">
+        <button id="btn-open-search" class="btn-settings" aria-label="جستجو" title="جستجو">
+          <span class="icon" data-icon="magnifying-glass"></span>
+        </button>
         <button id="btn-open-achievements" class="btn-settings" aria-label="دستاوردها" title="دستاوردها">
           <span class="icon" data-icon="achievements"></span>
         </button>
@@ -61,9 +64,41 @@
           + افزودن گیاه
         </button>
       </div>
-      <div id="motivation-banner" class="motivation-banner" style="display: none;">
-        <div class="motivation-icon" id="motivation-icon">🌱</div>
-        <div class="motivation-text" id="motivation-text">—</div>
+
+      <div id="search-panel" class="search-panel" style="display: none;">
+        <div class="search-filter-bar">
+          <div class="search-box">
+            <span class="icon search-icon" data-icon="magnifying-glass"></span>
+            <input
+              type="text"
+              id="search-input"
+              class="search-input"
+              placeholder="جستجو در نام، نوع یا محل..."
+              aria-label="جستجو در نام، نوع یا محل"
+            >
+            <button id="btn-clear-search" class="btn-clear-search" aria-label="پاک کردن جستجو" style="display: none;">
+              <span class="icon" data-icon="x"></span>
+            </button>
+          </div>
+
+          <button id="btn-toggle-filters" class="btn btn-secondary btn-toggle-filters" aria-label="نمایش فیلترها">
+            <span class="icon" data-icon="funnel"></span>
+            فیلترها
+          </button>
+        </div>
+
+        <div id="filters-panel" class="filters-panel" style="display: none;">
+          <div class="filter-group">
+            <label class="filter-label">وضعیت سلامت:</label>
+            <div class="filter-buttons">
+              <button class="filter-btn active" data-filter-health="all">همه</button>
+              <button class="filter-btn" data-filter-health="healthy">🙂 سالم</button>
+              <button class="filter-btn" data-filter-health="growing">🌱 در حال رشد</button>
+              <button class="filter-btn" data-filter-health="warning">😐 نیاز به توجه</button>
+              <button class="filter-btn" data-filter-health="sick">☹️ بیمار</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div id="streak-bar" class="streak-bar">
@@ -92,65 +127,10 @@
         </div>
       </div>
 
-      <div id="heatmap-section" class="heatmap-section">
-        <div class="heatmap-header">
-          <h3 class="heatmap-title">📊 فعالیت ۱۲ هفته اخیر</h3>
-          <span id="heatmap-total" class="heatmap-total">—</span>
-        </div>
-        <div class="heatmap-wrapper">
-          <div class="heatmap-day-labels">
-            <span>شنبه</span>
-            <span>یک‌شنبه</span>
-            <span>دوشنبه</span>
-            <span>سه‌شنبه</span>
-            <span>چهارشنبه</span>
-            <span>پنج‌شنبه</span>
-            <span>جمعه</span>
-          </div>
-          <div id="heatmap-grid" class="heatmap-grid"></div>
-        </div>
-        <div class="heatmap-legend">
-          <span class="legend-text">کم</span>
-          <div class="legend-cell level-0"></div>
-          <div class="legend-cell level-1"></div>
-          <div class="legend-cell level-2"></div>
-          <div class="legend-cell level-3"></div>
-          <span class="legend-text">زیاد</span>
-        </div>
-      </div>
-
-      <div class="search-filter-bar">
-        <div class="search-box">
-          <span class="icon search-icon" data-icon="magnifying-glass"></span>
-          <input
-            type="text"
-            id="search-input"
-            class="search-input"
-            placeholder="جستجو در نام گیاه..."
-            aria-label="جستجو در نام گیاه"
-          >
-          <button id="btn-clear-search" class="btn-clear-search" aria-label="پاک کردن جستجو" style="display: none;">
-            <span class="icon" data-icon="x"></span>
-          </button>
-        </div>
-
-        <button id="btn-toggle-filters" class="btn btn-secondary btn-toggle-filters" aria-label="نمایش فیلترها">
-          <span class="icon" data-icon="funnel"></span>
-          فیلترها
-        </button>
-      </div>
-
-      <div id="filters-panel" class="filters-panel" style="display: none;">
-        <div class="filter-group">
-          <label class="filter-label">وضعیت سلامت:</label>
-          <div class="filter-buttons">
-            <button class="filter-btn active" data-filter-health="all">همه</button>
-            <button class="filter-btn" data-filter-health="healthy">🙂 سالم</button>
-            <button class="filter-btn" data-filter-health="growing">🌱 در حال رشد</button>
-            <button class="filter-btn" data-filter-health="warning">😐 نیاز به توجه</button>
-            <button class="filter-btn" data-filter-health="sick">☹️ بیمار</button>
-          </div>
-        </div>
+      <div id="motivation-banner" class="motivation-banner" style="display: none;">
+        <div class="motivation-icon" id="motivation-icon">🌱</div>
+        <div class="motivation-text" id="motivation-text">—</div>
+        <button id="btn-dismiss-motivation" class="motivation-dismiss" aria-label="بستن پیام">عالیه!</button>
       </div>
 
       <div id="today-tasks" class="today-tasks" style="display: none;" aria-live="polite">
@@ -393,7 +373,7 @@
         </button>
       </div>
 
-            <div id="line-range-selector" class="bar-grouping-selector" style="display: none;">
+      <div id="line-range-selector" class="bar-grouping-selector" style="display: none;">
         <div class="bar-grouping-label">📅 بازه زمانی:</div>
         <div class="bar-grouping-buttons">
           <button class="bar-group-btn" data-line-range="2">۲ روز</button>
@@ -407,15 +387,9 @@
       <div id="bar-grouping-selector" class="bar-grouping-selector" style="display: none;">
         <div class="bar-grouping-label">📊 نمایش بر اساس:</div>
         <div class="bar-grouping-buttons">
-          <button class="bar-group-btn active" data-group-by="location">
-            📍 محل نگهداری
-          </button>
-          <button class="bar-group-btn" data-group-by="health">
-            💚 وضعیت سلامت
-          </button>
-          <button class="bar-group-btn" data-group-by="activity">
-            🎯 فعالیت‌ها
-          </button>
+          <button class="bar-group-btn active" data-group-by="location">📍 محل نگهداری</button>
+          <button class="bar-group-btn" data-group-by="health">💚 وضعیت سلامت</button>
+          <button class="bar-group-btn" data-group-by="activity">🎯 فعالیت‌ها</button>
         </div>
       </div>
 
@@ -432,6 +406,33 @@
       <div class="stats-section">
         <h3 class="stats-title">📊 آمار کلی</h3>
         <div id="stats-list" class="stats-list"></div>
+      </div>
+
+      <div id="heatmap-section" class="heatmap-section">
+        <div class="heatmap-header">
+          <h3 class="heatmap-title">📊 فعالیت ۱۲ هفته اخیر</h3>
+          <span id="heatmap-total" class="heatmap-total">—</span>
+        </div>
+        <div class="heatmap-wrapper">
+          <div class="heatmap-day-labels">
+            <span>شنبه</span>
+            <span>یک‌شنبه</span>
+            <span>دوشنبه</span>
+            <span>سه‌شنبه</span>
+            <span>چهارشنبه</span>
+            <span>پنج‌شنبه</span>
+            <span>جمعه</span>
+          </div>
+          <div id="heatmap-grid" class="heatmap-grid"></div>
+        </div>
+        <div class="heatmap-legend">
+          <span class="legend-text">کم</span>
+          <div class="legend-cell level-0"></div>
+          <div class="legend-cell level-1"></div>
+          <div class="legend-cell level-2"></div>
+          <div class="legend-cell level-3"></div>
+          <span class="legend-text">زیاد</span>
+        </div>
       </div>
     </section>
 
@@ -507,6 +508,19 @@
           بازگشت
         </button>
         <h2 class="page-title">⚙️ تنظیمات</h2>
+      </div>
+
+      <div class="settings-section">
+        <h3 class="settings-section-title">📊 مرتب‌سازی گیاهان</h3>
+        <div class="settings-option">
+          <label for="sort-select" class="sort-label">حالت نمایش گیاهان در صفحه اصلی:</label>
+          <select id="sort-select" class="sort-select">
+            <option value="newest">🆕 جدیدترین</option>
+            <option value="name">🔤 نام (الفبا)</option>
+            <option value="health">💚 وضعیت سلامت</option>
+            <option value="watering">💧 نیازمندترین</option>
+          </select>
+        </div>
       </div>
 
       <div class="settings-section">

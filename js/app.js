@@ -169,6 +169,7 @@ function setupEventListeners() {
 
   if (typeof setupSearch === 'function') setupSearch();
   if (typeof setupFilters === 'function') setupFilters();
+    setupSort();
   if (typeof setupCareTypeButtons === 'function') setupCareTypeButtons();
 
   console.log('✓ رویدادها وصل شدند');

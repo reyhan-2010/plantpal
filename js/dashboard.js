@@ -9,11 +9,19 @@ const DEFAULT_WATERING_THRESHOLD_DAYS = 7;
 const FERTILIZING_THRESHOLD_DAYS = 30;
 
 // ============================================
-// بخش ۲: متغیرهای جستجو و فیلتر
+// بخش ۲: متغیرهای جستجو، فیلتر و مرتب‌سازی
 // ============================================
 
 let searchQuery = '';
 let filterHealth = 'all';
+let sortMode = 'newest';
+
+const HEALTH_SORT_ORDER = {
+  sick: 0,
+  warning: 1,
+  growing: 2,
+  healthy: 3
+};
 
 // ============================================
 // بخش ۳: توابع کمکی
@@ -105,20 +113,36 @@ function getWateringScheduleText(plant) {
 }
 
 // ============================================
-// بخش ۴: فیلتر کردن گیاهان
+// بخش ۴: جستجوی پیشرفته
+// ============================================
+
+function matchesSearch(plant, query) {
+  if (!query) return true;
+
+  const words = query.toLowerCase().trim().split(/\s+/).filter(function(w) {
+    return w.length > 0;
+  });
+
+  if (words.length === 0) return true;
+
+  const name = (plant.name || '').toLowerCase();
+  const type = (plant.type || '').toLowerCase();
+  const location = (plant.location || '').toLowerCase();
+
+  // همه کلمات باید در حداقل یکی از فیلدها پیدا شوند (AND)
+  return words.every(function(word) {
+    return name.includes(word) || type.includes(word) || location.includes(word);
+  });
+}
+
+// ============================================
+// بخش ۵: فیلتر و مرتب‌سازی
 // ============================================
 
 function filterPlants(plants) {
   return plants.filter(function(plant) {
-    if (searchQuery) {
-      const query = searchQuery.trim().toLowerCase();
-      const name = (plant.name || '').toLowerCase();
-      const type = (plant.type || '').toLowerCase();
-      const location = (plant.location || '').toLowerCase();
-
-      if (!name.includes(query) && !type.includes(query) && !location.includes(query)) {
-        return false;
-      }
+    if (!matchesSearch(plant, searchQuery)) {
+      return false;
     }
 
     if (filterHealth !== 'all') {
@@ -132,8 +156,47 @@ function filterPlants(plants) {
   });
 }
 
+async function sortPlants(plants) {
+  const sorted = plants.slice();
+
+  if (sortMode === 'newest') {
+    sorted.sort(function(a, b) {
+      const da = new Date(a.createdAt || 0).getTime();
+      const db = new Date(b.createdAt || 0).getTime();
+      return db - da;
+    });
+  } else if (sortMode === 'name') {
+    sorted.sort(function(a, b) {
+      const na = (a.name || '').toLocaleLowerCase('fa');
+      const nb = (b.name || '').toLocaleLowerCase('fa');
+      return na.localeCompare(nb, 'fa');
+    });
+  } else if (sortMode === 'health') {
+    sorted.sort(function(a, b) {
+      const ha = HEALTH_SORT_ORDER[a.health] !== undefined ? HEALTH_SORT_ORDER[a.health] : 4;
+      const hb = HEALTH_SORT_ORDER[b.health] !== undefined ? HEALTH_SORT_ORDER[b.health] : 4;
+      return ha - hb;
+    });
+  } else if (sortMode === 'watering') {
+    // نیازمندترین اول: نسبت روزهای گذشته به فاصله گیاه
+    const ratios = {};
+    for (const plant of sorted) {
+      const logs = await getCareLogsByPlantId(plant.id);
+      const days = getDaysSinceLastWatering(logs);
+      const freq = getPlantWateringFrequency(plant);
+      const ratio = days === null ? 9999 : (days / freq);
+      ratios[plant.id] = ratio;
+    }
+    sorted.sort(function(a, b) {
+      return (ratios[b.id] || 0) - (ratios[a.id] || 0);
+    });
+  }
+
+  return sorted;
+}
+
 // ============================================
-// بخش ۵: نمایش داشبورد
+// بخش ۶: نمایش داشبورد
 // ============================================
 
 async function renderDashboard() {
@@ -159,9 +222,9 @@ async function renderDashboard() {
 
     if (emptyState) emptyState.style.display = 'none';
 
-    const plants = filterPlants(allPlants);
+    const filtered = filterPlants(allPlants);
 
-    if (plants.length === 0) {
+    if (filtered.length === 0) {
       if (todayTasksDiv) todayTasksDiv.style.display = 'none';
       if (attentionSection) attentionSection.style.display = 'none';
       if (healthySection) healthySection.style.display = 'none';
@@ -170,6 +233,8 @@ async function renderDashboard() {
     }
 
     if (noResultsState) noResultsState.style.display = 'none';
+
+    const plants = await sortPlants(filtered);
 
     const tasks = [];
     const healthyPlants = [];
@@ -202,7 +267,6 @@ async function renderDashboard() {
       }
     }
 
-    // مرتب‌سازی گیاهان نیازمند توجه: بیمارها اول
     attentionPlants.sort(function(a, b) {
       const order = { sick: 0, warning: 1 };
       const aOrder = order[a.health] !== undefined ? order[a.health] : 2;
@@ -210,7 +274,6 @@ async function renderDashboard() {
       return aOrder - bOrder;
     });
 
-    // نمایش کارهای امروز
     if (tasks.length > 0) {
       if (todayTasksDiv) todayTasksDiv.style.display = 'block';
       if (todayTasksList) {
@@ -224,7 +287,6 @@ async function renderDashboard() {
       if (todayTasksDiv) todayTasksDiv.style.display = 'none';
     }
 
-    // نمایش گیاهان نیازمند توجه
     if (attentionPlants.length > 0) {
       if (attentionSection) attentionSection.style.display = 'block';
       if (attentionList) {
@@ -238,7 +300,6 @@ async function renderDashboard() {
       if (attentionSection) attentionSection.style.display = 'none';
     }
 
-    // نمایش گیاهان من (گیاهانی که امروز نیازی ندارند)
     if (healthyPlants.length > 0) {
       if (healthySection) healthySection.style.display = 'block';
       const plantsList = document.getElementById('plants-list');
@@ -256,7 +317,8 @@ async function renderDashboard() {
 
     console.log('✓ داشبورد نمایش داده شد');
     console.log('  - کل گیاهان:', allPlants.length);
-    console.log('  - پس از فیلتر:', plants.length);
+    console.log('  - پس از فیلتر:', filtered.length);
+    console.log('  - مرتب‌سازی:', sortMode);
     console.log('  - نیاز به مراقبت:', tasks.length);
     console.log('  - نیازمند توجه:', attentionPlants.length);
     console.log('  - سالم:', healthyPlants.length);
@@ -271,7 +333,7 @@ async function renderDashboard() {
 }
 
 // ============================================
-// بخش ۶: ساخت آیتم کار امروز
+// بخش ۷: ساخت آیتم کار امروز
 // ============================================
 
 function createTodayTaskItem(item) {
@@ -352,7 +414,7 @@ function createTodayTaskItem(item) {
 }
 
 // ============================================
-// بخش ۷: ساخت آیتم گیاه نیازمند توجه
+// بخش ۸: ساخت آیتم گیاه نیازمند توجه
 // ============================================
 
 function createAttentionItem(plant) {
@@ -412,7 +474,7 @@ function createAttentionItem(plant) {
 }
 
 // ============================================
-// بخش ۸: مدیریت جستجو
+// بخش ۹: مدیریت جستجو
 // ============================================
 
 function setupSearch() {
@@ -448,7 +510,7 @@ function setupSearch() {
 }
 
 // ============================================
-// بخش ۹: مدیریت فیلترها
+// بخش ۱۰: مدیریت فیلترها
 // ============================================
 
 function setupFilters() {
@@ -478,3 +540,53 @@ function setupFilters() {
 
   console.log('✓ فیلترها راه‌اندازی شد');
 }
+
+// ============================================
+// بخش ۱۱: مدیریت مرتب‌سازی
+// ============================================
+
+function setupSort() {
+  const select = document.getElementById('sort-select');
+  if (!select) return;
+
+  select.addEventListener('change', function() {
+    sortMode = select.value;
+    console.log('✓ حالت مرتب‌سازی:', sortMode);
+    renderDashboard();
+  });
+
+  console.log('✓ مرتب‌سازی راه‌اندازی شد');
+}
+// ============================================
+// بخش ۱۲: مدیریت باز/بسته کردن پنل جستجو
+// ============================================
+
+function setupSearchToggle() {
+  const btn = document.getElementById('btn-open-search');
+  const panel = document.getElementById('search-panel');
+
+  if (!btn || !panel) {
+    console.warn('⚠ دکمه جستجو یا پنل پیدا نشد');
+    return;
+  }
+
+  btn.addEventListener('click', function() {
+    const isVisible = panel.style.display !== 'none';
+    panel.style.display = isVisible ? 'none' : 'block';
+
+    if (!isVisible) {
+      const input = document.getElementById('search-input');
+      if (input) {
+        setTimeout(function() { input.focus(); }, 100);
+      }
+    }
+
+    btn.classList.toggle('active', !isVisible);
+  });
+
+  console.log('✓ پنل جستجو راه‌اندازی شد');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  setupSearchToggle();
+});

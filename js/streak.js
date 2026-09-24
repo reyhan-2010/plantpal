@@ -1,13 +1,13 @@
 // PlantPal - Streak و سیستم انگیزشی
-// این فایل مسئول محاسبه Streak، امتیاز، سطح، نشان‌ها و Heatmap است.
+// این فایل مسئول محاسبه Streak، امتیاز، سطح، نشان‌ها، بنر انگیزشی و Heatmap است.
 
 // ============================================
 // بخش ۱: تنظیمات
 // ============================================
 
-const STREAK_KEY = 'plantpal-streak-data';
+var STREAK_KEY = 'plantpal-streak-data';
 
-const XP_REWARDS = {
+var XP_REWARDS = {
   water: 10,
   fertilize: 20,
   prune: 15,
@@ -19,7 +19,7 @@ const XP_REWARDS = {
   streakDaily: 5
 };
 
-const LEVELS = [
+var LEVELS = [
   { level: 1, name: 'تازه‌کار', minXP: 0 },
   { level: 2, name: 'جوانه', minXP: 100 },
   { level: 3, name: 'علاقه‌مند', minXP: 300 },
@@ -29,7 +29,7 @@ const LEVELS = [
   { level: 7, name: 'افسانه', minXP: 6000 }
 ];
 
-const STREAK_PLANTS = [
+var STREAK_PLANTS = [
   { minDays: 0, name: 'پژمرده' },
   { minDays: 1, name: 'جوانه' },
   { minDays: 3, name: 'برگ‌دار' },
@@ -40,7 +40,7 @@ const STREAK_PLANTS = [
   { minDays: 100, name: 'افسانه‌ای' }
 ];
 
-const BADGES = [
+var BADGES = [
   { id: 'first-plant', icon: '🌱', name: 'اولین قدم', description: 'اولین گیاه را ثبت کردی', check: function(stats) { return stats.plants >= 1; } },
   { id: 'plant-nurse', icon: '🌿', name: 'پرستار گیاهان', description: '۵ گیاه داری', check: function(stats) { return stats.plants >= 5; } },
   { id: 'gardener', icon: '🌳', name: 'باغبان', description: '۱۰ گیاه داری', check: function(stats) { return stats.plants >= 10; } },
@@ -53,12 +53,12 @@ const BADGES = [
   { id: 'streak-7', icon: '🏆', name: 'هفت‌روزه', description: '۷ روز پشت‌سرهم مراقبت کردی', check: function(stats) { return stats.streak >= 7; } }
 ];
 
-let streakData = null;
-let streakInitAttempts = 0;
-const MAX_INIT_ATTEMPTS = 30;
-let motivationIntervalId = null;
+var streakData = null;
+var streakInitAttempts = 0;
+var MAX_INIT_ATTEMPTS = 30;
+var motivationIntervalId = null;
 
-const SVG_FIRE = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="streak-fire-svg"><path d="M12 2 C12 2 8 7 8 12 C8 13 8 14 8 14 C8 14 7 13 6 11 C5 13 4 15 4 17 C4 20 8 22 12 22 C16 22 20 20 20 17 C20 15 19 13 18 11 C17 13 16 14 16 14 C16 14 16 13 16 12 C16 7 12 2 12 2 Z" fill="#d32f2f"/><path d="M12 4 C12 4 9 8 9 12 C9 13 9 14 9 14 C9 14 8 13 7.5 12 C7 13.5 6 15.5 6 17 C6 19.5 9 21 12 21 C15 21 18 19.5 18 17 C18 15.5 17 13.5 16.5 12 C16 13 15 14 15 14 C15 14 15 13 15 12 C15 8 12 4 12 4 Z" fill="#ff6f00"/><path d="M12 7 C12 7 10 10 10 13 C10 13.5 10 14 10 14 C10 14 9.5 13.5 9 13 C8.5 14 8 15.5 8 16.5 C8 18.5 10 20 12 20 C14 20 16 18.5 16 16.5 C16 15.5 15.5 14 15 13 C14.5 13.5 14 14 14 14 C14 14 14 13.5 14 13 C14 10 12 7 12 7 Z" fill="#ffab00"/><path d="M12 11 C12 11 11 13 11 14 C11 14.5 11.5 15 12 15 C12.5 15 13 14.5 13 14 C13 13 12 11 12 11 Z" fill="#fff8e1"/></svg>';
+var SVG_FIRE = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="streak-fire-svg"><path d="M12 2 C12 2 8 7 8 12 C8 13 8 14 8 14 C8 14 7 13 6 11 C5 13 4 15 4 17 C4 20 8 22 12 22 C16 22 20 20 20 17 C20 15 19 13 18 11 C17 13 16 14 16 14 C16 14 16 13 16 12 C16 7 12 2 12 2 Z" fill="#d32f2f"/><path d="M12 4 C12 4 9 8 9 12 C9 13 9 14 9 14 C9 14 8 13 7.5 12 C7 13.5 6 15.5 6 17 C6 19.5 9 21 12 21 C15 21 18 19.5 18 17 C18 15.5 17 13.5 16.5 12 C16 13 15 14 15 14 C15 14 15 13 15 12 C15 8 12 4 12 4 Z" fill="#ff6f00"/><path d="M12 7 C12 7 10 10 10 13 C10 13.5 10 14 10 14 C10 14 9.5 13.5 9 13 C8.5 14 8 15.5 8 16.5 C8 18.5 10 20 12 20 C14 20 16 18.5 16 16.5 C16 15.5 15.5 14 15 13 C14.5 13.5 14 14 14 14 C14 14 14 13.5 14 13 C14 10 12 7 12 7 Z" fill="#ffab00"/><path d="M12 11 C12 11 11 13 11 14 C11 14.5 11.5 15 12 15 C12.5 15 13 14.5 13 14 C13 13 12 11 12 11 Z" fill="#fff8e1"/></svg>';
 
 // ============================================
 // بخش ۲: راه‌اندازی
@@ -71,12 +71,10 @@ function isDatabaseReady() {
 function initStreak() {
   if (!isDatabaseReady()) {
     streakInitAttempts++;
-
     if (streakInitAttempts >= MAX_INIT_ATTEMPTS) {
       console.error('✗ دیتابیس آماده نشد پس از ' + MAX_INIT_ATTEMPTS + ' تلاش');
       return;
     }
-
     setTimeout(initStreak, 100);
     return;
   }
@@ -85,6 +83,7 @@ function initStreak() {
 
   setupAchievementsButton();
   setupCelebrationButton();
+  setupMotivationDismissButton();
 
   recalculateStreak()
     .then(function() { return recalculateXP(); })
@@ -129,10 +128,16 @@ function getDefaultStreakData() {
 
 function loadStreakData() {
   try {
-    const raw = localStorage.getItem(STREAK_KEY);
+    var raw = localStorage.getItem(STREAK_KEY);
     if (!raw) return getDefaultStreakData();
-    const data = JSON.parse(raw);
-    return Object.assign({}, getDefaultStreakData(), data);
+    var data = JSON.parse(raw);
+    var defaultData = getDefaultStreakData();
+    for (var key in defaultData) {
+      if (data[key] === undefined) {
+        data[key] = defaultData[key];
+      }
+    }
+    return data;
   } catch (error) {
     console.error('✗ خطا در خواندن Streak:', error);
     return getDefaultStreakData();
@@ -156,9 +161,9 @@ function getTodayKey() {
 }
 
 function dateToKey(d) {
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
+  var year = d.getFullYear();
+  var month = String(d.getMonth() + 1).padStart(2, '0');
+  var day = String(d.getDate()).padStart(2, '0');
   return year + '-' + month + '-' + day;
 }
 
@@ -167,9 +172,9 @@ function getDateKeyFromISO(isoString) {
 }
 
 function daysBetween(dateKey1, dateKey2) {
-  const d1 = new Date(dateKey1);
-  const d2 = new Date(dateKey2);
-  const diffMs = Math.abs(d2 - d1);
+  var d1 = new Date(dateKey1);
+  var d2 = new Date(dateKey2);
+  var diffMs = Math.abs(d2 - d1);
   return Math.round(diffMs / (1000 * 60 * 60 * 24));
 }
 
@@ -179,7 +184,7 @@ function daysBetween(dateKey1, dateKey2) {
 
 async function recalculateStreak() {
   try {
-    const activityDates = await getAllActivityDates();
+    var activityDates = await getAllActivityDates();
 
     if (activityDates.size === 0) {
       streakData.currentStreak = 0;
@@ -187,17 +192,17 @@ async function recalculateStreak() {
       return;
     }
 
-    const sortedDates = Array.from(activityDates).sort().reverse();
-    const todayKey = getTodayKey();
-    const mostRecent = sortedDates[0];
-    const daysFromToday = daysBetween(mostRecent, todayKey);
+    var sortedDates = Array.from(activityDates).sort().reverse();
+    var todayKey = getTodayKey();
+    var mostRecent = sortedDates[0];
+    var daysFromToday = daysBetween(mostRecent, todayKey);
 
-    let currentStreak = 0;
+    var currentStreak = 0;
 
     if (daysFromToday <= 1) {
       currentStreak = 1;
-      for (let i = 1; i < sortedDates.length; i++) {
-        const diff = daysBetween(sortedDates[i - 1], sortedDates[i]);
+      for (var i = 1; i < sortedDates.length; i++) {
+        var diff = daysBetween(sortedDates[i - 1], sortedDates[i]);
         if (diff === 1) {
           currentStreak++;
         } else {
@@ -214,19 +219,18 @@ async function recalculateStreak() {
     }
 
     saveStreakData();
-
   } catch (error) {
     console.error('✗ خطا در محاسبه Streak:', error);
   }
 }
 
 async function getAllActivityDates() {
-  const allLogs = await getAllCareLogs();
-  const allPlants = await getAllPlants();
-  const allPhotos = await getAllPhotos();
-  const allNotes = await getAllNotes();
+  var allLogs = await getAllCareLogs();
+  var allPlants = await getAllPlants();
+  var allPhotos = await getAllPhotos();
+  var allNotes = await getAllNotes();
 
-  const activityDates = new Set();
+  var activityDates = new Set();
 
   allLogs.forEach(function(log) {
     if (log.date) activityDates.add(getDateKeyFromISO(log.date));
@@ -253,15 +257,15 @@ async function getAllActivityDates() {
 
 async function recalculateXP() {
   try {
-    const allLogs = await getAllCareLogs();
-    const allPlants = await getAllPlants();
-    const allPhotos = await getAllPhotos();
-    const allNotes = await getAllNotes();
+    var allLogs = await getAllCareLogs();
+    var allPlants = await getAllPlants();
+    var allPhotos = await getAllPhotos();
+    var allNotes = await getAllNotes();
 
-    let xp = 0;
+    var xp = 0;
 
     allLogs.forEach(function(log) {
-      const type = log.type || 'water';
+      var type = log.type || 'water';
       xp += XP_REWARDS[type] || 10;
     });
 
@@ -277,7 +281,7 @@ async function recalculateXP() {
       xp += XP_REWARDS.note;
     });
 
-    const oldLevel = streakData.currentLevel;
+    var oldLevel = streakData.currentLevel;
     streakData.totalXP = xp;
     streakData.currentLevel = getLevelFromXP(xp).level;
 
@@ -300,8 +304,8 @@ async function recalculateXP() {
 // ============================================
 
 function getLevelFromXP(xp) {
-  let current = LEVELS[0];
-  for (let i = 0; i < LEVELS.length; i++) {
+  var current = LEVELS[0];
+  for (var i = 0; i < LEVELS.length; i++) {
     if (xp >= LEVELS[i].minXP) {
       current = LEVELS[i];
     } else {
@@ -312,14 +316,17 @@ function getLevelFromXP(xp) {
 }
 
 function getNextLevel(currentLevelNumber) {
-  return LEVELS.find(function(l) {
-    return l.level === currentLevelNumber + 1;
-  }) || null;
+  for (var i = 0; i < LEVELS.length; i++) {
+    if (LEVELS[i].level === currentLevelNumber + 1) {
+      return LEVELS[i];
+    }
+  }
+  return null;
 }
 
 function getPlantStageFromStreak(days) {
-  let stage = STREAK_PLANTS[0];
-  for (let i = 0; i < STREAK_PLANTS.length; i++) {
+  var stage = STREAK_PLANTS[0];
+  for (var i = 0; i < STREAK_PLANTS.length; i++) {
     if (days >= STREAK_PLANTS[i].minDays) {
       stage = STREAK_PLANTS[i];
     } else {
@@ -334,19 +341,19 @@ function getPlantStageFromStreak(days) {
 // ============================================
 
 async function getBadgeStats() {
-  const allLogs = await getAllCareLogs();
-  const allPlants = await getAllPlants();
-  const allPhotos = await getAllPhotos();
-  const allNotes = await getAllNotes();
+  var allLogs = await getAllCareLogs();
+  var allPlants = await getAllPlants();
+  var allPhotos = await getAllPhotos();
+  var allNotes = await getAllNotes();
 
-  let water = 0;
-  let fertilize = 0;
-  let prune = 0;
-  let repot = 0;
-  let cutting = 0;
+  var water = 0;
+  var fertilize = 0;
+  var prune = 0;
+  var repot = 0;
+  var cutting = 0;
 
   allLogs.forEach(function(log) {
-    const t = log.type || 'water';
+    var t = log.type || 'water';
     if (t === 'water') water++;
     else if (t === 'fertilize') fertilize++;
     else if (t === 'prune') prune++;
@@ -369,12 +376,12 @@ async function getBadgeStats() {
 
 async function checkBadges() {
   try {
-    const stats = await getBadgeStats();
-    const newlyUnlocked = [];
+    var stats = await getBadgeStats();
+    var newlyUnlocked = [];
 
-    for (let i = 0; i < BADGES.length; i++) {
-      const badge = BADGES[i];
-      const alreadyUnlocked = streakData.unlockedBadges.indexOf(badge.id) !== -1;
+    for (var i = 0; i < BADGES.length; i++) {
+      var badge = BADGES[i];
+      var alreadyUnlocked = streakData.unlockedBadges.indexOf(badge.id) !== -1;
 
       if (!alreadyUnlocked && badge.check(stats)) {
         streakData.unlockedBadges.push(badge.id);
@@ -392,7 +399,6 @@ async function checkBadges() {
 
     updateBadgesCountUI();
     return newlyUnlocked;
-
   } catch (error) {
     console.error('✗ خطا در بررسی نشان‌ها:', error);
     return [];
@@ -413,27 +419,28 @@ function getUnlockedBadges() {
 function updateStreakUI() {
   if (!streakData) return;
 
-  const fireIconLarge = document.getElementById('streak-fire-icon-large');
+  var fireIconLarge = document.getElementById('streak-fire-icon-large');
   if (fireIconLarge && !fireIconLarge.innerHTML.trim()) {
     fireIconLarge.innerHTML = SVG_FIRE;
   }
-  const fireIcon = document.getElementById('streak-fire-icon');
+
+  var fireIcon = document.getElementById('streak-fire-icon');
   if (fireIcon && !fireIcon.innerHTML.trim()) {
     fireIcon.innerHTML = SVG_FIRE;
   }
 
-  const currentEl = document.getElementById('streak-current');
-  const recordEl = document.getElementById('streak-record');
-  const levelEl = document.getElementById('streak-level');
-  const xpTextEl = document.getElementById('streak-xp-text');
-  const xpFillEl = document.getElementById('streak-xp-fill');
-  const fireEl = document.querySelector('.streak-fire');
+  var currentEl = document.getElementById('streak-current');
+  var recordEl = document.getElementById('streak-record');
+  var levelEl = document.getElementById('streak-level');
+  var xpTextEl = document.getElementById('streak-xp-text');
+  var xpFillEl = document.getElementById('streak-xp-fill');
+  var fireEl = document.querySelector('.streak-fire');
 
   if (currentEl) currentEl.textContent = String(streakData.currentStreak);
   if (recordEl) recordEl.textContent = 'رکورد: ' + streakData.longestStreak + ' روز';
 
-  const currentLevel = getLevelFromXP(streakData.totalXP);
-  const nextLevel = getNextLevel(currentLevel.level);
+  var currentLevel = getLevelFromXP(streakData.totalXP);
+  var nextLevel = getNextLevel(currentLevel.level);
 
   if (levelEl) {
     if (nextLevel) {
@@ -453,9 +460,9 @@ function updateStreakUI() {
 
   if (xpFillEl) {
     if (nextLevel) {
-      const xpInLevel = streakData.totalXP - currentLevel.minXP;
-      const xpNeeded = nextLevel.minXP - currentLevel.minXP;
-      const percent = Math.min(100, (xpInLevel / xpNeeded) * 100);
+      var xpInLevel = streakData.totalXP - currentLevel.minXP;
+      var xpNeeded = nextLevel.minXP - currentLevel.minXP;
+      var percent = Math.min(100, (xpInLevel / xpNeeded) * 100);
       xpFillEl.style.width = percent + '%';
     } else {
       xpFillEl.style.width = '100%';
@@ -474,11 +481,11 @@ function updateStreakUI() {
 }
 
 function updateBadgesCountUI() {
-  const el = document.getElementById('streak-badges');
+  var el = document.getElementById('streak-badges');
   if (!el || !streakData) return;
 
-  const unlocked = streakData.unlockedBadges.length;
-  const total = BADGES.length;
+  var unlocked = streakData.unlockedBadges.length;
+  var total = BADGES.length;
 
   el.textContent = '🏆 ' + unlocked + ' / ' + total + ' نشان';
 }
@@ -486,21 +493,21 @@ function updateBadgesCountUI() {
 function updateStreakUILarge() {
   if (!streakData) return;
 
-  const fireIconLarge = document.getElementById('streak-fire-icon-large');
+  var fireIconLarge = document.getElementById('streak-fire-icon-large');
   if (fireIconLarge && !fireIconLarge.innerHTML.trim()) {
     fireIconLarge.innerHTML = SVG_FIRE;
   }
 
-  const currentLevel = getLevelFromXP(streakData.totalXP);
-  const nextLevel = getNextLevel(currentLevel.level);
+  var currentLevel = getLevelFromXP(streakData.totalXP);
+  var nextLevel = getNextLevel(currentLevel.level);
 
-  const currentEl = document.getElementById('streak-current-large');
-  const recordEl = document.getElementById('streak-record-large');
-  const levelEl = document.getElementById('streak-level-large');
-  const xpEl = document.getElementById('streak-xp-large');
-  const badgesEl = document.getElementById('streak-badges-large');
-  const xpFillEl = document.getElementById('streak-xp-fill-large');
-  const fireEl = document.querySelector('.streak-bar-large-fire');
+  var currentEl = document.getElementById('streak-current-large');
+  var recordEl = document.getElementById('streak-record-large');
+  var levelEl = document.getElementById('streak-level-large');
+  var xpEl = document.getElementById('streak-xp-large');
+  var badgesEl = document.getElementById('streak-badges-large');
+  var xpFillEl = document.getElementById('streak-xp-fill-large');
+  var fireEl = document.querySelector('.streak-bar-large-fire');
 
   if (currentEl) currentEl.textContent = String(streakData.currentStreak);
   if (recordEl) recordEl.textContent = streakData.longestStreak + ' روز';
@@ -527,9 +534,9 @@ function updateStreakUILarge() {
 
   if (xpFillEl) {
     if (nextLevel) {
-      const xpInLevel = streakData.totalXP - currentLevel.minXP;
-      const xpNeeded = nextLevel.minXP - currentLevel.minXP;
-      const percent = Math.min(100, (xpInLevel / xpNeeded) * 100);
+      var xpInLevel = streakData.totalXP - currentLevel.minXP;
+      var xpNeeded = nextLevel.minXP - currentLevel.minXP;
+      var percent = Math.min(100, (xpInLevel / xpNeeded) * 100);
       xpFillEl.style.width = percent + '%';
     } else {
       xpFillEl.style.width = '100%';
@@ -550,102 +557,61 @@ function updateStreakUILarge() {
 // ============================================
 
 function getMotivationalMessage() {
-  const hour = new Date().getHours();
-  const todayKey = getTodayKey();
-  const lastActivity = streakData.lastActivityDate;
-  const streak = streakData.currentStreak;
+  var hour = new Date().getHours();
+  var todayKey = getTodayKey();
+  var lastActivity = streakData.lastActivityDate;
+  var streak = streakData.currentStreak;
+  var didActivityToday = (lastActivity === todayKey);
 
-  // اگر هیچ فعالیتی امروز نبود و آخرین فعالیت دیروز بود
-  const didActivityToday = (lastActivity === todayKey);
-
-  // شب (۲۱ تا ۶)
   if (hour >= 21 || hour < 6) {
     if (didActivityToday) {
-      return {
-        icon: '🌙',
-        text: 'شب بخیر! امروز خوب از گیاهانت مراقبت کردی',
-        type: 'night'
-      };
+      return { icon: '🌙', text: 'شب بخیر! امروز خوب از گیاهانت مراقبت کردی', type: 'night' };
     }
-    return {
-      icon: '🌙',
-      text: 'قبل از خواب، یه سر به گیاهانت بزن',
-      type: 'night'
-    };
+    return { icon: '🌙', text: 'قبل از خواب، یه سر به گیاهانت بزن', type: 'night' };
   }
 
-  // صبح (۶ تا ۱۲)
   if (hour < 12) {
     if (streak === 0) {
-      return {
-        icon: '🌅',
-        text: 'صبح بخیر! امروز یه فعالیت ثبت کن تا Streak شروع بشه',
-        type: 'info'
-      };
+      return { icon: '🌅', text: 'صبح بخیر! امروز یه فعالیت ثبت کن تا زنجیره‌ات شروع بشه', type: 'info' };
     }
     if (!didActivityToday) {
-      return {
-        icon: '🌅',
-        text: 'صبح بخیر! وقت آبیاری گیاهانت رسیده',
-        type: 'info'
-      };
+      return { icon: '🌅', text: 'صبح بخیر! وقت آبیاری گیاهانت رسیده', type: 'info' };
     }
-    return {
-      icon: '🌅',
-      text: 'صبح بخیر! امروز کارت رو انجام دادی، آفرین',
-      type: 'success'
-    };
+    return { icon: '🌅', text: 'صبح بخیر! امروز کارت رو انجام دادی، آفرین', type: 'success' };
   }
 
-  // بعد از ظهر/عصر
   if (streak === 0) {
-    return {
-      icon: '🌱',
-      text: 'امروز روز جدیدیه! یه فعالیت ثبت کن تا Streak شروع بشه',
-      type: 'info'
-    };
+    return { icon: '🌱', text: 'امروز روز جدیدیه! یه فعالیت ثبت کن تا زنجیره‌ات شروع بشه', type: 'info' };
   }
 
   if (!didActivityToday) {
-    return {
-      icon: '🔥',
-      text: 'امروز فعالیتی ثبت نکردی — نذار Streakت پاره بشه!',
-      type: 'warning'
-    };
+    return { icon: '🔥', text: 'امروز فعالیتی ثبت نکردی — نذار زنجیره‌ات پاره بشه!', type: 'warning' };
   }
 
   if (streak >= 7) {
-    return {
-      icon: '🏆',
-      text: 'عالیه! ' + streak + ' روز پشت‌سرهم! تو یه قهرمانی',
-      type: 'success'
-    };
+    return { icon: '🏆', text: 'عالیه! ' + streak + ' روز پشت‌سرهم! تو یه قهرمانی', type: 'success' };
   }
 
   if (streak >= 3) {
-    return {
-      icon: '🌟',
-      text: 'آفرین! ' + streak + ' روزه داری تلاش می‌کنی',
-      type: 'success'
-    };
+    return { icon: '🌟', text: 'آفرین! ' + streak + ' روزه داری تلاش می‌کنی', type: 'success' };
   }
 
-  return {
-    icon: '💪',
-    text: 'شروع خوبی داشتی! ادامه بده',
-    type: 'info'
-  };
+  return { icon: '💪', text: 'شروع خوبی داشتی! ادامه بده', type: 'info' };
 }
-
 function renderMotivationalBanner() {
-  const banner = document.getElementById('motivation-banner');
-  const iconEl = document.getElementById('motivation-icon');
-  const textEl = document.getElementById('motivation-text');
+  var banner = document.getElementById('motivation-banner');
+  var iconEl = document.getElementById('motivation-icon');
+  var textEl = document.getElementById('motivation-text');
 
   if (!banner || !iconEl || !textEl) return;
   if (!streakData) return;
 
-  const msg = getMotivationalMessage();
+  if (wasMotivationDismissedToday()) {
+    banner.style.display = 'none';
+    return;
+  }
+
+  var msg = getMotivationalMessage();
 
   banner.className = 'motivation-banner ' + msg.type;
   iconEl.textContent = msg.icon;
@@ -659,7 +625,6 @@ function startMotivationRefresh() {
     clearInterval(motivationIntervalId);
   }
 
-  // هر ۶۰ دقیقه به‌روزرسانی
   motivationIntervalId = setInterval(function() {
     renderMotivationalBanner();
   }, 60 * 60 * 1000);
@@ -671,26 +636,65 @@ document.addEventListener('visibilitychange', function() {
   }
 });
 
+function wasMotivationDismissedToday() {
+  try {
+    var dismissed = localStorage.getItem('plantpal-motivation-dismissed');
+    var todayKey = getTodayKey();
+    return dismissed === todayKey;
+  } catch (error) {
+    return false;
+  }
+}
+
+function setupMotivationDismissButton() {
+  var btn = document.getElementById('btn-dismiss-motivation');
+  if (btn) {
+    btn.addEventListener('click', function() {
+      dismissMotivationBanner();
+    });
+  }
+}
+
+function dismissMotivationBanner() {
+  var banner = document.getElementById('motivation-banner');
+  if (!banner) return;
+
+  banner.classList.add('hiding');
+
+  setTimeout(function() {
+    banner.style.display = 'none';
+    banner.classList.remove('hiding');
+
+    try {
+      localStorage.setItem('plantpal-motivation-dismissed', getTodayKey());
+    } catch (error) {
+      // نادیده بگیر
+    }
+  }, 450);
+
+  console.log('✓ بنر انگیزشی بسته شد');
+}
+
 // ============================================
 // بخش ۱۱: Heatmap
 // ============================================
 
 async function renderHeatmap() {
-  const container = document.getElementById('heatmap-grid');
-  const totalEl = document.getElementById('heatmap-total');
+  var container = document.getElementById('heatmap-grid');
+  var totalEl = document.getElementById('heatmap-total');
   if (!container) return;
 
   try {
-    const allLogs = await getAllCareLogs();
-    const allPhotos = await getAllPhotos();
-    const allNotes = await getAllNotes();
-    const allPlants = await getAllPlants();
+    var allLogs = await getAllCareLogs();
+    var allPhotos = await getAllPhotos();
+    var allNotes = await getAllNotes();
+    var allPlants = await getAllPlants();
 
-    const activityCounts = {};
+    var activityCounts = {};
 
     function addDate(iso) {
       if (!iso) return;
-      const key = getDateKeyFromISO(iso);
+      var key = getDateKeyFromISO(iso);
       activityCounts[key] = (activityCounts[key] || 0) + 1;
     }
 
@@ -699,35 +703,35 @@ async function renderHeatmap() {
     allNotes.forEach(function(n) { addDate(n.createdAt); });
     allPlants.forEach(function(p) { addDate(p.createdAt); });
 
-    const today = new Date();
+    var today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const daysSinceSat = (today.getDay() + 1) % 7;
-    const lastSaturday = new Date(today);
+    var daysSinceSat = (today.getDay() + 1) % 7;
+    var lastSaturday = new Date(today);
     lastSaturday.setDate(today.getDate() - daysSinceSat);
 
-    const startDate = new Date(lastSaturday);
+    var startDate = new Date(lastSaturday);
     startDate.setDate(startDate.getDate() - 11 * 7);
 
     container.innerHTML = '';
 
-    let totalCount = 0;
+    var totalCount = 0;
 
-    for (let week = 0; week < 12; week++) {
-      const col = document.createElement('div');
+    for (var week = 0; week < 12; week++) {
+      var col = document.createElement('div');
       col.className = 'heatmap-week';
 
-      for (let day = 0; day < 7; day++) {
-        const cellDate = new Date(startDate);
+      for (var day = 0; day < 7; day++) {
+        var cellDate = new Date(startDate);
         cellDate.setDate(startDate.getDate() + week * 7 + day);
 
-        const key = dateToKey(cellDate);
-        const count = activityCounts[key] || 0;
-        const isFuture = cellDate > today;
+        var key = dateToKey(cellDate);
+        var count = activityCounts[key] || 0;
+        var isFuture = cellDate > today;
 
         if (!isFuture) totalCount += count;
 
-        const cell = document.createElement('div');
+        var cell = document.createElement('div');
         cell.className = 'heatmap-cell';
 
         if (isFuture) {
@@ -766,7 +770,7 @@ async function renderHeatmap() {
 // ============================================
 
 function setupAchievementsButton() {
-  const btn = document.getElementById('btn-open-achievements');
+  var btn = document.getElementById('btn-open-achievements');
   if (btn) {
     btn.addEventListener('click', function() {
       showAchievementsPage();
@@ -774,7 +778,7 @@ function setupAchievementsButton() {
     console.log('✓ دکمه دستاوردها متصل شد');
   }
 
-  const backBtn = document.getElementById('btn-back-from-achievements');
+  var backBtn = document.getElementById('btn-back-from-achievements');
   if (backBtn) {
     backBtn.addEventListener('click', function() {
       showHomePage();
@@ -789,7 +793,7 @@ function showAchievementsPage() {
     document.querySelectorAll('.page').forEach(function(p) {
       p.classList.remove('active');
     });
-    const target = document.getElementById('page-achievements');
+    var target = document.getElementById('page-achievements');
     if (target) {
       target.classList.add('active');
       window.scrollTo(0, 0);
@@ -800,43 +804,43 @@ function showAchievementsPage() {
 }
 
 function renderAchievements() {
-  const container = document.getElementById('achievements-list');
-  const countEl = document.getElementById('achievements-count');
-  const totalEl = document.getElementById('achievements-total');
+  var container = document.getElementById('achievements-list');
+  var countEl = document.getElementById('achievements-count');
+  var totalEl = document.getElementById('achievements-total');
 
   if (!container || !streakData) return;
 
-  const unlockedCount = streakData.unlockedBadges.length;
+  var unlockedCount = streakData.unlockedBadges.length;
   if (countEl) countEl.textContent = String(unlockedCount);
   if (totalEl) totalEl.textContent = String(BADGES.length);
 
   container.innerHTML = '';
 
   BADGES.forEach(function(badge) {
-    const unlocked = streakData.unlockedBadges.indexOf(badge.id) !== -1;
+    var unlocked = streakData.unlockedBadges.indexOf(badge.id) !== -1;
 
-    const card = document.createElement('div');
+    var card = document.createElement('div');
     card.className = 'badge-card ' + (unlocked ? 'unlocked' : 'locked');
 
-    const iconEl = document.createElement('div');
+    var iconEl = document.createElement('div');
     iconEl.className = 'badge-icon';
     iconEl.textContent = badge.icon;
 
-    const infoEl = document.createElement('div');
+    var infoEl = document.createElement('div');
     infoEl.className = 'badge-info';
 
-    const nameEl = document.createElement('div');
+    var nameEl = document.createElement('div');
     nameEl.className = 'badge-name';
     nameEl.textContent = badge.name;
 
-    const descEl = document.createElement('div');
+    var descEl = document.createElement('div');
     descEl.className = 'badge-description';
     descEl.textContent = badge.description;
 
     infoEl.appendChild(nameEl);
     infoEl.appendChild(descEl);
 
-    const statusEl = document.createElement('div');
+    var statusEl = document.createElement('div');
     statusEl.className = 'badge-status';
     statusEl.textContent = unlocked ? '✅' : '🔒';
 
@@ -857,16 +861,16 @@ function renderAchievements() {
 function showCelebrationModal(badges) {
   if (!badges || badges.length === 0) return;
 
-  const modal = document.getElementById('modal-celebration');
+  var modal = document.getElementById('modal-celebration');
   if (!modal) return;
 
-  const firstBadge = badges[0];
-  const remaining = badges.length - 1;
+  var firstBadge = badges[0];
+  var remaining = badges.length - 1;
 
-  const iconEl = document.getElementById('celebration-badge-icon');
-  const nameEl = document.getElementById('celebration-badge-name');
-  const descEl = document.getElementById('celebration-badge-description');
-  const extraEl = document.getElementById('celebration-extra');
+  var iconEl = document.getElementById('celebration-badge-icon');
+  var nameEl = document.getElementById('celebration-badge-name');
+  var descEl = document.getElementById('celebration-badge-description');
+  var extraEl = document.getElementById('celebration-extra');
 
   if (iconEl) iconEl.textContent = firstBadge.icon;
   if (nameEl) nameEl.textContent = firstBadge.name;
@@ -886,34 +890,34 @@ function showCelebrationModal(badges) {
 }
 
 function closeCelebrationModal() {
-  const modal = document.getElementById('modal-celebration');
+  var modal = document.getElementById('modal-celebration');
   if (modal) {
     modal.classList.remove('active');
   }
-  const confettiContainer = document.getElementById('celebration-confetti');
+  var confettiContainer = document.getElementById('celebration-confetti');
   if (confettiContainer) {
     confettiContainer.innerHTML = '';
   }
 }
 
 function generateConfetti() {
-  const container = document.getElementById('celebration-confetti');
+  var container = document.getElementById('celebration-confetti');
   if (!container) return;
 
   container.innerHTML = '';
 
-  const colors = ['#ff6f00', '#ffc107', '#4caf50', '#2196f3', '#e91e63', '#9c27b0', '#00bcd4', '#ff5722'];
-  const totalConfetti = 50;
+  var colors = ['#ff6f00', '#ffc107', '#4caf50', '#2196f3', '#e91e63', '#9c27b0', '#00bcd4', '#ff5722'];
+  var totalConfetti = 50;
 
-  for (let i = 0; i < totalConfetti; i++) {
-    const piece = document.createElement('div');
+  for (var i = 0; i < totalConfetti; i++) {
+    var piece = document.createElement('div');
     piece.className = 'confetti-piece';
 
-    const color = colors[Math.floor(Math.random() * colors.length)];
-    const left = Math.random() * 100;
-    const delay = Math.random() * 1.5;
-    const duration = 2 + Math.random() * 2;
-    const size = 6 + Math.random() * 8;
+    var color = colors[Math.floor(Math.random() * colors.length)];
+    var left = Math.random() * 100;
+    var delay = Math.random() * 1.5;
+    var duration = 2 + Math.random() * 2;
+    var size = 6 + Math.random() * 8;
 
     piece.style.left = left + '%';
     piece.style.backgroundColor = color;
@@ -931,7 +935,7 @@ function generateConfetti() {
 }
 
 function setupCelebrationButton() {
-  const btn = document.getElementById('btn-celebration-close');
+  var btn = document.getElementById('btn-celebration-close');
   if (btn) {
     btn.addEventListener('click', function() {
       closeCelebrationModal();
