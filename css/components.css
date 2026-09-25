@@ -4381,3 +4381,54 @@
   animation: none !important;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
 }
+/* ============================================
+   نمایش تولد گیاه در صفحه جزئیات
+   ============================================ */
+
+#details-birthday {
+  color: #b8860b;
+  font-weight: 600;
+}
+
+[data-theme="dark"] #details-birthday {
+  color: #ffb74d;
+}
+
+/* ============================================
+   Modal تولد — کمی بزرگ‌تر از جشن نشان
+   ============================================ */
+
+.modal-celebration-wrapper .celebration-badge-icon {
+  width: 100px;
+  height: 100px;
+  margin: 0.5rem auto 1rem auto;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 193, 7, 0.15);
+  border: 3px solid #ffc107;
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+}
+
+.modal-celebration-wrapper .celebration-badge-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ============================================
+   پس‌زمینه ملایم برای ردیف تولد
+   ============================================ */
+
+.plant-info-row:has(#details-birthday) {
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 193, 7, 0.08) 100%);
+  padding-right: 0.5rem;
+  border-radius: var(--radius-sm);
+}
+
+[data-theme="dark"] .plant-info-row:has(#details-birthday) {
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 193, 7, 0.15) 100%);
+}

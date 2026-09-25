@@ -239,7 +239,11 @@ async function openPlantDetails(plantId) {
       const lastInfo = getLastWateringInfo(careLogs);
       lastWateringDisplay.textContent = lastInfo.text;
     }
-
+    const birthdayDisplay = document.getElementById('details-birthday');
+    if (birthdayDisplay) {
+      birthdayDisplay.textContent = getBirthdayText(plant.createdAt);
+    }
+    
     const detailsImage = document.getElementById('details-image');
     if (plant.image) {
       detailsImage.src = plant.image;
@@ -448,4 +452,105 @@ async function handleDeletePlant() {
     console.error('✗ خطا در حذف گیاه:', error);
     alert('خطا در حذف گیاه.');
   }
+}
+// ============================================
+// بخش ۱۰: محاسبه تولد گیاه
+// ============================================
+
+function getBirthdayText(createdAt) {
+  if (!createdAt) return '—';
+
+  var now = new Date();
+  var created = new Date(createdAt);
+  var diffMs = now - created;
+  var diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays < 0) return '—';
+  if (diffDays === 0) return 'امروز اضافه شد';
+  if (diffDays === 1) return 'دیروز اضافه شد';
+  if (diffDays < 7) return diffDays + ' روز پیش';
+
+  if (diffDays < 30) {
+    var weeks = Math.floor(diffDays / 7);
+    if (weeks === 1) return '۱ هفته پیش';
+    return weeks + ' هفته پیش';
+  }
+
+  if (diffDays < 365) {
+    var months = Math.floor(diffDays / 30);
+    if (months === 1) return '۱ ماه پیش';
+    return months + ' ماه پیش';
+  }
+
+  var years = Math.floor(diffDays / 365);
+  var remainingMonths = Math.floor((diffDays - years * 365) / 30);
+
+  if (years === 1 && remainingMonths === 0) return '۱ سال پیش';
+  if (remainingMonths === 0) return years + ' سال پیش';
+  return years + ' سال و ' + remainingMonths + ' ماه پیش';
+}
+
+function getPlantAgeInDays(createdAt) {
+  if (!createdAt) return 0;
+  var now = new Date();
+  var created = new Date(createdAt);
+  var diffMs = now - created;
+  return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+}
+
+// ============================================
+// بخش ۱۱: تشخیص سالگرد
+// ============================================
+
+function isMonthlyAnniversaryToday(createdAt) {
+  if (!createdAt) return null;
+
+  var now = new Date();
+  var created = new Date(createdAt);
+
+  var todayDay = now.getDate();
+  var createdDay = created.getDate();
+
+  if (todayDay !== createdDay) return null;
+
+  var months = (now.getFullYear() - created.getFullYear()) * 12
+              + (now.getMonth() - created.getMonth());
+
+  if (months < 1) return null;
+
+  return months;
+}
+
+function isYearlyAnniversaryToday(createdAt) {
+  if (!createdAt) return null;
+
+  var now = new Date();
+  var created = new Date(createdAt);
+
+  if (now.getDate() !== created.getDate()) return null;
+  if (now.getMonth() !== created.getMonth()) return null;
+
+  var years = now.getFullYear() - created.getFullYear();
+  if (years < 1) return null;
+
+  return years;
+}
+
+function getAnniversaryLabel(months, years) {
+  if (years && years >= 1) {
+    if (years === 1) return '۱ سالگی';
+    if (years === 2) return '۲ سالگی';
+    return years + ' سالگی';
+  }
+
+  if (months && months >= 1) {
+    if (months === 1) return '۱ ماهگی';
+    if (months === 2) return '۲ ماهگی';
+    if (months === 3) return '۳ ماهگی';
+    if (months === 6) return '۶ ماهگی';
+    if (months === 12) return '۱ سالگی';
+    return months + ' ماهگی';
+  }
+
+  return '';
 }

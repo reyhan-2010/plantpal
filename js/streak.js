@@ -94,6 +94,7 @@ function initStreak() {
       renderHeatmap();
       renderMotivationalBanner();
       startMotivationRefresh();
+            checkBirthdaysAndCelebrate();
       console.log('✓ سیستم Streak راه‌اندازی شد');
       console.log('  - Streak فعلی:', streakData.currentStreak);
       console.log('  - رکورد:', streakData.longestStreak);
@@ -956,4 +957,122 @@ async function onActivityAdded() {
   updateStreakUILarge();
   renderMotivationalBanner();
   await renderHeatmap();
+}
+// ============================================
+// بخش ۱۵: جشن تولد گیاهان
+// ============================================
+
+function getBirthdayCelebratedKey(plantId) {
+  return 'plantpal-birthday-celebrated-' + plantId;
+}
+
+function wasBirthdayCelebratedToday(plantId) {
+  try {
+    var key = getBirthdayCelebratedKey(plantId);
+    var saved = localStorage.getItem(key);
+    if (!saved) return false;
+
+    var parts = saved.split('|');
+    var savedDate = parts[0];
+    var savedLabel = parts[1] || '';
+
+    return savedDate === getTodayKey();
+  } catch (error) {
+    return false;
+  }
+}
+
+function markBirthdayCelebrated(plantId, label) {
+  try {
+    var key = getBirthdayCelebratedKey(plantId);
+    var value = getTodayKey() + '|' + label;
+    localStorage.setItem(key, value);
+  } catch (error) {
+    // نادیده بگیر
+  }
+}
+
+async function checkBirthdaysAndCelebrate() {
+  try {
+    var plants = await getAllPlants();
+    if (plants.length === 0) return;
+
+    var celebrations = [];
+
+    for (var i = 0; i < plants.length; i++) {
+      var plant = plants[i];
+      if (!plant.createdAt) continue;
+
+      if (wasBirthdayCelebratedToday(plant.id)) continue;
+
+      var yearly = isYearlyAnniversaryToday(plant.createdAt);
+      if (yearly) {
+        celebrations.push({
+          plant: plant,
+          label: getAnniversaryLabel(null, yearly),
+          type: 'yearly'
+        });
+        continue;
+      }
+
+      var monthly = isMonthlyAnniversaryToday(plant.createdAt);
+      if (monthly) {
+        celebrations.push({
+          plant: plant,
+          label: getAnniversaryLabel(monthly, null),
+          type: 'monthly'
+        });
+      }
+    }
+
+    if (celebrations.length === 0) return;
+
+    // اولی رو نشون بده
+    var first = celebrations[0];
+    showBirthdayCelebration(first);
+
+    // علامت‌گذاری همه به‌عنوان جشن‌گرفته
+    celebrations.forEach(function(c) {
+      markBirthdayCelebrated(c.plant.id, c.label);
+    });
+
+    console.log('🎂 جشن تولد گیاهان:', celebrations.length);
+
+  } catch (error) {
+    console.error('✗ خطا در بررسی تولد گیاهان:', error);
+  }
+}
+
+function showBirthdayCelebration(celebration) {
+  var modal = document.getElementById('modal-celebration');
+  if (!modal) return;
+
+  var plant = celebration.plant;
+
+  var titleEl = document.getElementById('celebration-title');
+  var iconEl = document.getElementById('celebration-badge-icon');
+  var nameEl = document.getElementById('celebration-badge-name');
+  var descEl = document.getElementById('celebration-badge-description');
+  var extraEl = document.getElementById('celebration-extra');
+
+  if (titleEl) titleEl.textContent = '🎂 تولد گیاهت مبارک!';
+  if (iconEl) {
+    if (plant.image) {
+      iconEl.innerHTML = '<img src="' + plant.image + '" alt="' + plant.name + '" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">';
+    } else {
+      iconEl.textContent = '🪴';
+    }
+  }
+  if (nameEl) nameEl.textContent = plant.name + ' — ' + celebration.label;
+  if (descEl) descEl.textContent = 'امروز ' + celebration.label + ' گیاهته! بهش یه عکس جدید بده یا یه یادداشت بنویس.';
+
+  if (extraEl) {
+    extraEl.textContent = '🎉 جشن بگیر و براش یه کار خاص انجام بده!';
+    extraEl.style.display = 'block';
+  }
+
+  generateConfetti();
+
+  modal.classList.add('active');
+  console.log('🎂 Modal تولد باز شد برای:', plant.name, '—', celebration.label);
 }
